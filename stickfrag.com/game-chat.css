@@ -1,0 +1,85 @@
+/* game-chat.css: the room chat (client/src/chatView.ts, docs/design/trust-and-safety.md, "129"). Linked from index.html. */
+#chat {
+  left: 14px;
+  bottom: 190px;
+  width: min(420px, calc(100vw / var(--hud-scale, 1) - 28px));
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  pointer-events: none;
+}
+#chat[hidden] {
+  display: none;
+}
+#chat .chat-lines {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+/* Light text on a dark panel, whatever the sky; the writer's name is in the team colour. */
+#chat .chat-line {
+  margin: 0;
+  padding: 2px 8px;
+  align-self: flex-start;
+  max-width: 100%;
+  background: rgba(21, 17, 28, 0.62);
+  color: #fff;
+  font: 700 13px/1.3 var(--font);
+  overflow-wrap: anywhere;
+  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.6);
+}
+#chat .chat-line b {
+  font-weight: 800;
+}
+#chat .chat-notice {
+  color: #bfb8c9;
+  font-style: italic;
+}
+#chat .chat-input {
+  pointer-events: auto;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 6px 10px;
+  border: 3px solid var(--ink);
+  background: var(--paper);
+  color: var(--ink);
+  font: 700 14px var(--font);
+}
+#chat .chat-input[hidden] {
+  display: none;
+}
+#chat .chat-row {
+  display: flex;
+  gap: 6px;
+}
+#chat .chat-row[hidden] {
+  display: none;
+}
+#chat .chat-row .chat-input {
+  flex: 1;
+  min-width: 0;
+  width: auto;
+}
+/* "Chat: press [Enter]" under the lines (chatHint.ts): see-through, so it never covers the fight. Its text
+   is as big as the chat input's (14px), the owner's ask of 2026-10-15; chatHint.test.ts holds the two equal. */
+#chat .chat-hint {
+  align-self: flex-start;
+  padding: 2px 8px;
+  background: rgba(21, 17, 28, 0.22);
+  color: rgba(255, 255, 255, 0.62);
+  font: 700 14px/1.3 var(--font);
+  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.5);
+}
+#chat .chat-hint[hidden] {
+  display: none;
+}
+#chat .chat-hint kbd {
+  margin-left: 2px;
+  font: 800 14px/1.3 var(--font);
+  color: rgba(255, 255, 255, 0.85);
+}
+/* SEND and CHAT are for touch: game-touch.css shows them under html.touch. */
+#chat .chat-send,
+.chat-open {
+  display: none;
+}

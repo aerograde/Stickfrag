@@ -1,0 +1,353 @@
+<!doctype html>
+<!-- translate="no": the HUD rewrites its text every frame, so a browser's page translation flipped it
+     between the player's language and English several times a second (owner, 2026-10-11). -->
+<html lang="en" translate="no">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="google" content="notranslate" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <!-- Standalone build: same-origin assets only; no matchmaking, events or rewards. -->
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob: data:; worker-src 'self' blob:; connect-src 'self' wss://broker.emqx.io:8084 wss://broker.hivemq.com:8884 wss://test.mosquitto.org:8081; object-src 'none'; base-uri 'self'; form-action 'self'"
+    />
+    <!-- Runs first: forces offline mode and a default nickname before the redirect check. -->
+    <script src="/play/standalone.js"></script>
+    <!-- Blocking on purpose: it sends a player without a name to the menu before anything paints (client/play-redirect.js). -->
+    <script src="/play-redirect.js?v=d7e7b19125"></script>
+    <title>Play StickFrag – free stickman shooter in your browser</title>
+    <meta
+      name="description"
+      content="Jump into a StickFrag match now: free multiplayer stickman FPS for up to 14 players. No download, no account."
+    />
+    <link rel="canonical" href="https://stickfrag.html/play/" />
+    <link rel="icon" href="/favicon.ico" sizes="48x48" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="StickFrag" />
+    <meta property="og:title" content="Play StickFrag – the free stickman shooter" />
+    <meta property="og:description" content="Open a link, type a name, fight. Up to 14 players, no download." />
+    <meta property="og:url" content="https://stickfrag.html/play/" />
+    <meta property="og:image" content="https://stickfrag.com/og.png?v=9abf0e8334" />
+    <!-- The site's card and every invite card (deploy/nginx/default.conf) share this size. -->
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <!-- The 13 source stylesheets are concatenated in this exact order by
+         tools/build.py. Their <link> order matters to the cascade. -->
+    <link rel="stylesheet" href="/game.all.css?v=55f94be8bf" />
+    <!-- Start the 1.1 MB brotli bundle before the parser reaches the module tag. -->
+    <link rel="modulepreload" href="/play/main.js?v=48537f59a6" fetchpriority="high" />
+  </head>
+  <body>
+    <canvas id="game"></canvas>
+
+    <div id="vignette" class="hud"></div>
+    <div id="scope" class="hud"></div>
+    <div id="flashbang" class="hud"></div>
+    <div id="crosshair" class="hud"></div>
+    <div id="dmgnums" class="hud"></div>
+    <div id="gear" class="hud panel" hidden></div>
+    <div id="range" class="hud panel" hidden></div>
+    <!-- Strokes, not a blurred drop-shadow: a blur made Chrome build a GPU pipeline at the first hit (uiWarmUp.ts). -->
+    <div id="hitmarker" class="hud">
+      <svg viewBox="0 0 28 28" aria-hidden="true">
+        <path class="rim" d="M3.39 3.39 11.54 11.54M16.46 16.46 24.61 24.61M24.61 3.39 16.46 11.54M11.54 16.46 3.39 24.61" />
+        <path class="mark" d="M4.1 4.1 10.83 10.83M17.17 17.17 23.9 23.9M23.9 4.1 17.17 10.83M10.83 17.17 4.1 23.9" />
+      </svg>
+    </div>
+    <div id="target-name" class="hud"></div>
+    <div id="dmgdir" class="hud"></div>
+    <div id="timer" class="hud panel" hidden></div>
+    <div id="banner" class="hud"></div>
+    <div id="countdown" class="hud" hidden></div>
+    <!-- A kill streak or a finished daily challenge, big in the middle (client/src/bigMoments.ts). -->
+    <div id="callout" class="hud" hidden></div>
+    <div id="tags" class="hud"></div>
+    <div id="killfeed" class="hud"></div>
+    <!-- A friends room with bots during the Friends Weekend, 9 seconds at a time (weekendBots.ts). Only the link takes clicks. -->
+    <div id="weekend-bots" class="hud panel" hidden>
+      <p id="weekend-bots-text"></p>
+      <a id="weekend-bots-make" href="/play/">MAKE A ROOM</a>
+      <small id="weekend-bots-host" hidden></small>
+    </div>
+    <!-- The browser draws on the CPU (item 295, gpuCard.ts): top left during play. Only its link and button take clicks. -->
+    <div id="gpu-card" class="hud" hidden>
+      <h2>SLOW GAME?</h2>
+      <p>Your browser is not using the graphics card. Change this setting in your browser: turn on hardware acceleration. Then restart the browser: the change works only after the restart.</p>
+      <a id="gpu-help" href="/graphics-help/" target="_blank" rel="noopener">SHOW ME HOW</a>
+      <button id="gpu-close" type="button" class="ghost">GOT IT</button>
+      <small>Press Esc to free the mouse, then click.</small>
+    </div>
+    <!-- A desktop under 30 fps asks the player first (item 249, lowFpsCard.ts): top left during play. Only its buttons take clicks. -->
+    <div id="fps-card" class="hud" hidden>
+      <h2>CHOPPY?</h2>
+      <p>The game runs slowly on this computer. Lower the graphics for smoother play?</p>
+      <button id="fps-lower" type="button">LOWER</button>
+      <button id="fps-keep" type="button" class="ghost">KEEP</button>
+      <small>Press Esc to free the mouse, then click.</small>
+    </div>
+    <div id="vitals" class="hud" hidden>
+      <div id="sighthint" class="panel" hidden></div>
+      <div id="heavyhint" class="panel" hidden></div>
+      <div id="sightkey" hidden><span id="sightnow"></span>Press <kbd>T</kbd> to change scope</div>
+      <div class="ammo-row">
+        <div id="ammo" class="panel">
+          <div class="slots">
+            <div class="sl" data-kind="gun"></div><div class="sl" data-kind="side"></div><div class="sl" data-kind="knife"></div><div class="sl" data-kind="nade"></div><div class="sl" data-kind="pumpkin" hidden></div>
+          </div>
+          <div class="body">
+            <div class="hd"><img class="gun" alt="" draggable="false" hidden><span class="label"></span><span class="num"></span></div>
+            <div class="bars"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div id="teamcue" class="hud"></div>
+    <div id="health" class="hud panel" hidden><span id="teamlabel" hidden></span><span class="num">100</span><div class="track"><div class="fill" style="width: 100%"></div></div></div>
+    <div id="ladder" class="hud panel" hidden></div>
+    <div id="prompt" class="hud" hidden></div>
+    <!-- Holding F on a map drop (mapDrop.ts, MapDrops.offer): fills as the hold goes on. -->
+    <svg id="holdring" class="hud" viewBox="0 0 64 64" hidden aria-hidden="true">
+      <circle class="track" cx="32" cy="32" r="24" />
+      <circle class="fill" cx="32" cy="32" r="24" pathLength="100" />
+    </svg>
+    <div id="toast" class="hud"></div>
+    <div id="xpbar" class="hud" hidden>
+      <span class="lv">LV 1</span>
+      <div class="track"><div class="fill"></div></div>
+      <span class="txt"></span>
+    </div>
+    <div id="xpfeed" class="hud"></div>
+    <div id="levelup" class="hud" hidden></div>
+    <!-- Out of the match for good (idle kick, connection gone, could not join): the pause card would
+         only offer CLICK TO PLAY, so this one takes its place (main.ts, leaveMatch). -->
+    <div id="left" class="card" hidden>
+      <h2>DISCONNECTED</h2>
+      <p id="left-text"></p>
+      <button id="left-reconnect" type="button">RECONNECT</button>
+      <div class="left-bar">
+        <button id="left-home" class="ghost" type="button">HOME</button>
+        <button id="left-fullscreen" class="ghost" type="button" hidden>EXIT FULLSCREEN</button>
+      </div>
+    </div>
+    <!-- The graphics or the map build failed at start (main.ts, bootFail.ts). -->
+    <div id="boot-fail" class="card" hidden>
+      <h2>COULD NOT START</h2>
+      <p id="boot-fail-text"></p>
+      <button id="boot-fail-retry" type="button">RETRY</button>
+      <div class="left-bar">
+        <button id="boot-fail-home" class="ghost" type="button">HOME</button>
+      </div>
+    </div>
+    <div id="pause" class="card" hidden>
+      <canvas class="lounger"></canvas>
+      <div id="pause-main">
+        <h2>PAUSED</h2>
+        <p id="pause-gpu" hidden>Your browser is drawing without the graphics card, so the game is slow and your ping looks high. Turn on hardware acceleration in the browser settings, then restart the browser.</p>
+        <button id="resume" type="button"><span class="no-touch">CLICK</span><span class="on-touch">TAP</span> TO PLAY</button>
+        <div class="pause-actions">
+          <button class="open-feedback ghost" type="button" title="Tell us what you think">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v11H10l-5 4v-4H4z" /><path d="M8 9.5h8M8 12.5h5" /></svg>FEEDBACK
+          </button>
+          <button class="open-report ghost" type="button" title="Report a player">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4" /><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7" /></svg>REPORT
+          </button>
+          <button id="open-settings" class="ghost" type="button" title="Settings">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3" /><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" /></svg>SETTINGS
+          </button>
+        </div>
+        <!-- Card packs waiting (client/src/packs.ts): open them here or on the results screen (O). -->
+        <button id="pause-packs" type="button" hidden></button>
+        <!-- Team deathmatch: ask for the other team (client/src/teamSwitchButton.ts). -->
+        <button id="pause-team" type="button" aria-label="Switch team" hidden>SWITCH TEAM</button>
+        <!-- Friends Weekend: where this player and the room stand (matchRewards.ts, weekendGame.ts). -->
+        <p id="weekend-line" hidden></p>
+        <p id="pause-squad" hidden></p>
+        <p id="pause-bots-note" hidden></p>
+        <div id="pause-invite" hidden>
+          <span id="pause-invite-label" class="pause-label">FRIENDS ROOM</span>
+          <b id="pause-invite-code" title="Room code"></b>
+          <button id="pause-invite-copy" type="button" class="ghost" title="Copy the room code">COPY</button>
+          <button id="pause-invite-link" type="button" class="ghost icon-btn labelled" title="Copy the invite link" aria-label="Copy the invite link">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 13.5a4.5 4.5 0 0 0 6.4.4l3-3a4.5 4.5 0 0 0-6.4-6.4l-1.2 1.2" /><path d="M14 10.5a4.5 4.5 0 0 0-6.4-.4l-3 3a4.5 4.5 0 0 0 6.4 6.4l1.2-1.2" /></svg>COPY LINK
+          </button>
+          <!-- The host of a friends room only (private-rooms.md, "176"): nobody new can join a locked room. -->
+          <button id="pause-lock" type="button" class="ghost" title="Lock the room: nobody new can join" hidden>LOCK</button>
+          <!-- The host only (private-rooms.md, "220"): the bots leave or come back at the next match break. -->
+          <button id="pause-bots" type="button" class="ghost" title="Bots on or off from the next match" hidden>BOTS</button>
+        </div>
+        <div class="pause-bar">
+          <button id="go-home" class="ghost icon-btn labelled" type="button" title="Return home">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11.5 12 4l9 7.5M5.5 9.5V20h13V9.5M10 20v-5.5h4V20" /></svg>HOME
+          </button>
+          <!-- The owner's powers (owner-powers.md): the owner only (hud.setPauseOwner). Back to the game with the owner menu open. -->
+          <button id="pause-owner" class="ghost icon-btn labelled" type="button" title="Owner powers" hidden>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><ellipse cx="12" cy="5" rx="7" ry="2.5" /><circle cx="12" cy="14" r="5" /></svg>OWNER
+          </button>
+          <span class="pause-gap"></span>
+          <a class="ghost icon-btn" href="https://discord.gg/mTYAtjNnyd" target="_blank" rel="noopener" title="Our Discord: find a squad, share clips" aria-label="Discord">
+            <svg class="logo" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.317 4.37a19.79 19.79 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.865-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.74 19.74 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.058a.082.082 0 0 0 .031.056 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 0 0-.041-.106 13.1 13.1 0 0 1-1.872-.892.077.077 0 0 1-.008-.128c.126-.094.252-.192.372-.291a.074.074 0 0 1 .078-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.009c.12.1.246.198.373.292a.077.077 0 0 1-.006.127 12.3 12.3 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.84 19.84 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.095 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.095 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z" /></svg>
+          </a>
+          <button id="fullscreen-btn" class="ghost icon-btn" type="button" title="Fullscreen" aria-label="Fullscreen" aria-pressed="false" hidden>
+            <svg class="fs-enter" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5" /></svg>
+            <svg class="fs-exit" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4v5H4M15 4v5h5M15 20v-5h5M9 20v-5H4" /></svg>
+          </button>
+        </div>
+      </div>
+      <div id="pause-settings" hidden>
+        <h2>SETTINGS</h2>
+        <div class="set-scroll">
+        <!-- On/off settings at the top, a label and its switch, no box; then every slider (play-menu.md). -->
+        <div class="tiles">
+          <button id="open-keys" class="set-link" type="button" title="Change the keys and mouse buttons">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="3" /><path d="M6 17.5h12" /><path d="M9.5 8.5h5M12 8.5v5" /></svg>
+            <span>Keybindings</span>
+          </button>
+          <label class="tile" title="For a trackpad or a Magic Mouse">
+            <svg class="mouse" viewBox="0 0 24 24" aria-hidden="true"><path class="lit" d="M12 2.5a7 7 0 0 1 7 7v1.5h-7z" /><rect x="5" y="2.5" width="14" height="19" rx="7" /><path d="M5 11h14M12 2.5V11" /></svg>
+            <span>Toggle aim<small class="when-off">hold to aim</small><small class="when-on">click to aim</small></span>
+            <input id="toggle-aim" class="switch" type="checkbox" />
+          </label>
+          <label class="tile" title="Mouse up looks down">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5v17M8 7.5l4-4 4 4M8 16.5l4 4 4-4" /></svg>
+            <span>Invert Y</span>
+            <input id="invert-y" class="switch" type="checkbox" />
+          </label>
+          <label class="tile" title="Frames per second and ping, in the top left">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 17a8.5 8.5 0 1 1 17 0" /><path d="M12 17l4.5-5" /><path d="M6.5 13.5l1 .6M12 8.5v1.2M17.5 13.5l-1 .6" /></svg>
+            <span>Show FPS</span>
+            <input id="show-fps" class="switch" type="checkbox" />
+          </label>
+          <label class="tile" title="When you die, the view drops gently instead of flying with your body and pulling out to watch it">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2.5" y="7" width="13" height="10" rx="2" /><path d="M15.5 10.5l6-3.5v10l-6-3.5" /></svg>
+            <span>Reduce motion</span>
+            <input id="reduce-motion" class="switch" type="checkbox" />
+          </label>
+          <label class="tile" title="Show the room chat. Enter writes a line.">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v11H9l-5 4z" /></svg>
+            <span>Chat</span>
+            <input id="chat-on" class="switch" type="checkbox" />
+          </label>
+          <label id="gore-row" class="tile" title="Red blood, heads that pop, arms and legs that come off" hidden>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3c3.5 4.6 6 8 6 11a6 6 0 0 1-12 0c0-3 2.5-6.4 6-11z" /></svg>
+            <span>Gore</span>
+            <input id="gore" class="switch" type="checkbox" />
+          </label>
+          <label class="tile" title="The small map top left: you and your team mates">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6l6-2 6 2 6-2v14l-6 2-6-2-6 2zM9 4v14M15 6v14" /></svg>
+            <span>Minimap</span>
+            <input id="minimap-on" class="switch" type="checkbox" />
+          </label>
+          <label class="tile" title="Off: north is always up">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5" /><path d="M12 5.5l2.5 6.5h-5z" /></svg>
+            <span>Minimap turns<small class="when-off">north up</small><small class="when-on">with my view</small></span>
+            <input id="minimap-turn" class="switch" type="checkbox" />
+          </label>
+          <label id="fullscreen-row" class="tile" hidden>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5" /></svg>
+            <span>Fullscreen</span>
+            <input id="fullscreen" class="switch" type="checkbox" />
+          </label>
+        </div>
+        <label class="slide"><span class="name">Mouse sensitivity</span><input id="sens" type="range" min="0" max="1" step="0.005" aria-label="Mouse sensitivity" /><span class="custom"><input id="sens-out" class="typed" type="number" min="0.01" max="10" step="0.001" inputmode="decimal" aria-label="Mouse sensitivity, custom" /><small>Custom 0.01–10</small></span></label>
+        <label class="slide" title="Mouse speed through a scope, like CS:GO's zoom_sensitivity_ratio"><span class="name">Scoped sensitivity</span><input id="scoped" type="range" min="0" max="1" step="0.005" aria-label="Scoped sensitivity" /><span class="custom"><input id="scoped-out" class="typed" type="number" min="0.01" max="10" step="0.001" inputmode="decimal" aria-label="Scoped sensitivity, custom" /><small>Custom 0.01–10</small></span></label>
+        <label class="slide"><span class="name">Field of view</span><input id="fov" type="range" min="50" max="100" step="1" aria-label="Field of view" /><span class="custom"><input id="fov-out" class="typed" type="number" min="40" max="120" step="1" inputmode="numeric" aria-label="Field of view, custom" /><small>Custom 40–120°</small></span></label>
+        <label class="slide"><span class="name">HUD size</span><input id="hud" type="range" min="0.7" max="1.5" step="0.05" /><output id="hud-out"></output></label>
+        <div class="slide gfx-row" role="group" aria-labelledby="gfx-label">
+          <span id="gfx-label" class="name">Graphics</span>
+          <div id="gfx" class="seg">
+            <button type="button" data-quality="0" aria-pressed="false">LOW</button>
+            <button type="button" data-quality="1" aria-pressed="false">MEDIUM</button>
+            <button type="button" data-quality="2" aria-pressed="false">HIGH</button>
+          </div>
+        </div>
+        <div class="slide gfx-row" role="group" aria-labelledby="minimap-size-label">
+          <span id="minimap-size-label" class="name">Minimap size</span>
+          <div id="minimap-size" class="seg">
+            <button type="button" data-size="0" aria-pressed="false">SMALL</button>
+            <button type="button" data-size="1" aria-pressed="false">MEDIUM</button>
+            <button type="button" data-size="2" aria-pressed="false">LARGE</button>
+          </div>
+        </div>
+        <label class="slide"><span class="name">Volume</span><input id="vol" type="range" min="0" max="1" step="0.05" /><output id="vol-out"></output></label>
+        <button id="reset-settings" class="ghost" type="button">RESET ALL SETTINGS</button>
+        <div id="reset-settings-confirm" class="reset-confirm" role="alertdialog" hidden>
+          <span></span>
+          <button id="reset-settings-yes" class="ghost" type="button">YES</button>
+          <button id="reset-settings-no" class="ghost" type="button">NO</button>
+        </div>
+        </div>
+        <button id="close-settings" class="ghost" type="button">BACK</button>
+        <div id="pause-keys">
+          <h2>KEY BINDINGS</h2>
+          <p id="keys-note" class="keys-note" role="status">Click an action, then press a key or a mouse button.</p>
+          <div id="keys-list" class="keys-list"></div>
+          <button id="reset-keys" class="ghost" type="button">RESET ALL</button>
+          <button id="close-keys" class="ghost" type="button">BACK</button>
+        </div>
+      </div>
+      <!-- FEEDBACK and REPORT open as views of this card, like SETTINGS (feedback.ts, report.ts, play-menu.md). -->
+      <div id="feedback" class="pause-view" hidden>
+        <h2>TELL US</h2>
+        <p class="fb-lead">What do you like? What should we build next? Found a bug?</p>
+        <div class="fb-kinds">
+          <label><input type="radio" name="fb-kind" value="like" checked /> I like…</label>
+          <label><input type="radio" name="fb-kind" value="idea" /> I want…</label>
+          <label><input type="radio" name="fb-kind" value="bug" /> Bug</label>
+        </div>
+        <textarea id="fb-text" maxlength="1000" rows="5" placeholder="Type here. 10 characters or more."></textarea>
+        <p id="fb-status"></p>
+        <div class="fb-row">
+          <button id="fb-close" type="button" class="ghost">BACK</button>
+          <button id="fb-send" type="button">SEND</button>
+        </div>
+        <p class="fb-note">Good ideas go on the public <a href="/ideas/" target="_blank" rel="noopener">ideas board</a>, where players like them. If we build your idea, we may thank you by your nickname. Do not write personal details.</p>
+      </div>
+      <div id="report" class="pause-view" hidden>
+        <h2>REPORT A PLAYER</h2>
+        <p class="fb-lead">Pick a reason next to the player. We review every report.</p>
+        <div id="report-list"></div>
+        <button id="report-close" type="button" class="ghost">BACK</button>
+      </div>
+    </div>
+    <!-- The running votekick, middle top (voteKick.ts). -->
+    <div id="votekick" class="hud card" hidden></div>
+    <div id="scoreboard" class="hud card" hidden><canvas class="lounger"></canvas><div id="scores"></div></div>
+    <!-- The daily challenges, top right while the scoreboard or the pause card shows (dailyCard.ts, GameDaily). -->
+    <div id="game-daily" class="daily game-daily" hidden></div>
+    <div id="results" class="hud card" hidden></div>
+    <div id="podium-title" class="hud" hidden></div>
+    <div id="owner-menu" class="hud card" hidden></div>
+    <div id="death" class="hud card" hidden></div>
+    <div id="loadout" class="hud" hidden>
+      <div class="lo-strip">
+        <div class="lo-top"></div>
+        <div class="lo-slots"></div>
+        <button type="button" class="go"></button>
+      </div>
+      <p class="keys"><kbd>1</kbd><kbd>2</kbd><kbd>3</kbd><kbd>4</kbd> step a slot · click a slot for all its choices · in the fight: <kbd>4</kbd> heavy weapon when earned · <kbd id="lo-key-knife">Q</kbd> knife · <kbd id="lo-key-throw">G</kbd> grenade</p>
+    </div>
+    <div id="debug" class="hud" hidden></div>
+    <div id="fps" class="hud panel" hidden></div>
+    <div id="status" class="hud panel" hidden></div>
+
+    <div id="loading" role="status" aria-live="polite">
+      <div class="loading-card">
+        <div class="loading-logo">STICKFRAG</div>
+        <svg class="loading-reticle" viewBox="0 0 64 64" aria-hidden="true">
+          <circle cx="32" cy="32" r="21" fill="none" stroke="#15111c" stroke-width="5" />
+          <path d="M32 3v14M32 47v14M3 32h14M47 32h14" stroke="#15111c" stroke-width="5" stroke-linecap="round" />
+          <circle cx="32" cy="32" r="5" fill="#ef4d4d" stroke="#15111c" stroke-width="2.5" />
+        </svg>
+        <p class="loading-title">LOADING <span class="loading-map"></span></p>
+        <div class="loading-bar"><div class="loading-fill"></div></div>
+        <p class="loading-step">Loading the game</p>
+      </div>
+    </div>
+
+    <script src="/retry.js?v=06dd2ace69"></script>
+    <script type="module" src="main.js?v=48537f59a6"></script>
+    <!-- Removed: the Cloudflare beacon. The site's own CSP blocks it, so it only
+         ever produced failed requests and CSP reports. -->
+</body>
+</html>

@@ -1,0 +1,1044 @@
+/* game-hud.css: part of index.html's styles, linked from it in order (the cascade depends on the order). */
+:root {
+  --paper: #fff4dc;
+  --ink: #15111c;
+  --red: #ef4d4d;
+  --blue: #3d7cf2;
+  --yellow: #ffd23f;
+  --green: #2fae72;
+  --orange: #f28c28;
+  --sky: #86c8ec;
+  --font: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+  --head: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+}
+* {
+  box-sizing: border-box;
+}
+/* A phone's words beside the keyboard's: game-touch.css swaps them under html.touch. */
+.on-touch {
+  display: none;
+}
+html,
+body {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+  background: var(--sky);
+  color: var(--ink);
+  font: 14px/1.35 var(--font);
+  user-select: none;
+}
+#game {
+  display: block;
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  transition: filter 0.8s;
+}
+#game.dead {
+  filter: grayscale(1) contrast(1.15);
+}
+/* Dead, the camera watches your body from behind: there is nothing to aim at. */
+#game.dead ~ #crosshair {
+  display: none;
+}
+.hud {
+  position: fixed;
+  pointer-events: none;
+}
+[hidden] {
+  display: none !important;
+}
+/* Comic panel: paper, ink border, hard offset shadow. */
+.panel {
+  background: var(--paper);
+  border: 3px solid var(--ink);
+  box-shadow: 4px 4px 0 var(--ink);
+}
+
+/* Crosshair and hit feedback */
+#crosshair {
+  left: 50%;
+  top: 50%;
+  width: 6px;
+  height: 6px;
+  margin: -3px 0 0 -3px;
+  border-radius: 50%;
+  background: var(--yellow);
+  border: 1.5px solid var(--ink);
+}
+#hitmarker {
+  left: 50%;
+  top: 50%;
+  width: 28px;
+  height: 28px;
+  margin: -14px 0 0 -14px;
+  opacity: 0;
+  transition: opacity 0.07s linear;
+}
+/* Four marks on the diagonals, each with a thin dark rim so the white reads against sky and sand.
+   The rim is a wider stroke underneath, not a drop-shadow: a blur froze the first hits (uiWarmUp.ts). */
+#hitmarker svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  fill: none;
+}
+#hitmarker .rim {
+  stroke: var(--ink);
+  stroke-width: 5;
+}
+#hitmarker .mark {
+  stroke: #fff;
+  stroke-width: 3;
+}
+#hitmarker.show {
+  opacity: 1;
+  transition: none;
+  animation: hitmarker-pop 0.06s ease-out;
+}
+/* Predicted, not yet confirmed by the server (Hud.hitGuess): faint and still. */
+#hitmarker.guess {
+  opacity: 0.4;
+  transition: none;
+}
+/* Lands big and snaps to size: reads as a punch, not a fade-in. */
+@keyframes hitmarker-pop {
+  from {
+    transform: scale(1.35);
+  }
+}
+/* White is a hit, red is the shot that killed. */
+#hitmarker.kill {
+  scale: 1.1;
+}
+#hitmarker.kill .mark {
+  stroke: #ff1f1f;
+}
+#target-name {
+  left: 50%;
+  top: calc(50% + 22px);
+  transform: translateX(-50%);
+  font: 800 13px var(--head);
+  -webkit-text-stroke: 3px var(--paper);
+  paint-order: stroke;
+}
+/* One arc per attacker around the crosshair; top = in front, rotated by hud.ts each frame. */
+#dmgdir {
+  inset: 0;
+}
+#dmgdir svg {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 220px;
+  height: 220px;
+  margin: -110px 0 0 -110px;
+  overflow: visible;
+  opacity: 0;
+}
+#dmgdir path {
+  fill: var(--red);
+  stroke: var(--ink);
+  stroke-width: 3;
+  stroke-linejoin: round;
+}
+/* Sniper scope: black round a clear circle, thin ink cross hairs. hud.ts sets the opacity. */
+#scope {
+  inset: 0;
+  opacity: 0;
+  background: radial-gradient(circle at center, transparent 0 38vmin, var(--ink) 38.4vmin 39.2vmin, #120f1c 39.6vmin);
+}
+#scope::before,
+#scope::after {
+  content: '';
+  position: absolute;
+  background: var(--ink);
+}
+#scope::before {
+  left: calc(50% - 39vmin);
+  right: calc(50% - 39vmin);
+  top: calc(50% - 1px);
+  height: 2px;
+}
+#scope::after {
+  top: calc(50% - 39vmin);
+  bottom: calc(50% - 39vmin);
+  left: calc(50% - 1px);
+  width: 2px;
+}
+/* A flash grenade: white over everything, fading as the blindness wears off. */
+#flashbang {
+  inset: 0;
+  opacity: 0;
+  background: #fffef4;
+}
+/* Damage numbers that rise from the crosshair on the range. */
+#dmgnums {
+  left: 50%;
+  top: 50%;
+}
+.dmgnum {
+  position: absolute;
+  left: 14px;
+  top: -24px;
+  font: 900 20px var(--head);
+  color: var(--paper);
+  -webkit-text-stroke: 1.5px var(--ink);
+  animation: dmgnum 0.9s ease-out forwards;
+}
+.dmgnum.head {
+  color: var(--yellow);
+  font-size: 26px;
+}
+/* Arm and leg hits: smaller and grey, they do less. */
+.dmgnum.limb {
+  color: #c9c2b4;
+  font-size: 16px;
+}
+@keyframes dmgnum {
+  from {
+    transform: translate(0, 0) scale(1.3);
+    opacity: 1;
+  }
+  to {
+    transform: translate(10px, -46px) scale(1);
+    opacity: 0;
+  }
+}
+/* Grenades and bandages carried, bottom left over the health card. */
+#gear {
+  left: 18px;
+  bottom: 66px;
+  padding: 4px 10px;
+  font: 800 13px var(--head);
+  display: flex;
+  gap: 12px;
+}
+#gear kbd,
+#range kbd,
+#sighthint kbd,
+#sightnow svg {
+  width: 28px;
+  height: 20px;
+  margin-right: 3px;
+  vertical-align: middle;
+  fill: none;
+  stroke: #fff;
+  stroke-width: 2.2;
+  stroke-linejoin: round;
+}
+#sightnow svg .dot {
+  fill: #ff2a4d;
+  stroke: none;
+}
+#sightkey kbd {
+  display: inline-block;
+  margin-right: 4px;
+  padding: 0 5px;
+  border: 2px solid var(--ink);
+  background: var(--yellow);
+  font: inherit;
+}
+/* The range panel: last hit, accuracy and time to kill. */
+#range {
+  left: 18px;
+  top: 70px;
+  padding: 6px 12px;
+  font: 700 13px var(--head);
+  line-height: 1.5;
+  white-space: pre;
+}
+#range b {
+  font-size: 15px;
+}
+/* The stickman with the gun's damage on each zone; the last zone hit in red. */
+#range .body-fig {
+  display: block;
+  width: 150px;
+  height: 96px;
+  margin-top: 6px;
+}
+#range .body-fig circle,
+#range .body-fig path {
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+#range .body-fig text {
+  font: 800 11px var(--head);
+  fill: var(--ink);
+}
+#range .body-fig tspan {
+  font-size: 14px;
+}
+#range .body-fig .on {
+  stroke: var(--red);
+  fill: var(--red);
+}
+#range .body-fig circle.on,
+#range .body-fig path.on {
+  fill: none;
+}
+#range .fig-cap {
+  display: block;
+  font-size: 10px;
+  white-space: normal;
+  max-width: 170px;
+}
+/*
+ * HUD size (Esc → Settings): every panel zooms by --hud-scale and keeps its corner or centre.
+ * Zoom multiplies vw too, so a width that must fit the screen divides 100vw by the scale.
+ * Full-screen layers (crosshair, scope, vignette, damage arcs) and the cards keep their size.
+ */
+#gear,
+#range,
+#timer,
+#banner,
+#callout,
+#killfeed,
+#vitals,
+#health,
+#ladder,
+#prompt,
+#toast,
+#xpbar,
+#xpfeed,
+#levelup,
+#death,
+#target-name,
+#loadout .lo-strip,
+#loadout .keys {
+  zoom: var(--hud-scale, 1);
+}
+#vignette {
+  inset: 0;
+  background: radial-gradient(ellipse at center, transparent 50%, rgba(239, 77, 77, 0.7) 100%);
+  opacity: 0;
+  transition: opacity 0.5s;
+}
+
+/* Top: timer and kill feed */
+#timer {
+  left: 50%;
+  top: 12px;
+  transform: translateX(-50%);
+  padding: 4px 16px;
+  font: 900 22px var(--head);
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+}
+#timer small {
+  display: block;
+  font: 700 11px var(--font);
+}
+/* Friends Weekend, a room with bots: a small card over the middle of the screen; only its link takes clicks (weekendBots.ts). */
+#weekend-bots {
+  left: 50%;
+  top: 28%;
+  transform: translateX(-50%);
+  width: min(320px, calc(100vw - 32px));
+  padding: 10px 14px;
+  text-align: center;
+  font: 800 13px/1.3 var(--head);
+}
+#weekend-bots p {
+  margin: 0 0 8px;
+}
+#weekend-bots a {
+  display: inline-block;
+  padding: 4px 12px;
+  border: 3px solid var(--ink);
+  background: var(--yellow);
+  color: var(--ink);
+  text-decoration: none;
+  pointer-events: auto;
+}
+#weekend-bots small {
+  display: block;
+  margin-top: 8px;
+  font: 700 11px var(--font);
+}
+/*
+ * The small scoreboard (miniBoard.ts): the 3 leaders and the player's own line. Top left on a
+ * computer (owner, 2026-10-14), top right on touch (game-touch.css).
+ * The top left corner stacks, each under the ones that show: the board, the fps counter (or the
+ * debug panel), the PING chip, the cards. --tl-shift is the board's height and a gap (each line is
+ * 19 px; miniBoard.ts writes the line count, 0 without the board); --tl-fps and --tl-ping are the
+ * counter's and the chip's slots while they show.
+ */
+:root {
+  /* The minimap (minimapView.ts, game-minimap.css) is first in the stack; it writes its height and gap in px to --minimap-h. */
+  --tl-map: calc(var(--minimap-h, 0) * 1px * var(--hud-scale, 1));
+  --tl-shift: calc((var(--mini-board-lines, 0) * 19px + min(var(--mini-board-lines, 0), 1) * 18px) * var(--hud-scale, 1) + var(--tl-map));
+}
+html:has(#fps:not([hidden])) {
+  --tl-fps: 32px;
+}
+html:has(#ping-note:not([hidden])) {
+  --tl-ping: 32px;
+}
+.mini-board {
+  padding: 3px 0;
+  border: 2px solid var(--ink);
+  background: rgba(21, 17, 28, 0.62);
+  color: var(--paper);
+  font: 800 13px/19px var(--head);
+  box-shadow: 2px 2px 0 rgba(21, 17, 28, 0.5);
+}
+.mini-board:empty {
+  display: none;
+}
+.mini-board div {
+  display: flex;
+  gap: 6px;
+  padding: 0 7px;
+}
+.mini-board div.me {
+  background: var(--yellow);
+  color: var(--ink);
+}
+.mini-board i {
+  min-width: 1.2em;
+  font-style: normal;
+  opacity: 0.75;
+}
+.mini-board span {
+  flex: 1;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.mini-board b {
+  font-variant-numeric: tabular-nums;
+}
+#mini-board {
+  left: 12px;
+  top: calc((12px + var(--tl-map)) / var(--hud-scale, 1));
+  min-width: 150px;
+  max-width: 200px;
+  zoom: var(--hud-scale, 1);
+}
+/* The browser draws on the CPU (item 295, gpuCard.ts), or a slow desktop (item 249, lowFpsCard.ts): a card top left, at the bottom of the corner's stack; only its link and buttons take clicks. */
+#gpu-card,
+#fps-card {
+  left: 14px;
+  top: calc((12px + var(--tl-shift) + var(--tl-fps, 0px) + var(--tl-ping, 0px)) / var(--hud-scale, 1));
+  width: min(300px, calc(100vw - 28px));
+  padding: 12px 16px 10px;
+  background: var(--paper);
+  border: 4px solid var(--ink);
+  box-shadow: 8px 8px 0 var(--ink);
+  transform: rotate(-1deg);
+  zoom: var(--hud-scale, 1);
+}
+#gpu-card h2,
+#fps-card h2 {
+  margin: 0 0 6px;
+  font: 900 22px var(--head);
+  color: var(--red);
+  -webkit-text-stroke: 1.5px var(--ink);
+  paint-order: stroke;
+}
+#gpu-card p,
+#fps-card p {
+  margin: 0 0 10px;
+  font: 800 13px/1.35 var(--head);
+}
+#gpu-card a,
+#gpu-card button,
+#fps-card button {
+  display: inline-block;
+  margin: 0 6px 0 0;
+  padding: 4px 12px;
+  border: 3px solid var(--ink);
+  background: var(--yellow);
+  color: var(--ink);
+  font: 900 13px var(--head);
+  text-decoration: none;
+  pointer-events: auto;
+  cursor: pointer;
+}
+#gpu-card button.ghost,
+#fps-card button.ghost {
+  background: var(--paper);
+}
+#gpu-card small,
+#fps-card small {
+  display: block;
+  margin-top: 8px;
+  font: 700 11px var(--font);
+}
+#killfeed {
+  right: 14px;
+  top: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+}
+/* Kill feed: light names on a dark panel, whatever the sky; the player colour is a dot. */
+.kf {
+  display: flex;
+  align-items: center;
+  max-width: min(460px, calc(100vw / var(--hud-scale, 1) - 28px));
+  padding: 3px 10px;
+  font-weight: 800;
+  color: var(--paper);
+  background: var(--ink);
+  border: 2px solid var(--ink);
+  box-shadow: 3px 3px 0 rgba(21, 17, 28, 0.5);
+  white-space: nowrap;
+  transition: opacity 0.5s;
+}
+.kf.me {
+  color: var(--ink);
+  background: var(--yellow);
+}
+.kf .gun {
+  margin: 0 6px;
+}
+/* Someone joined a friends room: smaller and lighter than a kill. */
+.kf.join {
+  gap: 5px;
+  font-size: 13px;
+  color: var(--ink);
+  background: var(--paper);
+}
+.kf-name {
+  display: inline-flex;
+  align-items: center;
+  min-width: 0;
+  max-width: 150px;
+}
+.kf-name span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+/* Your own kill or death: ink on yellow, never a team colour on yellow. */
+.kf.me .kf-name {
+  color: inherit !important;
+}
+.kf-how {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 4px;
+  margin: 0 8px;
+}
+.kf-head {
+  color: var(--red);
+}
+.kf-dist {
+  flex: none;
+  margin-left: 8px;
+  font-size: 12px;
+  opacity: 0.8;
+}
+/* Narrow screens: the feed would cover the timer at the top centre, so it starts below it. */
+@media (max-width: 720px) {
+  #killfeed {
+    top: 78px;
+  }
+}
+/* The gun-game leader's crown, beside a name or in the top bar. */
+.crown-ico {
+  color: #f6b21b;
+  margin: 0 4px;
+  vertical-align: -2px;
+}
+/* "bot" after a bot's name: quiet, not a badge. */
+.bot {
+  margin-left: 5px;
+  font: 600 0.75em var(--font);
+  opacity: 0.6;
+  -webkit-text-stroke: 0;
+}
+
+/* Bottom right: ammo. */
+#vitals {
+  right: 18px;
+  bottom: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 150px;
+}
+/* Bottom left: health as a number beside a bar that drains towards the left. */
+#health {
+  left: 18px;
+  bottom: 18px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 220px;
+  padding: 3px 8px 3px 10px;
+}
+#health .num {
+  min-width: 3ch;
+  font: 900 22px var(--head);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+#health .track {
+  flex: 1;
+  height: 16px;
+  background: rgba(21, 17, 28, 0.18);
+}
+#health .fill {
+  height: 100%;
+  background: var(--green);
+  transition: width 0.15s, background-color 0.15s;
+}
+#health.mid .fill {
+  background: var(--orange);
+}
+#health.low .fill {
+  background: var(--red);
+}
+/* The ammo card (ammoCard.ts, item 168): always the same size. The slots on top, the gun in hand with its count, one bar per round. */
+.ammo-row {
+  display: flex;
+  justify-content: flex-end;
+}
+#ammo {
+  width: 260px;
+  padding: 0;
+  overflow: hidden;
+}
+#ammo .slots {
+  display: flex;
+  border-bottom: 3px solid var(--ink);
+}
+#ammo .sl {
+  flex: 1;
+  height: 26px;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1px;
+  border-right: 2px solid var(--ink);
+  opacity: 0.7;
+}
+#ammo .sl:last-child {
+  border-right: 0;
+}
+#ammo .sl img {
+  height: 13px;
+  max-width: 34px;
+  object-fit: contain;
+}
+#ammo .sl.on {
+  background: var(--yellow);
+  opacity: 1;
+}
+#ammo .sl.faint {
+  opacity: 0.3;
+}
+#ammo .body {
+  padding: 6px 10px 8px;
+}
+#ammo .hd {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 34px;
+}
+#ammo .hd.melee img {
+  order: 3;
+}
+#ammo .hd.melee .num {
+  display: none;
+}
+#ammo .hd img {
+  height: 26px;
+  max-width: 110px;
+  object-fit: contain;
+}
+#ammo .hd.melee img {
+  height: 30px;
+}
+#ammo .label {
+  margin-right: auto;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 1px;
+}
+#ammo.empty .label {
+  color: var(--red);
+}
+#ammo .num {
+  font: 900 28px var(--head);
+  font-variant-numeric: tabular-nums;
+}
+#ammo .bars {
+  display: flex;
+  gap: 2px;
+  height: 14px;
+  margin-top: 6px;
+}
+#ammo .bars i {
+  flex: 1;
+  background: var(--ink);
+}
+#ammo .bars i.x {
+  background: rgba(21, 17, 28, 0.18);
+}
+/* Under the ammo, on every gun with a choice of sights: a standing reminder of the T key. */
+#sightkey {
+  margin-bottom: -4px;
+  font: 800 14px var(--head);
+  text-align: right;
+  color: #fff;
+  text-shadow: 0 0 3px var(--ink), 0 1px 2px var(--ink);
+}
+#sightkey kbd {
+  margin: 0 1px;
+  padding: 0 4px;
+  color: var(--ink);
+  text-shadow: none;
+}
+/* "T changes the sight" over the ammo panel (sightHint.ts): the gun's sights, the one on it in yellow. */
+#sighthint {
+  padding: 6px 10px 8px;
+  background: var(--paper);
+  transform: rotate(-1.5deg);
+  animation: sighthint 0.35s ease-out;
+}
+#sighthint .head {
+  margin-bottom: 6px;
+  font: 900 15px var(--head);
+  text-align: right;
+  white-space: nowrap;
+}
+#sighthint .row {
+  display: flex;
+  justify-content: flex-end;
+  gap: 6px;
+}
+#sighthint .chip {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 3px 5px;
+  border: 2px solid var(--ink);
+  background: #fffdf5;
+  font: 800 9px var(--head);
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+}
+#sighthint .chip.on {
+  background: var(--yellow);
+}
+#sighthint svg {
+  width: 28px;
+  height: 20px;
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 2.2;
+  stroke-linejoin: round;
+}
+#sighthint svg .dot {
+  fill: #ff2a4d;
+  stroke: none;
+}
+@keyframes sighthint {
+  from {
+    opacity: 0;
+    transform: translateX(30px) rotate(-1.5deg);
+  }
+}
+/* Gun game: the ladder of guns, over the ammo */
+#ladder {
+  right: 18px;
+  bottom: 138px;
+  padding: 4px 10px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  text-align: right;
+}
+#ladder .done {
+  opacity: 0.45;
+}
+#ladder .now {
+  padding: 0 4px;
+  background: var(--yellow);
+}
+#ladder .to {
+  display: block;
+  margin-top: 2px;
+  font-size: 10px;
+}
+#prompt {
+  left: 50%;
+  top: calc(50% + 76px);
+  transform: translateX(-50%) rotate(-2deg);
+  padding: 4px 12px;
+  background: var(--paper);
+  border: 3px solid var(--ink);
+  box-shadow: 4px 4px 0 var(--ink);
+  font: 900 15px var(--head);
+  white-space: nowrap;
+}
+/* The range's stat line for the gun on the rack. */
+#prompt small {
+  display: block;
+  margin-top: 2px;
+  font: 700 11px var(--head);
+}
+#prompt kbd {
+  display: inline-block;
+  margin-right: 6px;
+  padding: 0 6px;
+  border: 2px solid var(--ink);
+  background: var(--yellow);
+  font: inherit;
+}
+#holdring {
+  left: 50%;
+  top: 50%;
+  width: 64px;
+  height: 64px;
+  margin: -32px 0 0 -32px;
+  transform: rotate(-90deg);
+}
+#holdring circle {
+  fill: none;
+  stroke-width: 7;
+}
+#holdring .track {
+  stroke: rgba(21, 17, 28, 0.45);
+}
+#holdring .fill {
+  stroke: var(--yellow);
+  stroke-dasharray: 100;
+  stroke-linecap: round;
+}
+#toast {
+  right: 18px;
+  bottom: 148px;
+  padding: 4px 12px;
+  background: var(--yellow);
+  border: 3px solid var(--ink);
+  box-shadow: 4px 4px 0 var(--ink);
+  font: 900 18px var(--head);
+  opacity: 0;
+  transform: rotate(-3deg) scale(0.6);
+}
+#toast.show {
+  animation: toast 1.6s ease-out;
+}
+@keyframes toast {
+  0% { opacity: 0; transform: rotate(-3deg) scale(0.6); }
+  12% { opacity: 1; transform: rotate(-3deg) scale(1.15); }
+  22% { transform: rotate(-3deg) scale(1); }
+  80% { opacity: 1; }
+  100% { opacity: 0; transform: rotate(-3deg) scale(1); }
+}
+
+/* The big moments (bigMoments.ts; owner, 2026-10-11): a kill streak or a finished daily
+   challenge, big in the upper middle, one at a time for 2.4 s. */
+#callout {
+  left: 50%;
+  top: 26%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  white-space: nowrap;
+  color: var(--yellow);
+  -webkit-text-stroke: 6px var(--ink);
+  paint-order: stroke;
+  opacity: 0;
+}
+#callout small {
+  display: block;
+  font: 900 20px var(--head);
+  letter-spacing: 0.08em;
+  color: #fff;
+  -webkit-text-stroke: 5px var(--ink);
+}
+#callout b {
+  display: block;
+  font: 900 68px/1.05 var(--head);
+}
+#callout em {
+  display: inline-block;
+  margin-top: 10px;
+  padding: 4px 14px;
+  border: 3px solid var(--ink);
+  background: var(--paper);
+  box-shadow: 4px 4px 0 var(--ink);
+  color: var(--ink);
+  font: 900 18px var(--head);
+  font-style: normal;
+  -webkit-text-stroke: 0;
+}
+#callout.streak b {
+  color: var(--orange);
+}
+/* A challenge's words are longer than a streak's: smaller, and white like a stamp. */
+#callout.daily b,
+#callout.lucky b {
+  font-size: 42px;
+  color: #fff;
+}
+#callout.daily small,
+#callout.lucky small {
+  color: var(--green);
+}
+#callout.lucky em {
+  background: var(--yellow);
+}
+#callout.show {
+  animation: callout 2.4s ease-out both;
+}
+@keyframes callout {
+  0% { opacity: 0; transform: translate(-50%, -50%) scale(1.8) rotate(-4deg); }
+  10% { opacity: 1; transform: translate(-50%, -50%) scale(0.92) rotate(1deg); }
+  18% { transform: translate(-50%, -50%) scale(1) rotate(-1deg); }
+  85% { opacity: 1; transform: translate(-50%, -50%) scale(1) rotate(-1deg); }
+  100% { opacity: 0; transform: translate(-50%, -58%) scale(1) rotate(-1deg); }
+}
+@media (prefers-reduced-motion: reduce) {
+  #callout.show {
+    animation: callout-still 2.4s both;
+  }
+}
+@keyframes callout-still {
+  0%, 85% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+/* The daily challenges in a match (dailyCard.ts, GameDaily; daily.css; owner, 2026-10-11): top
+   right over the kill feed, only while the scoreboard (Tab) or the pause card (Esc) shows, and only
+   where it fits beside a 560 px card. */
+#game-daily {
+  position: fixed;
+  top: 12px;
+  right: 14px;
+  width: min(300px, calc((100vw - 620px) / 2));
+  box-sizing: border-box;
+  border: 4px solid var(--ink);
+  box-shadow: 6px 6px 0 var(--ink);
+  pointer-events: none;
+  display: none;
+}
+body:has(#scoreboard:not([hidden])) #game-daily:not([hidden]),
+body:has(#pause:not([hidden])):not(:has(#pause-settings:not([hidden]), .pause-view:not([hidden]))) #game-daily:not([hidden]) {
+  display: grid;
+}
+/* A phone or a small window: no room beside the card, and the results screen lists the challenges. */
+@media (max-width: 1019px) {
+  #game-daily {
+    display: none !important;
+  }
+}
+
+/* Which team am I on (teamCue.ts, item 385): an edge on the health bar, a label above it, a banner at spawn. */
+#health.teamed {
+  box-shadow: 0 0 0 3px var(--team);
+}
+#teamlabel {
+  position: absolute;
+  left: 0;
+  bottom: 100%;
+  margin-bottom: 4px;
+  font: 900 13px var(--head);
+  letter-spacing: 0.06em;
+  color: var(--team);
+  -webkit-text-stroke: 3px var(--ink);
+  paint-order: stroke;
+}
+#teamcue {
+  left: 50%;
+  top: 22%;
+  transform: translateX(-50%);
+  font: 900 54px var(--head);
+  color: var(--team);
+  -webkit-text-stroke: 8px var(--ink);
+  paint-order: stroke;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+}
+#teamcue.show {
+  animation: teamcue 2s ease-out;
+}
+@keyframes teamcue {
+  0% { opacity: 0; transform: translateX(-50%) scale(1.5); }
+  12% { opacity: 1; transform: translateX(-50%) scale(1); }
+  75% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+/* A calmer first hour (item 377): <html data-fh> lists the steps still closed (client/src/firstHour.ts). */
+html[data-fh~='daily'] #game-daily {
+  display: none !important;
+}
+/* One line about another player's drop (dropTicker.ts): small, top centre, on screen a few seconds. */
+.drop-line {
+  position: fixed;
+  top: 54px;
+  left: 50%;
+  z-index: 6;
+  max-width: min(80vw, 520px);
+  padding: 3px 12px;
+  background: var(--yellow);
+  border: 2px solid var(--ink);
+  box-shadow: 3px 3px 0 var(--ink);
+  font: 900 14px var(--head);
+  pointer-events: none;
+  opacity: 0;
+  transform: translateX(-50%) translateY(-8px);
+  transition:
+    opacity 0.25s,
+    transform 0.25s;
+}
+.drop-line.show {
+  opacity: 1;
+  transform: translateX(-50%);
+}
+/* The Haunted Crate's mark (crate.ts): a ghost-green gem with the distance, top of the screen, sliding to where the crate is. */
+.crate-mark {
+  position: fixed;
+  top: 84px;
+  left: 50%;
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  transform: translateX(-50%);
+  pointer-events: none;
+  font: 900 13px var(--head);
+  color: #d9fff0;
+  text-shadow:
+    -1px -1px 0 var(--ink),
+    1px 1px 0 var(--ink),
+    1px -1px 0 var(--ink),
+    -1px 1px 0 var(--ink);
+}
+.crate-mark[hidden] {
+  display: none;
+}
+.crate-mark .gem {
+  width: 16px;
+  height: 16px;
+  background: #a8ffd8;
+  border: 2px solid var(--ink);
+  box-shadow: 0 0 10px #a8ffd8;
+  transform: rotate(45deg);
+}
+.crate-mark[data-arrow='left'] .gem {
+  border-radius: 50% 0 50% 50%;
+}
+.crate-mark[data-arrow='right'] .gem {
+  border-radius: 0 50% 50% 50%;
+}

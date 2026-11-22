@@ -1,0 +1,64 @@
+/* game-emote.css: the emote wheel (client/src/emotes.ts, docs/design/emotes.md). Linked from index.html. */
+#emotewheel {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: grid;
+  place-items: center;
+  background: rgba(21, 17, 28, 0.35);
+}
+#emotewheel[hidden] {
+  display: none;
+}
+#emotewheel .ring {
+  position: relative;
+  width: 0;
+  height: 0;
+}
+/* Each slice sits on a circle round the middle, at its own angle (--a). */
+#emotewheel button {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 132px;
+  margin: -27px 0 0 -66px;
+  padding: 10px 8px;
+  border: 3px solid var(--ink);
+  background: var(--paper);
+  box-shadow: 4px 4px 0 var(--ink);
+  color: var(--ink);
+  font: 800 15px var(--head);
+  cursor: pointer;
+  transform: rotate(var(--a)) translateY(-120px) rotate(calc(-1 * var(--a)));
+}
+#emotewheel button:hover,
+#emotewheel button.hover {
+  background: var(--yellow);
+}
+#emotewheel button.locked {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+#emotewheel button small {
+  font-size: 10px;
+}
+#emotewheel kbd {
+  display: inline-block;
+  margin-right: 6px;
+  padding: 0 5px;
+  border: 2px solid var(--ink);
+  background: var(--yellow);
+  font: inherit;
+}
+#emotewheel p {
+  position: absolute;
+  left: -120px;
+  top: 0;
+  width: 240px;
+  margin: 0;
+  transform: translateY(-50%);
+  text-align: center;
+  color: var(--paper);
+  font: 800 12px var(--head);
+  text-shadow: 2px 2px 0 var(--ink);
+}

@@ -1,0 +1,326 @@
+/* Pumpkin Bomb on the game page (bombClient.ts, item 749): a strip under the top bar (teamBar.ts) with a line that says what
+   to do for a few seconds, and the plant and defuse bar; a small mark for each site and for the pumpkin under the bar. */
+.bomb-strip {
+  position: fixed;
+  top: 52px;
+  left: 50%;
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  transform: translateX(-50%);
+  pointer-events: none;
+  font: 900 12px var(--head);
+  color: #fff;
+  text-shadow:
+    -1px -1px 0 var(--ink),
+    1px 1px 0 var(--ink),
+    1px -1px 0 var(--ink),
+    -1px 1px 0 var(--ink);
+}
+.bomb-strip[hidden],
+.bomb-line[hidden],
+.bomb-bar[hidden],
+.bomb-mark[hidden] {
+  display: none;
+}
+.bomb-line {
+  padding: 2px 10px;
+  border: 3px solid var(--ink);
+  background: var(--yellow);
+  color: var(--ink);
+  text-shadow: none;
+}
+.bomb-bar {
+  position: relative;
+  width: 220px;
+  height: 22px;
+  border: 3px solid var(--ink);
+  background: rgba(30, 24, 44, 0.78);
+}
+.bomb-bar i {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 0;
+  background: #ff7a1a;
+}
+.bomb-bar[data-kind='defuse'] i {
+  background: #5fd48a;
+}
+.bomb-bar span {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  letter-spacing: 1px;
+}
+.bomb-mark {
+  position: fixed;
+  top: 88px;
+  left: 50%;
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  transform: translateX(-50%);
+  pointer-events: none;
+  font: 900 12px var(--head);
+  color: #fff;
+  text-shadow:
+    -1px -1px 0 var(--ink),
+    1px 1px 0 var(--ink),
+    1px -1px 0 var(--ink),
+    -1px 1px 0 var(--ink);
+}
+.bomb-mark .gem {
+  display: grid;
+  place-items: center;
+  min-width: 18px;
+  height: 18px;
+  border: 2px solid var(--ink);
+  border-radius: 50%;
+  background: #f08a24;
+  color: var(--ink);
+  font-size: 11px;
+  text-shadow: none;
+}
+.bomb-mark[data-kind='pumpkin'] .gem {
+  min-width: 14px;
+  height: 14px;
+  background: #ffb43a;
+}
+.bomb-mark[data-lit='1'] .gem {
+  box-shadow: 0 0 10px #ffd84a;
+  animation: bomb-pulse 0.5s ease-in-out infinite alternate;
+}
+.bomb-mark[data-arrow='left'] {
+  left: 8% !important;
+}
+.bomb-mark[data-arrow='right'] {
+  left: 92% !important;
+}
+@keyframes bomb-pulse {
+  from {
+    transform: scale(1);
+  }
+  to {
+    transform: scale(1.18);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  #team-bar .tb-clock[data-tone='last'],
+  .bomb-mark[data-lit='1'] .gem {
+    animation: none;
+  }
+}
+/* The banner (PLANTED, the round, the result) sits under the strip, not over the site marks at the top. */
+body:has(.bomb-strip:not([hidden])) #banner {
+  top: calc(140px / var(--hud-scale, 1));
+}
+
+/* The top bar of Pumpkin Bomb and Capture the Flag (teamBar.ts, items 767 and 801), as Counter-Strike's: the clock in the middle,
+   each team's score and heads on its side, your team on the left. */
+#team-bar {
+  position: fixed;
+  top: 6px;
+  left: 50%;
+  z-index: 4;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: start;
+  gap: 4px;
+  width: min(640px, 96vw);
+  transform: translateX(-50%);
+  pointer-events: none;
+  zoom: var(--hud-scale, 1);
+}
+#team-bar[hidden] {
+  display: none;
+}
+#team-bar .tb-side {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+#team-bar .tb-side:first-child {
+  justify-content: flex-end;
+}
+#team-bar .tb-heads {
+  display: flex;
+  gap: 2px;
+}
+#team-bar .tb-head {
+  position: relative;
+  box-sizing: border-box;
+  width: 38px;
+  height: 38px;
+  border: 2px solid var(--ink);
+  background: rgba(30, 24, 44, 0.72);
+}
+#team-bar [data-team='0'] .tb-head {
+  border-bottom: 4px solid #2f7dff;
+}
+#team-bar [data-team='1'] .tb-head {
+  border-bottom: 4px solid #e8343a;
+}
+#team-bar .tb-head img {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+#team-bar .tb-head[data-dead='1'] img {
+  filter: grayscale(1) brightness(0.55);
+}
+#team-bar .tb-head[data-dead='1'] {
+  border-bottom-color: #777;
+}
+#team-bar .tb-head[data-dead='1']::after {
+  content: '×';
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font: 900 30px/1 var(--head);
+  color: #fff;
+  text-shadow: 0 0 3px var(--ink), 1px 1px 0 var(--ink);
+}
+#team-bar .tb-head[data-carrier='1'] {
+  outline: 3px solid var(--yellow);
+}
+/* Your own head is ringed in white. */
+#team-bar .tb-head[data-self='1'] {
+  outline: 2px solid #fff;
+  outline-offset: 1px;
+}
+#team-bar .tb-heads i {
+  align-self: center;
+  font: 900 12px var(--head);
+  color: #fff;
+  text-shadow: 1px 1px 0 var(--ink);
+}
+/* The team's score: a block of its colour next to the clock. */
+#team-bar .tb-score {
+  display: grid;
+  place-items: center;
+  box-sizing: border-box;
+  min-width: 38px;
+  height: 38px;
+  padding: 0 6px;
+  border: 2px solid var(--ink);
+  font: 900 26px/1 var(--head);
+  text-align: center;
+  color: #fff;
+  text-shadow: 1px 1px 0 var(--ink);
+}
+#team-bar [data-team='0'] .tb-score {
+  background: #2f7dff;
+}
+#team-bar [data-team='1'] .tb-score {
+  background: #e8343a;
+}
+/* The count of the living: shown on a phone, where the heads would be too small (game-touch.css). */
+#team-bar .tb-alive {
+  display: none;
+  font: 900 12px var(--head);
+  color: #fff;
+  text-shadow: 1px 1px 0 var(--ink);
+}
+#team-bar .tb-mid {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-sizing: border-box;
+  min-width: 104px;
+  height: 38px;
+  justify-content: center;
+  padding: 0 8px;
+  border: 2px solid var(--ink);
+  background: rgba(30, 24, 44, 0.78);
+  font: 900 9px var(--head);
+  color: #fff;
+  text-shadow: 1px 1px 0 var(--ink);
+}
+#team-bar .tb-mid small {
+  font: inherit;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+}
+#team-bar .tb-clock {
+  font: 900 22px/1 var(--head);
+  color: var(--yellow);
+}
+/* The pumpkin is planted: the fuse is orange, and red in its last seconds. A round is won: the winner's colour. */
+#team-bar .tb-clock[data-tone='fuse'] {
+  color: #ff7a1a;
+}
+#team-bar .tb-clock[data-tone='last'] {
+  color: #ff4a3a;
+  animation: bomb-pulse 0.4s ease-in-out infinite alternate;
+}
+#team-bar .tb-clock[data-tone='win0'] {
+  color: #6fa4ff;
+}
+#team-bar .tb-clock[data-tone='win1'] {
+  color: #ff6a6f;
+}
+
+/* The pumpkin in the hands (bombHand.ts, item 768): the fifth slot of the ammo card, and the plant prompt over the crosshair. */
+#ammo .sl {
+  border-right: 0;
+}
+#ammo .sl:has(~ .sl:not([hidden])) {
+  border-right: 2px solid var(--ink);
+}
+#ammo .sl[hidden] {
+  display: none;
+}
+#ammo .sl[data-kind='pumpkin']::before {
+  content: '';
+  width: 18px;
+  height: 14px;
+  border: 2px solid var(--ink);
+  border-radius: 50% 50% 46% 46%;
+  background: radial-gradient(circle at 40% 35%, #ffb04a, #f08a24 60%, #c4600e);
+}
+.bomb-plant {
+  position: fixed;
+  top: 58%;
+  left: 50%;
+  z-index: 5;
+  padding: 4px 16px;
+  transform: translateX(-50%);
+  pointer-events: none;
+  border: 3px solid var(--ink);
+  background: var(--yellow);
+  color: var(--ink);
+  font: 900 22px var(--head);
+}
+.bomb-plant[hidden] {
+  display: none;
+}
+
+/* The carry icon (bombCarryIcon.ts, item 789): a pumpkin on the right while this player carries it. */
+.bomb-carry {
+  position: fixed;
+  top: 50%;
+  right: 14px;
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  transform: translateY(-50%);
+  pointer-events: none;
+  font: 900 10px var(--head);
+  color: #fff;
+  text-shadow:
+    -1px -1px 0 var(--ink),
+    1px 1px 0 var(--ink),
+    1px -1px 0 var(--ink),
+    -1px 1px 0 var(--ink);
+}
+.bomb-carry[hidden] {
+  display: none;
+}

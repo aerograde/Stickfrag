@@ -1,0 +1,117 @@
+/* Capture the Flag on the game page (ctfClient.ts, item 747): a strip with both flags' state under the top bar, a line for the
+   flag you carry or lost, and a mark for each flag on the top of the screen. --flag is the team colour, set by the script. */
+.ctf-strip {
+  position: fixed;
+  top: 52px;
+  left: 50%;
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  transform: translateX(-50%);
+  pointer-events: none;
+  font: 900 12px var(--head);
+  color: #fff;
+  text-shadow:
+    -1px -1px 0 var(--ink),
+    1px 1px 0 var(--ink),
+    1px -1px 0 var(--ink),
+    -1px 1px 0 var(--ink);
+}
+.ctf-strip[hidden],
+.ctf-line[hidden],
+.ctf-mark[hidden] {
+  display: none;
+}
+.ctf-flags {
+  display: flex;
+  gap: 4px;
+}
+.ctf-flag {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 80px;
+  padding: 1px 6px 1px 5px;
+  border: 3px solid var(--ink);
+  background: rgba(30, 24, 44, 0.72);
+}
+.ctf-flag i {
+  width: 12px;
+  height: 14px;
+  border: 2px solid var(--ink);
+  background: var(--flag);
+  clip-path: polygon(0 0, 100% 0, 100% 62%, 50% 100%, 0 62%);
+}
+/* At home, the cloth says it all: the word shows only when a flag is taken or dropped (item 790). */
+.ctf-flag[data-status='0'] {
+  min-width: 0;
+}
+.ctf-flag[data-status='0'] span {
+  display: none;
+}
+/* Taken: the cloth pulses. Dropped: it turns amber. */
+.ctf-flag[data-status='1'] i {
+  animation: ctf-pulse 0.8s ease-in-out infinite alternate;
+}
+.ctf-flag[data-status='2'] {
+  border-color: #ffb43a;
+}
+.ctf-line {
+  padding: 2px 10px;
+  border: 3px solid var(--ink);
+  background: var(--yellow);
+  color: var(--ink);
+  text-shadow: none;
+}
+.ctf-mark {
+  position: fixed;
+  top: 88px;
+  left: 50%;
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  transform: translateX(-50%);
+  pointer-events: none;
+  font: 900 12px var(--head);
+  color: #fff;
+  text-shadow:
+    -1px -1px 0 var(--ink),
+    1px 1px 0 var(--ink),
+    1px -1px 0 var(--ink),
+    -1px 1px 0 var(--ink);
+}
+.ctf-mark .gem {
+  width: 14px;
+  height: 18px;
+  background: var(--flag);
+  border: 2px solid var(--ink);
+  box-shadow: 0 0 8px var(--flag);
+  clip-path: polygon(0 0, 100% 0, 100% 62%, 50% 100%, 0 62%);
+}
+.ctf-mark[data-carried='1'] .gem {
+  animation: ctf-pulse 0.8s ease-in-out infinite alternate;
+}
+.ctf-mark[data-arrow='left'] .gem {
+  transform: rotate(90deg);
+}
+.ctf-mark[data-arrow='right'] .gem {
+  transform: rotate(-90deg);
+}
+@keyframes ctf-pulse {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0.45;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ctf-flag[data-status='1'] i,
+  .ctf-mark[data-carried='1'] .gem {
+    animation: none;
+  }
+}

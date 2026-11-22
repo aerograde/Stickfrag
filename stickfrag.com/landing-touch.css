@@ -1,0 +1,460 @@
+/* landing-touch.css: part of landing.html's styles, linked last (the cascade depends on the order).
+   The home page on a phone that plays (arrangeTouch in client/src/playMenu.ts, docs/design/mobile.md):
+   the stickman on top, the haven's cards in one column under him, in the order a thumb needs them.
+   Held sideways, he stands on the left and the column scrolls on the right. */
+
+/* The top bar (outside #gear, so under html.touch-menu): one line, as on a narrow phone in portrait,
+   whichever way it is held: logo, Discord and Feedback as icons, PLAY. The text links go. */
+html.touch-menu .bar .wrap {
+  gap: 14px;
+  min-width: 0;
+}
+html.touch-menu .bar nav .opt,
+html.touch-menu .bar nav .soon-only,
+html.touch-menu .bar .discord-link span,
+html.touch-menu .bar .fb-btn span {
+  display: none;
+}
+html.touch-menu .bar nav {
+  gap: 14px;
+  white-space: nowrap;
+}
+html.touch-menu .bar .logo,
+html.touch-menu .bar .btn {
+  flex: none;
+  white-space: nowrap;
+}
+html.touch-menu .bar .fb-btn {
+  padding: 9px 10px;
+}
+
+#gear.touch-menu {
+  --stage-h: min(44svh, 112vw);
+  --touch-gap: 18px;
+  background: #4a2616;
+}
+/* The room on top, the width of the screen. */
+#gear.touch-menu .gear-stage {
+  inset: 0 0 auto 0;
+  height: var(--stage-h);
+  border-bottom: 3px solid var(--ink);
+}
+#gear.touch-menu .gear-grid {
+  display: block;
+  min-height: 0;
+  padding: calc(var(--stage-h) - 34px) 0 0;
+}
+#gear.touch-menu .touch-col {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  gap: var(--touch-gap);
+  padding: 0 0 72px;
+}
+/* The cards stop floating: each takes the column's width. */
+#gear.touch-menu .touch-col > *,
+#gear.touch-menu .touch-col .haven-float {
+  position: relative;
+  inset: auto;
+  translate: none;
+  width: auto;
+  min-height: 0;
+  margin: 0;
+}
+/* Name and level side by side, hanging over the stage's bottom edge. */
+#gear.touch-menu .haven-toprow {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 12px;
+  --top-card-w: auto;
+}
+#gear.touch-menu .who-card,
+#gear.touch-menu .level-stripe {
+  padding: 12px 14px;
+}
+#gear.touch-menu .who-card .gear-who b {
+  font-size: 19px;
+}
+/* 16 px or more: iPhone zooms the page into a smaller field when it gets focus. */
+#gear.touch-menu input {
+  font-size: 17px;
+}
+#gear.touch-menu .level-stripe .xp {
+  grid-template-columns: auto 1fr;
+  gap: 8px;
+}
+#gear.touch-menu .level-stripe .xp-bar {
+  grid-column: 1 / -1;
+  grid-row: 2;
+}
+#gear.touch-menu .level-stripe .xp-lv.next {
+  justify-self: end;
+}
+#gear.touch-menu .play-big {
+  min-height: 104px;
+  font-size: 60px;
+}
+/* The room code: the field and JOIN on one line, CREATE A ROOM under them. */
+#gear.touch-menu .code-card {
+  padding: 16px 18px 14px;
+}
+#gear.touch-menu .code-card h3 {
+  margin: 0 0 10px;
+  font-size: 17px;
+}
+#gear.touch-menu .code-join {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+}
+#gear.touch-menu #code-create {
+  grid-column: 1 / -1;
+}
+#gear.touch-menu .code-join .btn {
+  min-height: 48px;
+}
+/* The Locker column becomes one row of three buttons: LOCKER, PACKS and SIGN IN (item 571). Each shows
+   its face only; the sign-in card's whole face opens the list of ways (havenSignIn.ts). */
+#gear.touch-menu .locker-side {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+#gear.touch-menu .locker-side > * {
+  min-width: 0;
+  min-height: 92px;
+  box-sizing: border-box;
+}
+#gear.touch-menu .lk-card,
+#gear.touch-menu .side-btn,
+#gear.touch-menu .signin-card.saved {
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 6px;
+  text-align: center;
+}
+#gear.touch-menu .lk-head img,
+#gear.touch-menu .lk-head svg {
+  width: 44px;
+  height: 44px;
+}
+#gear.touch-menu .lk-text {
+  flex: none;
+  justify-items: center;
+}
+#gear.touch-menu .lk-text b {
+  font-size: 15px;
+}
+#gear.touch-menu .lk-text small,
+#gear.touch-menu .lk-chips,
+#gear.touch-menu .lk-go,
+#gear.touch-menu .signin-why,
+#gear.touch-menu .signin-note {
+  display: none;
+}
+#gear.touch-menu .side-btn {
+  font-size: 13px;
+  line-height: 1.15;
+}
+#gear.touch-menu .signin-card {
+  display: flex;
+  align-items: center;
+  justify-content: stretch;
+}
+#gear.touch-menu .signin-card {
+  align-self: stretch;
+}
+#gear.touch-menu .signin-btns {
+  display: flex;
+}
+#gear.touch-menu .signin-btns,
+#gear.touch-menu .signin-btns .btn {
+  width: 100%;
+  height: 100%;
+  justify-content: center;
+}
+#gear.touch-menu .signin-btns svg {
+  display: none;
+}
+#gear.touch-menu .signin-card[hidden] {
+  display: none;
+}
+#gear.touch-menu .signin-line {
+  flex-direction: column;
+  gap: 2px;
+  font-size: 12px;
+}
+#gear.touch-menu .signin-line i {
+  display: none;
+}
+#gear.touch-menu .ev-slot .side-title {
+  display: none;
+}
+/* The Friends Weekend card: its own row under the Locker, the column's width, never over another card
+   (the haven pins it to the stage's corner; the selector is longer to win). */
+#gear.touch-menu.haven .touch-col > .event-row {
+  position: relative;
+  inset: auto;
+  z-index: auto;
+  width: auto;
+  max-width: none;
+  margin: 0;
+  padding: 0;
+}
+#gear.touch-menu.haven .touch-col .event-card {
+  display: flex;
+  width: 100%;
+  min-height: 0;
+  padding: 12px 20px;
+  box-sizing: border-box;
+}
+#gear.touch-menu .event-card[hidden] {
+  display: none;
+}
+#gear.touch-menu .event-card svg {
+  width: 40px;
+  height: 48px;
+}
+/* The tips name keys a phone has not got; the daily card left the column for the touch column. */
+#gear.touch-menu .haven-right {
+  display: none;
+}
+/* After PLAY: the steps take the column, over the stage's edge like the cards. */
+#gear.touch-menu .gear-card {
+  margin-top: 0;
+}
+#gear.touch-menu:not([data-step='gear']) .touch-col {
+  display: none;
+}
+#gear.touch-menu:not([data-step='gear']) .gear-card {
+  padding-bottom: 72px;
+}
+/* After PLAY (item 415): the modes as a small row of three, QUICK JOIN under it, then BACK and CREATE ROOM. */
+#gear.touch-menu #step-start:not(.off) {
+  grid-template-columns: 104px minmax(0, 1fr);
+  grid-template-areas: 'modes modes' 'quick quick' 'code code' 'back servers';
+  gap: var(--touch-gap);
+}
+#gear.touch-menu #step-start .choice.create,
+#gear.touch-menu #step-start .mode-tiles,
+#gear.touch-menu #step-start .choice.quick {
+  min-height: 0;
+}
+#gear.touch-menu #step-start .choice.quick {
+  min-height: 104px;
+}
+#gear.touch-menu #step-start .mode-tiles {
+  gap: 12px;
+}
+#gear.touch-menu #step-start .choice.mode-tile {
+  min-height: 84px;
+  padding: 12px 6px;
+}
+#gear.touch-menu #step-start .mode-tile b {
+  font-size: 22px;
+}
+#gear.touch-menu #step-start .choice.create {
+  gap: 8px;
+  padding: 12px 12px;
+}
+#gear.touch-menu #step-start .choice.create .start-icon {
+  width: 30px;
+  height: 30px;
+}
+#gear.touch-menu #step-start .choice.create .start-text b {
+  font-size: 16px;
+  letter-spacing: 0;
+}
+#gear.touch-menu #step-start .choice.create .start-text span {
+  font-size: 12px;
+}
+#gear.touch-menu #step-start .back {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 56px;
+  font-size: 16px;
+}
+#gear.touch-menu #step-start .back span {
+  position: static;
+  width: auto;
+  height: auto;
+  margin: 0 6px 0 0;
+  background: none;
+  font-size: 22px;
+}
+/* The haven's full board (landing-board.css, item 307) is for the computer: a phone keeps its stickman and its stack. */
+#gear.touch-menu[data-step='start'] #gear-canvas,
+#gear.touch-menu[data-step='invite'] #gear-canvas {
+  visibility: visible;
+}
+#gear.touch-menu[data-step='start'] .gear-grid,
+#gear.touch-menu[data-step='invite'] .gear-grid {
+  padding-bottom: 0;
+}
+#gear.touch-menu #step-start:not(.off) {
+  width: auto;
+  margin-inline: 0;
+  padding: 0;
+  background: none;
+  border: 0;
+  box-shadow: none;
+}
+/* The later steps' card takes the column's width (the haven's friends room asks for 78vw). */
+#gear.touch-menu:not([data-step='gear']) .gear-card {
+  justify-self: stretch;
+  width: auto;
+  padding-left: 16px;
+  padding-right: 16px;
+  transform: rotate(0.4deg);
+}
+/* The friends room: each setting's label above it, the maps three to a row, big enough to tap. */
+#gear.touch-menu .room-row {
+  grid-template-columns: minmax(0, 1fr);
+  gap: 6px;
+}
+#gear.touch-menu .room-seg button {
+  min-height: 44px;
+}
+#gear.touch-menu #room-maps {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+#gear.touch-menu #room-maps .map-pick {
+  font-size: 14px;
+}
+#gear.touch-menu .room-code {
+  flex-wrap: wrap;
+  gap: 8px 12px;
+}
+#gear.touch-menu .room-code b {
+  font-size: 30px;
+  letter-spacing: 0.12em;
+}
+#gear.touch-menu #invite-go {
+  width: 100%;
+  min-height: 88px;
+  font-size: 48px;
+}
+/* A phone has no hover: a tapped card must not stay lifted. */
+@media (hover: none) {
+  #gear.touch-menu .row-card:hover {
+    transform: rotate(var(--tilt, 0deg));
+    box-shadow: 8px 8px 0 var(--ink);
+  }
+}
+
+/* Held sideways: the stage on the left, full height; the column on the right. */
+@media (orientation: landscape) {
+  #gear.touch-menu {
+    --stage-h: auto;
+    min-height: calc(100svh - 60px);
+  }
+  #gear.touch-menu .gear-stage {
+    inset: 0 auto 0 0;
+    width: 50%;
+    height: auto;
+    border-bottom: 0;
+    border-right: 3px solid var(--ink);
+  }
+  #gear.touch-menu .gear-grid {
+    width: 50%;
+    max-width: none;
+    margin: 0 0 0 50%;
+    padding: 20px max(20px, env(safe-area-inset-right)) 0 22px;
+  }
+  #gear.touch-menu .touch-col,
+  #gear.touch-menu:not([data-step='gear']) .gear-card {
+    padding-bottom: 56px;
+  }
+  #gear.touch-menu .play-big {
+    min-height: 88px;
+    font-size: 52px;
+  }
+}
+/* After PLAY (item 571): the three mode tiles are full-width rows, name and blurb on the left, JOIN on the right. */
+#gear.touch-menu #step-start .mode-tiles {
+  display: grid;
+  grid-auto-flow: row;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 12px;
+}
+#gear.touch-menu #step-start .choice.mode-tile {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas: 'name join' 'blurb join' 'live join';
+  align-items: center;
+  justify-items: start;
+  column-gap: 12px;
+  row-gap: 2px;
+  min-height: 0;
+  padding: 14px 16px;
+  text-align: left;
+}
+#gear.touch-menu #step-start .mode-tile .tile-name {
+  grid-area: name;
+  font-size: 22px;
+}
+#gear.touch-menu #step-start .mode-tile .tile-blurb {
+  grid-area: blurb;
+  font-size: 13px;
+}
+#gear.touch-menu #step-start .mode-tile .tile-live {
+  grid-area: live;
+  margin-top: 4px;
+}
+#gear.touch-menu #step-start .mode-tile .tile-join {
+  grid-area: join;
+  align-self: center;
+  margin: 0;
+  padding: 12px 14px;
+  font-size: 16px;
+  white-space: nowrap;
+}
+/* Item 631: the big CREATE A ROOM and the room code are one card in the step; the server list is a button beside BACK. */
+#gear.touch-menu #step-start .choice.create {
+  display: none;
+}
+#gear.touch-menu #step-start #code-card {
+  grid-area: code;
+  position: static;
+  width: auto;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+#gear.touch-menu #step-start #code-card[hidden] {
+  display: none;
+}
+#gear.touch-menu #code-create {
+  min-height: 64px;
+  font-size: 22px;
+}
+#gear.touch-menu #step-start #start-servers {
+  grid-area: servers;
+  min-height: 44px;
+}
+#gear.touch-menu .code-or {
+  margin: 0;
+  font-size: 12px;
+}
+#gear.touch-menu .server-head {
+  flex-wrap: wrap;
+}
+
+/* The mode list on a phone (item 809; the list itself is landing-modelist.css, which loads after this file and has less weight): full-width rows. */
+#gear.touch-menu #step-start .mode-tiles {
+  --tile-gap: 10px;
+}
+#gear.touch-menu #step-start .mode-tiles .choice.mode-tile {
+  --icon: 44px;
+  padding: 10px 14px 10px 10px;
+}
+#gear.touch-menu #step-start .mode-tile .tile-name {
+  font-size: 16px;
+  letter-spacing: 0;
+}
+#gear.touch-menu #step-start .mode-tile .tile-blurb {
+  font-size: 12px;
+}

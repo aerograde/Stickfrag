@@ -1,0 +1,376 @@
+/* landing-servers.css: the server list is back (item 631, owner 2026-10-18), and the pieces of the home
+   menu that came with it: the first page hides the EVENT & NEWS slot while the Locker is open, the
+   "ALL SERVERS" button and the big CREATE A ROOM after PLAY, the mode chips that filter the list.
+   Linked after landing-cards.css. The list's rows are the game's row cards (landing-home.css, .row-card).
+   Phones: landing-touch.css. Design: docs/design/play-menu.md, "631", and server-list.md. */
+
+/* The Locker panel and the slot stood on the same corner of the first page (owner's picture 1). */
+#gear:has(#locker:not([hidden])) .ev-slot {
+  visibility: hidden;
+}
+
+/* ---- After PLAY: ALL SERVERS above the tiles' right end ---- */
+#start-servers {
+  white-space: nowrap;
+}
+#gear.haven:not([data-layout='touch']) #step-start #start-servers {
+  position: absolute;
+  z-index: 3;
+  bottom: calc(var(--haven-lift) + var(--quick-h) + 18px + var(--tiles-h) + 8px);
+  left: calc(50% + var(--row-w) / 2);
+  translate: -100% 0;
+  padding: 6px 14px;
+  font-size: 14px;
+  box-shadow: 3px 3px 0 var(--ink);
+}
+
+/* ---- WITH FRIENDS: the big CREATE A ROOM, the code under it ---- */
+#gear.haven[data-step='start'] #code-card:not([hidden]) {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: min(310px, 22%);
+  padding: 18px 20px 20px;
+}
+#gear.haven[data-step='start'] #code-card h3 {
+  margin: 0;
+}
+#gear.haven[data-step='start'] #code-create {
+  min-height: 78px;
+  font-size: clamp(18px, 1.35vw, 24px);
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+#gear.haven[data-step='start'] .code-or {
+  display: block;
+  margin: 0;
+  font: 800 12px/1 var(--head);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+#gear.haven[data-step='start'] .code-error {
+  margin: 0;
+}
+
+/* ---- The server step: a board over the room, as the friends room is ---- */
+#gear.haven[data-step='servers'] #gear-canvas {
+  visibility: hidden;
+}
+#gear.haven[data-step='servers'] .gear-grid {
+  align-content: center;
+  padding-bottom: 24px;
+}
+.gear.haven[data-step='servers'] .gear-card {
+  width: min(1040px, 92vw);
+}
+.server-head {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 12px;
+}
+.server-title {
+  margin: 0 auto 0 0;
+  font: 900 18px var(--head);
+}
+/* The region choice beside the title, with each region's ping (playMenuServers.ts, drawRegions). */
+.server-region {
+  margin-left: 6px;
+  padding: 3px 6px;
+  border: 2px solid currentColor;
+  border-radius: 6px;
+  background: transparent;
+  color: inherit;
+  font: 700 13px var(--head);
+  cursor: pointer;
+}
+#server-quick {
+  white-space: nowrap;
+}
+/* The mode chips filter the list: ALL, then one per mode in its colour. */
+.mode-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 0 0 14px;
+}
+.mode-chip {
+  padding: 7px 16px;
+  border: 3px solid var(--ink);
+  background: var(--paper);
+  color: var(--ink);
+  font: 900 14px var(--head);
+  letter-spacing: 0.04em;
+  box-shadow: 3px 3px 0 var(--ink);
+  cursor: pointer;
+}
+.mode-chip[data-game] {
+  border-left: 8px solid var(--mode);
+}
+.mode-chip[aria-pressed='true'] {
+  background: var(--yellow);
+}
+.mode-chip[data-game][aria-pressed='true'] {
+  background: var(--mode);
+  color: #fff;
+  text-shadow: 2px 2px 0 var(--ink);
+}
+.mode-chip[aria-pressed='false']:hover {
+  background: #fffbe9;
+}
+/* The name search (item 638) and the names under a row. */
+.server-find {
+  width: 100%;
+  box-sizing: border-box;
+  margin: 0 0 12px;
+  padding: 8px 12px;
+  border: 3px solid var(--ink);
+  background: var(--paper);
+  color: var(--ink);
+  font: 700 14px var(--head);
+}
+.server .names {
+  grid-column: 2 / -1;
+  margin-top: 6px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.server.has-names .mode {
+  grid-row: 1 / span 2;
+}
+/* Mode · server · match · players · ping · join; each cell a bold line over a small one. */
+.server-cols,
+.server {
+  display: grid;
+  grid-template-columns: 1.1fr 1fr 1.7fr 1fr 0.7fr auto;
+  align-items: center;
+  column-gap: 10px;
+}
+.server-cols {
+  padding: 0 24px 6px 3px;
+  font: 900 11px var(--head);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.server-cols > span:first-child {
+  text-align: center;
+}
+.servers {
+  display: grid;
+  gap: 14px;
+  max-height: min(54vh, 460px);
+  overflow-y: auto;
+  padding: 2px 10px 12px 2px;
+}
+.server > span {
+  display: grid;
+  min-width: 0;
+}
+.server small {
+  font: 600 12px var(--head);
+  color: #7a7366;
+}
+#gear .server.row-card {
+  --tilt: 0deg;
+  width: 100%;
+  padding: 12px 14px 12px 0;
+  background: var(--paper);
+  text-align: left;
+  font: 700 14px var(--head);
+  box-shadow: 5px 5px 0 var(--ink);
+  cursor: pointer;
+}
+#gear .server.row-card:hover:not(:disabled),
+#gear .server.row-card:focus-visible {
+  background: #fffbe9;
+  box-shadow: 8px 8px 0 var(--ink);
+}
+#gear .server.row-card:disabled {
+  cursor: not-allowed;
+}
+.server.full {
+  opacity: 0.55;
+}
+/* The mode is the card's own left end, in big letters and the mode's colour. */
+.server .mode {
+  align-self: stretch;
+  place-items: center;
+  margin: -12px 0;
+  padding: 0 8px;
+  border-right: 3px solid var(--ink);
+  background: var(--mode, var(--ink));
+}
+.server .mode b {
+  color: #fff;
+  font: 900 20px/1 var(--head);
+  letter-spacing: 0.02em;
+  text-align: center;
+  text-shadow: 2px 2px 0 var(--ink);
+}
+.server .match b {
+  font-size: 13px;
+}
+.server .ping.good {
+  color: #1d8a3a;
+}
+.server .ping.ok {
+  color: #b07a00;
+}
+.server .ping.bad {
+  color: var(--red);
+}
+.server .join {
+  padding: 3px 8px;
+  border: 2px solid var(--ink);
+  background: var(--yellow);
+  font: 900 13px var(--head);
+}
+.server.full .join {
+  background: #e3d8c2;
+}
+.server-note {
+  margin: 6px 0 0;
+  font-weight: 700;
+}
+@media (max-width: 560px) {
+  .server-cols {
+    display: none;
+  }
+  .server {
+    grid-template-columns: 64px minmax(0, 1fr) auto auto;
+    column-gap: 8px;
+  }
+  .server .names {
+    white-space: normal;
+  }
+  .server .match,
+  .server .ping {
+    display: none !important;
+  }
+}
+
+/* ---- Item 634 (owner, 2026-10-18, from the local dev screenshot) ----
+   1. A mode card is the button: no JOIN inside it.
+   2. QUICK JOIN is as big as PLAY on the first page (min(440px, 31%) by 158 px), the mode cards a
+      smaller row above it.
+   3. CREATE A ROOM is one big pink button; no room code on this step (room links still work).
+   4. ALL SERVERS is bigger, with a servers icon.
+   `html` in front: landing-board.css loads after this file and sets the same custom properties. */
+html #gear.haven .mode-tile .tile-join {
+  display: none;
+}
+html #gear.haven:not([data-layout='touch']) #step-start:not(.off) {
+  --quick-w: min(440px, 31%);
+  --quick-h: 158px;
+  --tiles-h: 112px;
+}
+html #gear.haven:not([data-layout='touch']) #step-start .choice.quick {
+  width: var(--quick-w);
+  flex-direction: column;
+  gap: 6px;
+}
+html #gear.haven:not([data-layout='touch']) #step-start .choice.quick b {
+  font-size: clamp(34px, 3.3vw, 54px);
+  line-height: 1;
+}
+html #gear.haven:not([data-layout='touch']) #step-start .choice.quick > span {
+  font-size: 15px;
+}
+html #gear.haven:not([data-layout='touch']) #step-start .mode-tile {
+  padding: 12px 14px;
+  gap: 8px;
+}
+html #gear.haven:not([data-layout='touch']) #step-start .mode-tile .tile-name {
+  font-size: clamp(18px, 1.5vw, 23px);
+}
+html #gear.haven:not([data-layout='touch']) #step-start .mode-tile .tile-blurb {
+  display: none;
+}
+html #gear.haven:not([data-layout='touch']) #step-start .back {
+  left: calc(50% - var(--quick-w) / 2 - 24px - 64px);
+}
+/* CREATE A ROOM: the pink card itself is the button, PLAY's height, right of QUICK JOIN. */
+html #gear[data-step='start'] #code-card:not([hidden]) {
+  padding: 0;
+  border: 0;
+  background: none;
+  box-shadow: none;
+}
+html #gear[data-step='start'] #code-card::after,
+html #gear[data-step='start'] #code-card :is(h3, .code-or, .code-join, .code-error) {
+  display: none;
+}
+html #gear.haven:not([data-layout='touch'])[data-step='start'] #code-card:not([hidden]) {
+  left: calc(50% + min(220px, 15.5%) + 30px);
+  right: auto;
+  width: min(290px, 20%);
+  height: 158px;
+}
+html #gear[data-step='start'] #code-create {
+  flex: 1;
+  width: 100%;
+  min-height: 78px;
+  border: 3px solid var(--ink);
+  background: var(--pink);
+  color: var(--ink);
+  box-shadow: 8px 8px 0 var(--ink);
+  font: 900 clamp(22px, 1.9vw, 32px)/1.05 var(--head);
+  white-space: normal;
+  rotate: -1deg;
+}
+html #gear[data-step='start'] #code-create:hover,
+html #gear[data-step='start'] #code-create:focus-visible {
+  translate: -3px -3px;
+  box-shadow: 11px 11px 0 var(--ink);
+}
+/* ALL SERVERS: bigger, with its icon. */
+#start-servers {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+#start-servers .servers-icon {
+  width: 22px;
+  height: 22px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+}
+#start-servers .servers-icon circle {
+  fill: currentColor;
+  stroke: none;
+}
+html #gear.haven:not([data-layout='touch']) #step-start #start-servers {
+  padding: 11px 18px;
+  font-size: 18px;
+  box-shadow: 5px 5px 0 var(--ink);
+}
+
+/* ---- Item 639 (owner, 2026-10-18, second screenshot) ----
+   1. No "PICK A MODE · YOU JOIN AT ONCE" label.
+   2. CREATE A ROOM has the row cards' dashed perforation, as the other cards.
+   3. A mode card names its players only from 2 up (playersText), as plain text, no black chip. */
+html #gear.haven #step-start .pick-label {
+  display: none;
+}
+html #gear[data-step='start'] #code-create {
+  position: relative;
+}
+html #gear[data-step='start'] #code-create::after {
+  content: '';
+  position: absolute;
+  inset: 6px;
+  border: 2px dashed rgba(21, 17, 28, 0.4);
+  pointer-events: none;
+}
+html #gear.haven .mode-tile .tile-live {
+  padding: 0;
+  background: none;
+  color: var(--ink);
+  font: 800 14px/1.2 var(--head);
+  letter-spacing: 0;
+}
+html #gear.haven .mode-tile .tile-live::before {
+  display: none;
+}

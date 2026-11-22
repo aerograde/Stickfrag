@@ -1,0 +1,609 @@
+/* game-touch.css: part of index.html's styles, linked last. Every rule is under html.touch, which
+   only touch/phoneScreen.ts sets, so a desktop page draws nothing from here (docs/design/mobile.md).
+   client/test/touchCss.test.ts checks that every selector starts so.
+
+   The touch HUD, laid out after Krunker's phone HUD (owner, 2026-10-09):
+   top left II, the clock and the mode; top centre the kill feed; top right the small scoreboard;
+   left thumb the stick (always drawn) with a second FIRE above it, health under it;
+   bottom centre NADE, SWAP, RELOAD and HEAL, small; right thumb AIM, the big FIRE, JUMP with DUCK under it,
+   the ammo card under them. Icons, no words. Panels zoom by --hud-scale, so their offsets divide by it. */
+
+html.touch,
+html.touch body {
+  /* No double-tap zoom, no pull to refresh, no text selection or long-press menu mid-fight. */
+  touch-action: manipulation;
+  overscroll-behavior: none;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* The layer under every HUD panel and card: it takes the fingers that land on the game. */
+html.touch #touch {
+  position: fixed;
+  inset: 0;
+  touch-action: none;
+}
+html.touch.touch-paused #touch {
+  display: none;
+}
+
+/* The stick: drawn at rest bottom left, and under the thumb wherever it lands on the left side. */
+html.touch .t-stick {
+  position: fixed;
+  left: -60px;
+  top: -60px;
+  width: 120px;
+  height: 120px;
+  border: 3px solid rgba(21, 17, 28, 0.55);
+  border-radius: 50%;
+  background: rgba(255, 244, 220, 0.22);
+  pointer-events: none;
+}
+html.touch .t-stick.rest {
+  left: calc(40px + env(safe-area-inset-left));
+  top: auto;
+  bottom: 70px;
+  opacity: 0.7;
+}
+html.touch .t-knob {
+  position: absolute;
+  left: 36px;
+  top: 36px;
+  width: 42px;
+  height: 42px;
+  border: 3px solid var(--ink);
+  border-radius: 50%;
+  background: rgba(255, 244, 220, 0.8);
+}
+
+/* Buttons: paper discs with the ink border and an ink icon, yellow while held or on. */
+html.touch .t-btn {
+  position: fixed;
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  border: 3px solid var(--ink);
+  border-radius: 50%;
+  background: rgba(255, 244, 220, 0.62);
+  color: var(--ink);
+  box-shadow: 2px 2px 0 rgba(21, 17, 28, 0.6);
+}
+html.touch .t-btn svg {
+  width: 56%;
+  height: 56%;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+html.touch .t-btn.on {
+  background: var(--yellow);
+}
+html.touch .t-btn[hidden] {
+  display: none;
+}
+/* The player's layout (touchLayout.ts): the HUD gives a moved button left, top and a scale, and one
+   opacity for all of them. */
+html.touch .t-btn {
+  opacity: var(--t-opacity, 1);
+}
+html.touch .t-btn.placed {
+  right: auto;
+  bottom: auto;
+}
+
+/* Right thumb. iPhone takes a swipe from the left edge as "back", so nothing sits within 24 px
+   of it; every spot keeps out of the notch (safe area). */
+html.touch .t-fire {
+  right: calc(30px + env(safe-area-inset-right));
+  bottom: 116px;
+  width: 84px;
+  height: 84px;
+  background: rgba(239, 77, 77, 0.82);
+}
+html.touch .t-fire.on,
+html.touch .t-fire-left.on {
+  background: var(--red);
+}
+html.touch .t-aim {
+  right: calc(44px + env(safe-area-inset-right));
+  bottom: 216px;
+  width: 56px;
+  height: 56px;
+}
+/* A short phone (iPhone mini, 340 px or so): AIM stays under a four-line board. */
+@media (max-height: 360px) {
+  html.touch .t-aim {
+    bottom: 206px;
+    width: 50px;
+    height: 50px;
+  }
+}
+html.touch .t-crouch {
+  right: calc(170px + env(safe-area-inset-right));
+  bottom: 34px;
+  width: 52px;
+  height: 52px;
+}
+/* JUMP left of RELOAD, which took its old spot (owner, 2026-10-09). */
+html.touch .t-jump {
+  right: calc(184px + env(safe-area-inset-right));
+  bottom: 98px;
+  width: 60px;
+  height: 60px;
+}
+
+/* Left thumb: the second FIRE above the stick. */
+html.touch .t-fire-left {
+  left: calc(124px + env(safe-area-inset-left));
+  bottom: 198px;
+  width: 58px;
+  height: 58px;
+  background: rgba(239, 77, 77, 0.82);
+}
+
+/* RELOAD where JUMP was, centred on its old spot (owner, 2026-10-09). */
+html.touch .t-reload {
+  right: calc(130px + env(safe-area-inset-right));
+  bottom: 106px;
+  width: 44px;
+  height: 44px;
+}
+
+/* Bottom centre, small, above the XP bar: NADE, SWAP, HEAL, EMOTE. The row ends 44 px right of the middle: the
+   gun in hand fills the screen from about 48 px right of the middle down, so no button of the row sits on it
+   (item 906; client/test/touchGeometry.test.ts holds the numbers at the common phone sizes). */
+html.touch .t-throw,
+html.touch .t-weapon,
+html.touch .t-heal {
+  bottom: 30px;
+  width: 40px;
+  height: 40px;
+}
+html.touch .t-throw {
+  left: calc(50% - 152px);
+}
+html.touch .t-weapon {
+  left: calc(50% - 100px);
+}
+html.touch .t-heal {
+  left: calc(50% - 48px);
+}
+
+/* EMOTE: beside HEAL, small; a tap opens the wheel (game-emote.css). */
+html.touch .t-emote {
+  bottom: 30px;
+  left: calc(50% + 4px);
+  width: 40px;
+  height: 40px;
+}
+
+/* USE: only while a pickup is offered, beside its prompt under the crosshair. */
+html.touch .t-use {
+  left: calc(50% + 96px);
+  top: calc(50% + 14px);
+  width: 54px;
+  height: 54px;
+  background: rgba(255, 216, 74, 0.85);
+}
+
+/* A word under USE and HEAVY: the hints say "HOLD USE" and "tap HEAVY" (bombClient.ts, hudLoadout.ts). */
+html.touch .t-use::after,
+html.touch .t-heavy::after {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  font: 700 10px/1 var(--font);
+  letter-spacing: 0.06em;
+  color: var(--ink);
+  text-shadow: 0 0 3px rgba(255, 244, 220, 0.95), 0 0 3px rgba(255, 244, 220, 0.95);
+  pointer-events: none;
+}
+html.touch .t-use::after {
+  content: 'USE';
+}
+html.touch .t-heavy::after {
+  content: 'HEAVY';
+}
+
+/* HEAVY: above SWAP, with its word under it in the gap above the row; shows once the heavy weapon is earned
+   (key 4 on a keyboard; item 906). Not beside EMOTE: that put it, and its word, on the gun art. */
+html.touch .t-heavy {
+  bottom: 92px;
+  left: calc(50% - 100px);
+  width: 40px;
+  height: 40px;
+  background: rgba(255, 216, 74, 0.85);
+}
+
+/* Top left: II, then the clock and the mode beside it. */
+html.touch .t-pause {
+  left: calc(26px + env(safe-area-inset-left));
+  top: 8px;
+  width: 52px;
+  height: 52px;
+  border-radius: 10px;
+}
+html.touch #timer {
+  left: calc((88px + env(safe-area-inset-left)) / var(--hud-scale, 1));
+  top: calc(8px / var(--hud-scale, 1));
+  transform: none;
+  text-align: left;
+}
+
+/* Top right: the small scoreboard (its look: .mini-board in game-hud.css). A tap opens the full one,
+   the next tap closes it. */
+html.touch .t-board {
+  position: fixed;
+  right: calc(12px + env(safe-area-inset-right));
+  top: 8px;
+  min-width: 128px;
+  max-width: 170px;
+  font: 800 11px/1.45 var(--head);
+}
+html.touch .t-board.on {
+  outline: 2px solid var(--yellow);
+}
+
+/* Top centre: the kill feed, where the clock is on a computer. */
+html.touch #killfeed {
+  right: auto;
+  left: 50%;
+  top: calc(8px / var(--hud-scale, 1));
+  transform: translateX(-50%);
+  align-items: center;
+}
+html.touch .kf {
+  max-width: calc(100vw / var(--hud-scale, 1) - 440px);
+}
+
+/* Bottom left: health under the stick, grenades and bandages beside it. */
+html.touch #gear {
+  left: calc(248px + env(safe-area-inset-left));
+  bottom: 18px;
+}
+
+/* The fps counter sits where the pause button is: under it on touch. */
+html.touch #fps {
+  top: 66px !important;
+  left: calc(26px + env(safe-area-inset-left)) !important;
+}
+
+html.touch #ping-note {
+  top: 98px !important;
+  left: calc(26px + env(safe-area-inset-left)) !important;
+}
+
+/* The cards keep their spot under the pause button; the computer's corner stack is in game-hud.css. */
+html.touch #gpu-card,
+html.touch #fps-card {
+  top: 44px;
+}
+
+/* Keyboard hints mean nothing on a phone. The sight is picked on the pause card (#pause-sight).
+   The loadout card's DEPLOY and RESPAWN are tapped. */
+html.touch #sightkey,
+html.touch #sighthint,
+html.touch #gear kbd,
+html.touch #prompt kbd,
+html.touch #loadout .keys,
+html.touch #loadout .go kbd {
+  display: none !important;
+}
+
+/* The pause card's sight switch, built by touch/main.ts under TAP TO PLAY: a square with the
+   sight's picture, one sight for every gun (owner, 2026-10-09). */
+html.touch #pause-sight {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  width: 136px;
+  margin: 10px auto 0;
+  padding: 6px 6px 8px;
+  line-height: 1;
+}
+html.touch #pause-sight small {
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  opacity: 0.7;
+}
+html.touch #pause-sight img {
+  display: block;
+  width: 96px;
+  height: 96px;
+  border-radius: 10px;
+  background: #fff;
+}
+html.touch #pause-sight span {
+  font-size: 13px;
+}
+
+/* Words for a phone: "Tap JUMP", "TAP TO PLAY", "II" (the .on-touch default is in game-hud.css). */
+html.touch .no-touch {
+  display: none;
+}
+html.touch .on-touch {
+  display: inline;
+}
+
+/* Cards fit a phone held sideways (about 390 px tall): they scroll inside instead of off screen. */
+html.touch .card {
+  max-height: calc(100dvh - 16px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  touch-action: pan-y;
+}
+@media (max-height: 500px) {
+  html.touch .card {
+    zoom: 0.78;
+    max-height: calc(100dvh / 0.78 - 16px);
+  }
+}
+/* A scrolling card clips what sticks out of its edge: the room code sits on the title's line
+   instead of on the top edge (owner, 2026-10-10). */
+html.touch #scoreboard h2 {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+html.touch #scoreboard .room {
+  position: static;
+  margin-left: auto;
+  white-space: nowrap;
+}
+
+/* iPhone cannot lock landscape: this card covers the game while the phone is upright. */
+html.touch #turn-phone {
+  display: none;
+}
+@media (orientation: portrait) {
+  html.touch #turn-phone {
+    position: fixed;
+    inset: 0;
+    z-index: 60;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    padding: 24px;
+    background: var(--paper);
+    color: var(--ink);
+    font: 800 20px/1.3 var(--head);
+    text-align: center;
+  }
+  html.touch #turn-phone p {
+    margin: 0;
+    max-width: 14em;
+    text-wrap: balance;
+  }
+}
+/* The picture: an ink phone on a sky screen, turned on its side and back, inside red turning arrows. */
+html.touch #turn-phone svg {
+  width: 156px;
+  height: 156px;
+  overflow: visible;
+}
+html.touch #turn-phone .tp-arrows {
+  fill: none;
+  stroke: var(--red);
+  stroke-width: 5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+html.touch #turn-phone .tp-body {
+  fill: var(--paper);
+  stroke: var(--ink);
+  stroke-width: 5;
+}
+html.touch #turn-phone .tp-screen {
+  fill: var(--sky);
+}
+html.touch #turn-phone .tp-speaker {
+  stroke: var(--ink);
+  stroke-width: 3;
+  stroke-linecap: round;
+}
+html.touch #turn-phone .tp-phone {
+  transform-box: view-box;
+  transform-origin: 48px 48px;
+  animation: turn-phone 2.4s ease-in-out infinite;
+}
+@keyframes turn-phone {
+  0%,
+  20% {
+    transform: rotate(0deg);
+  }
+  45%,
+  75% {
+    transform: rotate(-90deg);
+  }
+  100% {
+    transform: rotate(0deg);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  html.touch #turn-phone .tp-phone {
+    animation: none;
+    transform: rotate(-20deg);
+  }
+}
+
+/* The layout editor (touch/layoutEditor.ts), over the paused game: the real buttons stay visible,
+   the pause card steps aside, and a grid of tenths lies on the screen. */
+html.touch.touch-editing #touch {
+  display: block;
+  pointer-events: none;
+}
+html.touch.touch-editing #pause {
+  display: none;
+}
+html.touch .t-btn.picked {
+  outline: 4px solid var(--yellow);
+  outline-offset: 3px;
+}
+html.touch #t-edit .t-edit-pad {
+  position: fixed;
+  inset: 0;
+  z-index: 6;
+  touch-action: none;
+  background-color: rgba(21, 17, 28, 0.35);
+  background-image: linear-gradient(rgba(255, 244, 220, 0.18) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 244, 220, 0.18) 1px, transparent 1px);
+  background-size: 10% 10%;
+}
+html.touch #t-edit #t-edit-card {
+  position: fixed;
+  z-index: 7;
+  left: 50%;
+  top: 8px;
+  transform: translateX(-50%);
+  min-width: 0;
+  width: min(420px, calc(100vw - 32px));
+  padding: 8px 14px 10px;
+}
+html.touch #t-edit-card h2 {
+  margin: 0;
+  font-size: 20px;
+}
+html.touch #t-edit-card .t-edit-hint {
+  margin: 2px 0 4px;
+  font-size: 12px;
+  font-weight: 800;
+}
+html.touch #t-edit-card .t-edit-slide {
+  display: grid;
+  grid-template-columns: 84px 1fr 44px;
+  align-items: center;
+  gap: 8px;
+  margin: 2px 0;
+  font-size: 12px;
+  font-weight: 900;
+}
+html.touch #t-edit-card .t-edit-slide input {
+  width: 100%;
+  accent-color: var(--red);
+}
+html.touch #t-edit-card .t-edit-bar {
+  display: flex;
+  gap: 8px;
+  margin-top: 6px;
+}
+html.touch #t-edit-card .t-edit-bar button {
+  flex: 1;
+  padding: 6px 8px;
+  font-size: 14px;
+}
+html.touch #pause-layout {
+  display: block;
+  margin: 10px auto 0;
+  font-size: 13px;
+}
+/* A phone has no keys to bind: TOUCH CONTROLS (touch/main.ts) takes KEY BINDINGS' place in the settings. */
+html.touch #open-keys,
+html.touch #pause-keys {
+  display: none;
+}
+
+/* Chat on touch (client/src/chatView.ts): the CHAT button under the pause button opens the line; the
+   open line moves to the top, so the soft keyboard does not cover it, and SEND sits beside it. */
+html.touch .chat-open {
+  display: block;
+  position: fixed;
+  left: calc(26px + env(safe-area-inset-left));
+  top: 68px;
+  min-width: 52px;
+  height: 36px;
+  padding: 0 10px;
+  border: 3px solid var(--ink);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.78);
+  color: var(--ink);
+  font: 800 12px var(--font);
+  pointer-events: auto;
+}
+html.touch .chat-open[hidden],
+html.touch.touch-paused .chat-open,
+html.touch #chat .chat-hint {
+  display: none;
+}
+html.touch #chat.open {
+  top: 8px;
+  bottom: auto;
+  left: calc(26px + env(safe-area-inset-left));
+  width: min(520px, calc(100vw / var(--hud-scale, 1) - 52px));
+}
+html.touch #chat .chat-send {
+  display: block;
+  padding: 0 14px;
+  border: 3px solid var(--ink);
+  border-radius: 8px;
+  background: var(--accent, #ffd84a);
+  color: var(--ink);
+  font: 800 14px var(--font);
+  pointer-events: auto;
+}
+html.touch #chat .chat-input {
+  font-size: 16px; /* under 16px iOS zooms the page when the input takes focus */
+}
+
+/* The top bar shows the count of the living only (teamBar.ts, items 767 and 801), beside the minimap. */
+html.touch #team-bar {
+  left: 0;
+  display: flex;
+  gap: 6px;
+  width: auto;
+  padding: 0 0 0 276px;
+  transform: none;
+  zoom: 1;
+}
+html.touch #team-bar .tb-mid {
+  min-width: 0;
+  height: 32px;
+}
+html.touch #team-bar .tb-alive {
+  display: block;
+}
+html.touch #team-bar .tb-score {
+  min-width: 0;
+  height: 32px;
+  font-size: 16px;
+}
+html.touch #team-bar .tb-clock {
+  font-size: 18px;
+}
+html.touch #team-bar .tb-mid small {
+  display: none;
+}
+html.touch #team-bar .tb-heads {
+  display: none;
+}
+
+/* The minimap (minimapView.ts, minimapTouch.ts, item 762): 88 px top left, under the top bar and RIGHT of the second FIRE (its
+   right edge is 124 + 58 = 182 px; the map starts at 190). Left of the FIRE it overlapped the button on screens under 388 px high
+   (item 852: 863x360, 750x342), because the FIRE's top is 256 px above the bottom edge. Right of it, the map is clear of the
+   PAUSE and CHAT column, the stick and every right-thumb button at any width the touch HUD supports. A tap takes the whole map
+   over the veil, in the screen's middle; a tap anywhere closes it. The HUD scale does not apply: the sizes are real px. */
+html.touch .minimap {
+  left: calc(190px + env(safe-area-inset-left));
+  top: 36px;
+  zoom: 1;
+  z-index: 2;
+  pointer-events: auto;
+  touch-action: manipulation;
+}
+html.touch .minimap.whole {
+  z-index: 6;
+}
+html.touch #minimap-veil {
+  position: fixed;
+  inset: 0;
+  z-index: 5;
+  background: rgba(21, 17, 28, 0.6);
+  touch-action: manipulation;
+}

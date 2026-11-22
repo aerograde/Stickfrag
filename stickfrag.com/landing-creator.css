@@ -1,0 +1,137 @@
+/* The Creator panel inside the Locker (client/src/lockerCreator.ts, creator-packs.md, item 564):
+   a button under the packs row; its panel takes the place of the tile grid. */
+.locker-creator-row {
+  padding: 8px 14px;
+  border-bottom: 3px solid var(--ink);
+  background: #fffbe9;
+}
+.locker-creator-row .btn {
+  width: 100%;
+  padding: 6px 12px;
+  font-size: 13px;
+}
+.locker.creator .locker-grid,
+.locker.creator .locker-tabs {
+  display: none;
+}
+.locker-creator {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 14px 14px 18px;
+}
+.locker-creator[hidden] {
+  display: none;
+}
+.locker-creator h3 {
+  margin: 0 0 4px;
+  font: 900 18px/1.1 var(--head);
+  text-transform: uppercase;
+}
+.locker-creator h4 {
+  margin: 16px 0 6px;
+  font: 900 14px/1.1 var(--head);
+  text-transform: uppercase;
+}
+.locker-creator p {
+  margin: 0 0 10px;
+  font: 600 13px/1.4 var(--head);
+  color: var(--ink-soft);
+}
+.cr-form {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.cr-form input {
+  flex: 1 1 200px;
+  min-width: 0;
+  padding: 8px 10px;
+  border: 3px solid var(--ink);
+  background: #fff;
+  color: var(--ink);
+  font: 600 14px var(--head);
+}
+.cr-form .btn {
+  padding: 6px 14px;
+  font-size: 14px;
+}
+.cr-message {
+  min-height: 1.4em;
+  margin-top: 8px;
+}
+.cr-message[data-bad='true'] {
+  color: var(--red);
+}
+.cr-claims,
+.cr-tiers {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.cr-claim {
+  padding: 8px 10px;
+  border: 3px solid var(--ink);
+  background: #fff;
+  font: 700 14px/1.3 var(--head);
+}
+.cr-claim .cr-state {
+  float: right;
+  font-size: 11px;
+}
+.cr-claim[data-state='approved'] {
+  background: #d8f5e6;
+}
+.cr-claim[data-state='refused'] {
+  background: #ffe1e1;
+}
+.cr-claim small,
+.cr-tier small {
+  display: block;
+  color: var(--ink-soft);
+  font-weight: 600;
+}
+.cr-code {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 6px;
+}
+.cr-code code {
+  padding: 3px 10px;
+  border: 3px solid var(--ink);
+  background: var(--yellow);
+  font: 900 20px/1 var(--head);
+  letter-spacing: 0.15em;
+}
+.cr-code .btn {
+  padding: 3px 12px;
+  font-size: 12px;
+}
+.cr-tier {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font: 700 14px/1.3 var(--head);
+}
+.cr-tier i {
+  color: var(--green);
+  font-style: normal;
+  font-size: 11px;
+}
+/* A prize nobody has released yet is a black shape: what stays hidden stays a mystery. */
+.cr-silhouette {
+  flex: none;
+  filter: brightness(0) opacity(0.75);
+}
+.cr-tier.earned .cr-silhouette {
+  filter: none;
+}
+/* The panel needs the room: the Locker's own intro and the save strip wait while it is open. */
+.locker.creator .locker-head p,
+.locker.creator .locker-save,
+.locker.creator .locker-packs {
+  display: none;
+}

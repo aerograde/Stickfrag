@@ -1,0 +1,609 @@
+/* game-menu.css: part of index.html's styles, linked from it in order (the cascade depends on the order). */
+#pause {
+  position: fixed;
+  min-width: min(420px, calc(100vw - 32px));
+  z-index: 5;
+}
+#pause label {
+  display: block;
+  margin: 10px 0;
+  font-weight: 800;
+}
+#pause label[hidden] {
+  display: none;
+}
+/* Slider rows: the name on the left, the slider, then the value on the right. On a phone the
+   slider moves under the name and the value. */
+#pause .slide {
+  display: grid;
+  grid-template-columns: 168px 1fr 92px;
+  grid-template-areas: 'name range value';
+  align-items: center;
+  column-gap: 14px;
+  margin: 6px 0;
+}
+#pause .slide .name {
+  grid-area: name;
+}
+#pause .slide input[type='range'] {
+  grid-area: range;
+}
+#pause .slide output,
+#pause .slide .custom {
+  grid-area: value;
+  justify-self: end;
+  text-align: right;
+}
+@media (max-width: 560px) {
+  #pause .slide {
+    grid-template-columns: 1fr auto;
+    grid-template-areas: 'name value' 'range range';
+    margin: 10px 0;
+  }
+}
+/* Sensitivities: the value is a field for a custom number, typed to a thousandth (settings.ts). */
+#pause .custom small {
+  display: block;
+  margin-top: 3px;
+  font-size: 10px;
+  font-weight: 700;
+  opacity: 0.7;
+  white-space: nowrap;
+}
+#pause input.typed {
+  box-sizing: border-box;
+  width: 92px;
+  padding: 5px 8px;
+  border: 3px solid var(--ink);
+  border-radius: 8px;
+  box-shadow: 2px 2px 0 var(--ink);
+  background: #fff;
+  color: var(--ink);
+  font: inherit;
+  font-size: 17px;
+  text-align: right;
+  -moz-appearance: textfield;
+}
+#pause input.typed::-webkit-inner-spin-button,
+#pause input.typed::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+#pause input.typed:focus {
+  outline: none;
+  background: var(--yellow);
+}
+/* Sliders: a fat ink-lined groove that fills red up to a yellow knob big enough for a finger.
+   `--fill` comes from settings.ts. */
+#pause input[type='range'] {
+  -webkit-appearance: none;
+  appearance: none;
+  display: block;
+  width: 100%;
+  height: 40px;
+  margin: 2px 0 0;
+  background: none;
+  cursor: pointer;
+}
+#pause input[type='range']::-webkit-slider-runnable-track {
+  height: 22px;
+  border: 3px solid var(--ink);
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--red) var(--fill, 50%), #fff var(--fill, 50%));
+  box-shadow: 2px 2px 0 var(--ink);
+}
+#pause input[type='range']::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 34px;
+  height: 34px;
+  margin-top: -9px;
+  border: 3px solid var(--ink);
+  border-radius: 50%;
+  background: var(--yellow);
+  box-shadow: 2px 2px 0 var(--ink);
+  transition: transform 0.1s;
+}
+#pause input[type='range']:active::-webkit-slider-thumb {
+  transform: scale(1.15);
+}
+#pause input[type='range']::-moz-range-track {
+  height: 16px;
+  border: 3px solid var(--ink);
+  border-radius: 999px;
+  background: #fff;
+  box-shadow: 2px 2px 0 var(--ink);
+}
+#pause input[type='range']::-moz-range-progress {
+  height: 16px;
+  border: 3px solid var(--ink);
+  border-radius: 999px;
+  background: var(--red);
+}
+#pause input[type='range']::-moz-range-thumb {
+  width: 28px;
+  height: 28px;
+  border: 3px solid var(--ink);
+  border-radius: 50%;
+  background: var(--yellow);
+  box-shadow: 2px 2px 0 var(--ink);
+}
+#pause input[type='range']:focus-visible {
+  outline: 2px dashed var(--ink);
+  outline-offset: 2px;
+}
+/* On/off settings, at the top of the settings: a grid of rows with no box, each a drawing, a short
+   label and its switch. The long explanation is the row's tooltip. Keybindings (.set-link) is a row
+   too, with an arrow where a switch would be. Three columns, two on a phone (play-menu.md). */
+#pause .tiles {
+  /* 80px: the card's 16px gutter, padding and border a side. */
+  width: min(660px, calc(100vw - 80px));
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 4px 18px;
+  margin: 4px 0 10px;
+  padding-bottom: 10px;
+  border-bottom: 3px solid var(--ink);
+}
+#pause label.tile,
+#pause button.set-link {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  margin: 0;
+  padding: 2px 0;
+  text-align: left;
+  line-height: 1.15;
+  cursor: pointer;
+}
+#pause button.set-link {
+  width: auto;
+  border: 0;
+  background: none;
+  box-shadow: none;
+  color: var(--ink);
+  font: inherit;
+  font-weight: 800;
+}
+#pause button.set-link:active {
+  transform: none;
+}
+#pause button.set-link:hover > span,
+#pause button.set-link:focus-visible > span {
+  text-decoration: underline 3px;
+}
+/* The arrow sits where the rows' switches sit. */
+#pause button.set-link::after {
+  content: '\203A';
+  flex: none;
+  width: 54px;
+  font: 900 30px/1 var(--head);
+  text-align: center;
+}
+#pause label.tile[hidden] {
+  display: none;
+}
+/* A phone: two columns that may shrink, smaller switches, and no drawings, so each label keeps its line. */
+@media (max-width: 560px) {
+  #pause .tiles {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: 12px;
+    font-size: 14px;
+  }
+  #pause .tiles svg {
+    display: none;
+  }
+  #pause .tiles .switch {
+    width: 44px;
+    height: 26px;
+  }
+  #pause .tiles .switch::before {
+    width: 10px;
+    height: 10px;
+  }
+  #pause .tiles .switch:checked::before {
+    transform: translateX(18px);
+  }
+  #pause button.set-link::after {
+    width: 44px;
+  }
+}
+#pause label.tile > svg,
+#pause button.set-link > svg {
+  width: 24px;
+  height: 24px;
+  flex: none;
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+#pause label.tile > span:first-of-type,
+#pause button.set-link > span {
+  flex: 1;
+  min-width: 0;
+}
+#pause .tile small {
+  display: block;
+  margin-top: 2px;
+  font-weight: 600;
+  font-size: 11px;
+  opacity: 0.7;
+}
+/* Toggle aim: the mouse's right button is lit, and the line under the label says what a right click does now. */
+#pause .mouse .lit {
+  fill: var(--red);
+  stroke: none;
+}
+#pause .tile .when-on,
+#pause .tile:has(input:checked) .when-off {
+  display: none;
+}
+#pause .tile:has(input:checked) .when-on {
+  display: block;
+}
+/* Dev map pins' rows (dev/pins.ts): the words on the left, a chunky switch on the right. */
+#pause label.switch-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 12px 0;
+  cursor: pointer;
+}
+#pause .switch-row small {
+  display: block;
+  font-weight: 600;
+  font-size: 11px;
+  opacity: 0.7;
+}
+#pause-gpu {
+  margin: 0 0 12px;
+  padding: 6px 10px;
+  background: var(--yellow);
+  border: 3px solid var(--ink);
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.35;
+}
+#pause .switch {
+  -webkit-appearance: none;
+  appearance: none;
+  position: relative;
+  flex: none;
+  width: 54px;
+  height: 30px;
+  margin: 0;
+  border: 3px solid var(--ink);
+  border-radius: 999px;
+  background: #fff;
+  box-shadow: 2px 2px 0 var(--ink);
+  cursor: pointer;
+  transition: background 0.12s;
+}
+#pause .switch::before {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 14px;
+  height: 14px;
+  border: 3px solid var(--ink);
+  border-radius: 50%;
+  background: var(--paper);
+  transition: transform 0.12s;
+}
+#pause .switch:checked {
+  background: var(--green);
+}
+#pause .switch:checked::before {
+  background: var(--yellow);
+  transform: translateX(24px);
+}
+#pause .switch:focus-visible {
+  outline: 2px dashed var(--ink);
+  outline-offset: 3px;
+}
+#pause button {
+  margin-top: 8px;
+  width: 100%;
+}
+/* One row, no words: the code (big enough to read out), COPY for the code, a chain for the link. */
+#pause-invite {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 14px;
+  padding: 8px 8px 8px 12px;
+  border: 2px dashed var(--ink);
+  background: #fffbe9;
+}
+#pause-invite[hidden] {
+  display: none;
+}
+#pause-invite b {
+  flex: 1;
+  font-size: 30px;
+  font-weight: 900;
+  letter-spacing: 0.18em;
+  user-select: all;
+}
+#pause #pause-invite button {
+  flex: none;
+  height: 44px;
+  margin: 0;
+}
+#pause #pause-invite-copy,
+#pause #pause-lock,
+#pause #pause-bots {
+  width: auto;
+}
+#pause #pause-lock[hidden],
+#pause #pause-bots[hidden] {
+  display: none;
+}
+#left,
+#boot-fail {
+  position: fixed;
+  min-width: min(420px, calc(100vw - 32px));
+  z-index: 5;
+}
+#left p,
+#boot-fail p {
+  margin: 0 0 6px;
+  font-weight: 800;
+}
+#left button,
+#boot-fail button {
+  width: 100%;
+  margin-top: 8px;
+}
+.left-bar {
+  display: flex;
+  gap: 8px;
+}
+.pause-bar {
+  display: flex;
+  gap: 8px;
+  margin-top: 14px;
+}
+.pause-gap {
+  flex: 1;
+}
+#pause .icon-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 44px;
+  height: 44px;
+  margin: 0;
+  padding: 0;
+}
+#pause .icon-btn.labelled {
+  width: auto;
+  padding: 0 12px 0 10px;
+}
+/* Narrow screens: the labelled buttons keep only their icons, so the bar fits in one row. */
+@media (max-width: 480px) {
+  #pause .icon-btn.labelled {
+    width: 44px;
+    padding: 0;
+    font-size: 0;
+  }
+}
+#pause .icon-btn svg {
+  width: 24px;
+  height: 24px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+/* The Discord link is an <a>: it gets the ghost button's look by hand. Its logo is filled. */
+#pause a.icon-btn {
+  box-sizing: border-box;
+  border: 3px solid var(--ink);
+  background: var(--paper);
+  color: var(--ink);
+  box-shadow: 3px 3px 0 var(--ink);
+}
+#pause a.icon-btn:active {
+  transform: translate(3px, 3px);
+  box-shadow: 1px 1px 0 var(--ink);
+}
+#pause .icon-btn svg.logo {
+  fill: currentColor;
+  stroke: none;
+}
+/* Fullscreen in the pause bar shows the arrows of what a click does. */
+#fullscreen-btn .fs-exit,
+#fullscreen-btn[aria-pressed='true'] .fs-enter {
+  display: none;
+}
+#fullscreen-btn[aria-pressed='true'] .fs-exit {
+  display: block;
+}
+/* Graphics: a slider row whose groove is a pill of three presets, the chosen one yellow. */
+#pause .gfx-row {
+  font-weight: 800;
+}
+#pause .seg {
+  grid-area: range;
+  display: flex;
+  overflow: hidden;
+  border: 3px solid var(--ink);
+  border-radius: 999px;
+  box-shadow: 2px 2px 0 var(--ink);
+}
+#pause .seg button {
+  flex: 1;
+  margin: 0;
+  padding: 7px 0;
+  border-radius: 0;
+  border: 0;
+  border-left: 3px solid var(--ink);
+  background: var(--paper);
+  box-shadow: none;
+  font-size: 14px;
+}
+#pause .seg button:first-child {
+  border-left: 0;
+}
+#pause .seg button:hover {
+  background: #fff;
+}
+#pause .seg button[aria-pressed='true'] {
+  background: var(--yellow);
+  box-shadow: inset 0 -4px 0 rgba(21, 17, 28, 0.18);
+}
+#pause .seg button:active {
+  transform: none;
+  box-shadow: inset 2px 2px 0 rgba(21, 17, 28, 0.3);
+}
+/* Friends Weekend: the pause card's line about packs, kills and players (weekendGame.ts). */
+#weekend-line {
+  margin: 10px 0 0;
+  font-weight: 800;
+  font-size: 13px;
+  letter-spacing: 0.04em;
+  text-align: center;
+  color: var(--yellow, #ffd23f);
+}
+#weekend-line[hidden] {
+  display: none;
+}
+/* The event's squad line in a friends room (eventTexts.ts, item 527). */
+#pause-squad {
+  margin: 10px 0 0;
+  font-weight: 800;
+  font-size: 13px;
+  letter-spacing: 0.04em;
+  text-align: center;
+  color: var(--yellow, #ffd23f);
+}
+#pause-squad[hidden] {
+  display: none;
+}
+/* The host's Bots switch: what the next match brings (weekendBots.ts). */
+#pause-bots-note {
+  margin: 6px 0 0;
+  font-weight: 800;
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  text-align: center;
+}
+#pause-bots-note[hidden] {
+  display: none;
+}
+
+/* Key bindings (item 146): one row per action, the key on the right; a key used twice is marked. */
+#pause .keys-note {
+  min-height: 2.6em;
+  margin: 4px 0 10px;
+  font-size: 12px;
+  font-weight: 700;
+  opacity: 0.8;
+}
+#pause .keys-list {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px 14px;
+  margin-bottom: 10px;
+}
+#pause .keys-list button {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  padding: 7px 10px;
+  border: 3px solid var(--ink);
+  border-radius: 8px;
+  background: #fff;
+  color: var(--ink);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 800;
+  text-align: left;
+  cursor: pointer;
+}
+#pause .keys-list button kbd {
+  min-width: 2.6em;
+  padding: 2px 8px;
+  border-radius: 6px;
+  background: var(--ink);
+  color: #fff;
+  font-size: 12px;
+  text-align: center;
+  white-space: nowrap;
+}
+#pause .keys-list button.clash kbd {
+  background: #d63a3a;
+}
+#pause .keys-list button.listening {
+  background: #ffd84a;
+}
+@media (max-width: 560px) {
+  #pause .keys-list {
+    grid-template-columns: 1fr;
+  }
+}
+#pause-settings.keys-open > :not(#pause-keys),
+#pause-settings:not(.keys-open) > #pause-keys {
+  display: none;
+}
+
+/* The pause card's main view: three labelled buttons under CLICK TO PLAY, and a small label over the friends room. */
+.pause-actions {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-top: 10px;
+}
+#pause .pause-actions button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 44px;
+  margin: 0;
+  padding: 0 6px;
+  font-size: 14px;
+}
+#pause .pause-actions svg {
+  flex: none;
+  width: 22px;
+  height: 22px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+@media (max-width: 400px) {
+  #pause .pause-actions button {
+    flex-direction: column;
+    gap: 2px;
+    padding: 4px 2px;
+    font-size: 12px;
+  }
+}
+#pause-invite {
+  flex-wrap: wrap;
+}
+#pause-invite .pause-label {
+  flex: 0 0 100%;
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  opacity: 0.7;
+}
+/* The settings view: the title and BACK stay in view, the list between them scrolls when the window is short. */
+#pause .set-scroll {
+  max-height: calc(100dvh - 210px);
+  overflow-y: auto;
+  padding-right: 4px;
+}

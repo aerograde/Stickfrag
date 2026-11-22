@@ -1,0 +1,608 @@
+/* game-results.css: part of index.html's styles, linked from it in order (the cascade depends on the order). */
+/* Cards: scoreboard, results, death */
+.card {
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  min-width: min(560px, calc(100vw - 32px));
+  padding: 16px 20px;
+  background: var(--paper);
+  border: 4px solid var(--ink);
+  box-shadow: 8px 8px 0 var(--ink);
+}
+.card h2 {
+  margin: 0 0 10px;
+  font: 900 24px var(--head);
+}
+/* A friends match's room code, a sticker on the scoreboard's top edge: the title keeps its
+   one line (hud.ts, showScoreboard). */
+#scoreboard .room {
+  position: absolute;
+  top: -20px;
+  right: 18px;
+  padding: 2px 10px;
+  border: 3px solid var(--ink);
+  background: var(--yellow);
+  box-shadow: 3px 3px 0 var(--ink);
+  font-size: 13px;
+  white-space: nowrap;
+  transform: rotate(2deg);
+}
+/* The player's stickman lying on the card's top edge, top left (lounger.ts). */
+.card .lounger {
+  position: absolute;
+  left: 10px;
+  bottom: calc(100% + 3px);
+  pointer-events: none;
+}
+#scoreboard .server {
+  margin: 10px 0 0;
+  font-size: 12px;
+  text-align: right;
+  opacity: 0.6;
+}
+#scoreboard .room b {
+  margin-left: 4px;
+  font-size: 22px;
+  letter-spacing: 0.14em;
+}
+.card table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.card th {
+  text-align: left;
+  font-size: 11px;
+  padding: 4px 6px;
+  border-bottom: 3px solid var(--ink);
+}
+.card td {
+  padding: 4px 6px;
+  font-weight: 800;
+  border-bottom: 1px dashed rgba(21, 17, 28, 0.3);
+}
+/* One line per row: a long name ends with "…" and the hat tag stays beside it. */
+.card td:nth-child(2) {
+  width: 100%;
+  max-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+}
+.card td:nth-child(2) > span:not([class]) {
+  display: inline-block;
+  max-width: 10em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  vertical-align: middle;
+}
+.card tr.me td {
+  background: var(--yellow);
+}
+.card .n {
+  text-align: right;
+}
+#death {
+  top: 66%;
+  min-width: 0;
+  text-align: center;
+  background: var(--red);
+  color: #fff;
+  transform: translate(-50%, -50%) rotate(-1.5deg);
+}
+#death .who {
+  font: 900 20px var(--head);
+}
+#death .who span {
+  -webkit-text-stroke: 3px var(--ink);
+  paint-order: stroke;
+}
+#death kbd {
+  display: inline-block;
+  margin: 0 4px;
+  padding: 0 6px;
+  border: 2px solid var(--ink);
+  background: var(--yellow);
+  color: var(--ink);
+  font: 900 13px var(--head);
+}
+#death .dealt {
+  margin: 2px 0 4px;
+  font: 800 14px var(--head);
+}
+/* The killer's title, under their name (item 830). */
+#death .title-line {
+  margin: 0 0 2px;
+  font: 800 12px var(--head);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  opacity: 0.75;
+}
+/* The killer's hat and how to get it (item 529). */
+#death .hat-line {
+  margin: 0 0 4px;
+  font: 800 12px var(--head);
+  opacity: 0.9;
+}
+#death .go {
+  font: 900 15px var(--head);
+}
+#death .hint {
+  margin-top: 4px;
+  font-size: 11px;
+  opacity: 0.85;
+}
+/* The event's line in a public match (eventTexts.ts, item 527). */
+#death .event-line {
+  margin-top: 6px;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  color: var(--yellow, #ffd23f);
+}
+/* Team modes: one column per team on the scoreboard and the results. */
+.card.wide {
+  min-width: min(860px, calc(100vw - 32px));
+}
+.card .teams {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+}
+.card h3 {
+  margin: 0 0 4px;
+  font: 900 18px var(--head);
+}
+.team-name {
+  -webkit-text-stroke: 3px var(--ink);
+  paint-order: stroke;
+}
+/* The results screen's map vote, keys 1 to 4 or a click; the map just played first (hud.ts, voteHtml). */
+/* Sixteen rows and the vote outgrow a short screen. Clicks reach the map cards. */
+#results {
+  max-height: calc(100vh - 24px);
+  overflow-y: auto;
+  pointer-events: auto;
+  transition: opacity 0.35s;
+}
+/* The winners' intro (podium.ts) fills the screen first; the card fades in after it. */
+#results.intro {
+  opacity: 0;
+  pointer-events: none;
+}
+/* The owner's powers (hud.ts, showOwnerMenu; owner-powers.md). */
+#owner-menu {
+  width: max-content;
+  min-width: 0;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  padding: 10px 14px;
+  font: 700 13px var(--head);
+}
+#owner-menu[hidden] {
+  display: none;
+}
+#owner-menu h3 {
+  margin: 0 0 6px;
+  font: 900 13px var(--head);
+  letter-spacing: 0.06em;
+}
+#owner-menu ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 4px;
+}
+#owner-menu li.on {
+  color: #b07d00;
+}
+/*
+ * Rows and the close cross are buttons for a free pointer's click. They take pointer events
+ * again over .hud's pointer-events: none, as #loadout's do.
+ */
+#owner-menu button {
+  all: unset;
+  pointer-events: auto;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 2px 4px;
+  cursor: pointer;
+}
+#owner-menu button:hover {
+  background: var(--yellow);
+}
+#owner-menu h3 {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+#owner-menu .hint {
+  margin: 0 0 6px;
+  font: 600 11px var(--font);
+  opacity: 0.75;
+}
+#owner-menu h3 .close {
+  width: auto;
+  padding: 0 6px;
+  border: 2px solid var(--ink);
+}
+#owner-menu kbd {
+  display: inline-block;
+  min-width: 18px;
+  margin-right: 8px;
+  padding: 0 4px;
+  border: 2px solid var(--ink);
+  background: var(--yellow);
+  font: 900 12px var(--font);
+  text-align: center;
+}
+#podium-title {
+  left: 50%;
+  top: 7%;
+  transform: translateX(-50%);
+  text-align: center;
+  color: #fff;
+  font: 900 64px/1 var(--head);
+  -webkit-text-stroke: 8px var(--ink);
+  paint-order: stroke;
+  white-space: nowrap;
+  pointer-events: none;
+  animation: podium-title 0.5s ease-out;
+}
+#podium-title[hidden] {
+  display: none;
+}
+#podium-title small {
+  display: block;
+  margin-top: 6px;
+  font-size: 26px;
+  color: var(--yellow);
+  -webkit-text-stroke: 5px var(--ink);
+}
+@keyframes podium-title {
+  0% { transform: translateX(-50%) scale(2); opacity: 0; }
+  60% { transform: translateX(-50%) scale(0.95); opacity: 1; }
+  100% { transform: translateX(-50%) scale(1); }
+}
+/* This match's XP with the level bar, and the pack meter as one pip a match (hud.ts, rewardsHtml). */
+#results .mr-xp,
+#results .mr-meter {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin: 10px auto 0;
+  max-width: 360px;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+}
+#results .mr-xp b {
+  min-width: 7ch;
+  text-align: right;
+}
+#results .mr-lv {
+  padding: 1px 6px;
+  background: var(--yellow);
+  color: var(--ink);
+  border: 2px solid var(--ink);
+  box-shadow: 2px 2px 0 var(--ink);
+  font: 900 12px var(--head);
+  white-space: nowrap;
+}
+#results .mr-bar {
+  flex: 1;
+  height: 10px;
+  background: var(--paper);
+  border: 2px solid var(--ink);
+}
+#results .mr-bar i {
+  display: block;
+  height: 100%;
+  background: var(--blue);
+}
+#results .mr-pips {
+  display: flex;
+  gap: 4px;
+}
+#results .mr-pips i {
+  width: 14px;
+  height: 14px;
+  background: var(--paper);
+  border: 2px solid var(--ink);
+}
+#results .mr-pips i.on {
+  background: var(--red);
+}
+/* resultsCount.ts: the new pip, a new level and the card pack stamp drop in with a bounce. */
+#results .pop {
+  animation: mr-pop 0.4s cubic-bezier(0.3, 1.8, 0.5, 1);
+}
+@keyframes mr-pop {
+  from {
+    transform: scale(2.2) rotate(-8deg);
+    opacity: 0;
+  }
+  to {
+    transform: none;
+    opacity: 1;
+  }
+}
+/* The level badge is redrawn every frame of the count, so an animation would restart: it flashes instead. */
+#results .mr-lv.pop {
+  animation: none;
+  transform: scale(1.3);
+  background: var(--red);
+  color: #fff;
+}
+@media (prefers-reduced-motion: reduce) {
+  #results .pop {
+    animation: none;
+  }
+}
+/* A pack waits: a red button, a click or O opens it (hudScores.ts, rewardsHtml). */
+#results .pack-line {
+  display: flex;
+  width: fit-content;
+  align-items: center;
+  gap: 8px;
+  font: inherit;
+  cursor: pointer;
+  margin: 10px auto 0;
+  padding: 4px 14px 4px 8px;
+  border: 3px solid var(--ink);
+  background: var(--red);
+  color: #fff;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+  box-shadow: 3px 3px 0 var(--ink);
+}
+#results .pack-line .pack-fan {
+  width: 28px;
+  height: 24px;
+  flex: none;
+}
+/* The O key cap. */
+#results .pack-line kbd {
+  min-width: 1.5em;
+  padding: 0 5px;
+  border: 2px solid var(--ink);
+  border-bottom-width: 4px;
+  border-radius: 4px;
+  background: var(--paper);
+  color: var(--ink);
+  font: inherit;
+  text-align: center;
+}
+#results .pack-line:hover {
+  filter: brightness(1.12);
+}
+#results .pack-line:active {
+  transform: translate(2px, 2px);
+  box-shadow: 1px 1px 0 var(--ink);
+}
+#pause-packs {
+  display: block;
+  margin: 10px auto 0;
+  padding: 8px 18px;
+  border: 3px solid var(--ink);
+  background: var(--red);
+  color: #fff;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  box-shadow: 4px 4px 0 var(--ink);
+  cursor: pointer;
+}
+#pause-team {
+  display: block;
+  margin: 10px auto 0;
+  padding: 8px 18px;
+  border: 3px solid var(--ink);
+  background: var(--blue, #2f6df0);
+  color: #fff;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  box-shadow: 4px 4px 0 var(--ink);
+  cursor: pointer;
+}
+#pause-team:disabled {
+  background: #aaa;
+  box-shadow: none;
+  cursor: default;
+}
+#results .vote {
+  margin-top: 14px;
+}
+#results .vote h3 {
+  text-align: center;
+}
+#results .maps {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(96px, 1fr));
+  gap: 10px;
+}
+#results .map {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  gap: 2px;
+  padding: 6px;
+  border: 3px solid var(--ink);
+  background: #fffbe9;
+  box-shadow: 3px 3px 0 var(--ink);
+  font: 800 11px var(--font);
+  color: var(--ink);
+  cursor: pointer;
+}
+#results .map:hover {
+  background: #fff3c4;
+}
+#results .map.on {
+  background: var(--yellow);
+  transform: translateY(-3px);
+  box-shadow: 4px 6px 0 var(--ink);
+}
+#results .map img {
+  width: 100%;
+  height: clamp(40px, 9vh, 90px);
+  object-fit: cover;
+  border: 2px solid var(--ink);
+}
+#results .map b {
+  font: 900 15px var(--head);
+}
+#results .map kbd,
+#results .map i {
+  position: absolute;
+  top: 2px;
+  padding: 0 6px;
+  border: 2px solid var(--ink);
+  font: 900 13px var(--head);
+}
+#results .map kbd {
+  left: 2px;
+  background: var(--paper);
+}
+#results .map i {
+  right: 2px;
+  background: var(--ink);
+  color: var(--paper);
+  font-size: 10px;
+  font-style: normal;
+}
+#results .map em {
+  padding: 0 5px;
+  border: 2px solid var(--ink);
+  background: var(--yellow);
+  font: 900 9px var(--head);
+  font-style: normal;
+}
+#results > p {
+  text-align: center;
+}
+/* Daily challenges done or moved in this match (hudScores.ts, dailyCard.ts); the roll flips in. */
+#results .mr-daily {
+  margin: 10px auto 0;
+  padding: 6px 12px;
+  max-width: 420px;
+  border: 3px solid var(--ink);
+  background: var(--paper);
+  color: var(--ink);
+  box-shadow: 3px 3px 0 var(--ink);
+  text-align: left;
+}
+#results .mr-daily h4 {
+  margin: -6px -12px 4px;
+  padding: 3px 12px;
+  border-bottom: 3px solid var(--ink);
+  background: var(--yellow);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-align: center;
+}
+#results .mr-daily p {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 2px 10px;
+  margin: 3px 0 0;
+  font-weight: 800;
+}
+#results .mr-daily em {
+  font-style: normal;
+  opacity: 0.75;
+}
+#results .mr-daily .ok {
+  color: var(--green);
+}
+#results .mr-daily .roll {
+  padding: 1px 8px;
+  border: 2px solid var(--ink);
+  background: var(--yellow, #ffd23f);
+  color: var(--ink);
+  font-weight: 900;
+  animation: mr-flip 0.6s ease-out both;
+}
+#results .mr-daily .roll.miss {
+  background: #ddd;
+}
+#results .mr-daily .roll.all {
+  background: var(--red);
+  color: #fff;
+}
+@keyframes mr-flip {
+  from {
+    transform: rotateX(90deg);
+  }
+  to {
+    transform: rotateX(0);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  #results .mr-daily .roll {
+    animation: none;
+  }
+}
+/* Friends Weekend: the pack, or the reason it did not come (weekendGame.ts). */
+#results .weekend-line {
+  margin: 10px 0 0;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  color: var(--yellow, #ffd23f);
+}
+/* Friends Weekend in a public match (item 219): a plum sticker with the gold MAKE A ROOM, like
+   the home page's event section (weekendGame.ts, weekendInvite). */
+#results .weekend-invite {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 14px;
+  margin: 10px 0 0;
+  padding: 8px 12px;
+  border: 3px solid var(--ink);
+  background: #3d1f52;
+  color: #fff;
+  box-shadow: 4px 4px 0 var(--ink);
+}
+#results .wi-got {
+  flex-basis: 100%;
+  margin: 0;
+  font-size: 13px;
+  color: var(--yellow);
+  font-weight: 900;
+  letter-spacing: 0.04em;
+}
+#results .wi-line {
+  flex: 1;
+  min-width: 180px;
+  margin: 0;
+  font-weight: 800;
+  font-size: 13px;
+  letter-spacing: 0.04em;
+}
+#results .wi-line small {
+  display: block;
+  margin-top: 2px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  opacity: 0.8;
+}
+#results .wi-cta {
+  padding: 8px 16px;
+  border: 3px solid var(--ink);
+  background: var(--yellow);
+  color: var(--ink);
+  box-shadow: 3px 3px 0 var(--ink);
+  font: 900 16px var(--head);
+  letter-spacing: 0.06em;
+  text-decoration: none;
+  white-space: nowrap;
+}
+#results .wi-cta:hover {
+  transform: translate(-1px, -1px);
+  box-shadow: 4px 4px 0 var(--ink);
+}

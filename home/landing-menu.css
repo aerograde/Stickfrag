@@ -1,0 +1,718 @@
+/* landing-menu.css: part of landing.html's styles, linked from it in order (the cascade depends on the order). */
+/* The play menu (client/src/playMenu.ts): one step shows at a time, the stage stays. */
+.gear {
+  padding-block: clamp(20px, 3.5vw, 44px);
+  /* Room for the squad ribbon, which overlaps this section's bottom edge. */
+  padding-bottom: 60px;
+}
+/* One step shows at a time; the others are hidden and inert (playMenu.ts, show). Since the
+   stage spans the page above the menu (2026-10-05), each step takes its own height. */
+.menu-steps {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+}
+.step {
+  grid-area: 1 / 1;
+}
+.step.off {
+  visibility: hidden;
+}
+.step:not(.off) {
+  animation: step-in 0.22s ease-out;
+}
+@keyframes step-in {
+  from {
+    opacity: 0;
+    transform: translateX(14px);
+  }
+}
+/* BACK: a small paper button, like the ghost buttons of the game's pause card. */
+.gear-card .back {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 14px;
+  padding: 6px 14px 6px 12px;
+  border: 3px solid var(--ink);
+  background: var(--paper);
+  color: var(--ink);
+  font: 900 14px var(--head);
+  box-shadow: 3px 3px 0 var(--ink);
+  cursor: pointer;
+}
+.gear-card .back:hover {
+  background: #fffbe9;
+}
+.gear-card .back:active {
+  transform: translate(3px, 3px);
+  box-shadow: none;
+}
+.linkish:hover {
+  text-decoration: underline;
+}
+.gear-card .step:not(#step-gear) h2 {
+  font-size: clamp(30px, 3.4vw, 42px);
+  margin-bottom: 16px;
+}
+.gear-who {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 10px;
+  margin: 12px 0 0;
+  font-size: 17px;
+}
+/* `display: flex` above beats the `hidden` attribute: without this the pencil shows under an empty field. */
+.gear-who[hidden] {
+  display: none;
+}
+.linkish {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--ink);
+  font: 800 15px var(--head);
+  text-decoration: underline dotted;
+  cursor: pointer;
+}
+/* Level panel: this level, the XP bar, the next level, and what it unlocks. */
+.xp {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  margin: 14px 0 0;
+  padding: 12px 14px;
+  border: 3px solid var(--ink);
+  background: #fffbe9;
+  box-shadow: 4px 4px 0 var(--ink);
+}
+.xp-lv {
+  padding: 6px 10px;
+  border: 3px solid var(--ink);
+  background: var(--yellow);
+  box-shadow: 3px 3px 0 var(--ink);
+  font: 900 22px/1 var(--head);
+  white-space: nowrap;
+  transform: rotate(-3deg);
+}
+/* The owner's level (glitch.ts): the level badge's own colours, two flickering characters
+   instead of a number (owner, 2026-10-06). */
+.glitch {
+  display: inline-block;
+  min-width: 2ch;
+  font-family: var(--font);
+  text-align: center;
+}
+.xp-lv.next {
+  padding: 4px 8px;
+  border-style: dashed;
+  background: var(--paper);
+  box-shadow: none;
+  font-size: 15px;
+  transform: rotate(3deg);
+}
+.xp-bar {
+  position: relative;
+  height: 26px;
+  border: 3px solid var(--ink);
+  background: #fff;
+  overflow: hidden;
+}
+.xp-fill {
+  width: 0;
+  height: 100%;
+  background: repeating-linear-gradient(-45deg, var(--blue) 0 8px, #5b93f5 8px 16px);
+  border-right: 3px solid var(--ink);
+  transition: width 0.8s ease-out;
+}
+.xp-bar span {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font: 900 13px var(--head);
+  -webkit-text-stroke: 3px #fff;
+  paint-order: stroke fill;
+}
+@media (prefers-reduced-motion: reduce) {
+  .xp-fill {
+    transition: none;
+  }
+}
+.gear-invite {
+  margin: -6px 0 16px;
+  padding: 8px 12px;
+  border: 3px dashed var(--ink);
+  background: #fffbe9;
+  font-weight: 700;
+}
+#gear-phone .phone-note {
+  margin-top: 12px;
+}
+/* On the haven the note sits over the scene: a paper card keeps it readable. */
+#gear.haven #gear-phone .phone-note {
+  padding: 8px 12px;
+  border: 3px solid var(--ink);
+  background: var(--paper);
+  color: var(--ink);
+}
+.choices {
+  display: grid;
+  gap: 12px;
+}
+.choices.maps {
+  grid-template-columns: 1fr 1fr;
+}
+.choice {
+  display: block;
+  width: 100%;
+  padding: 14px 18px 14px 22px;
+  border: 3px solid var(--ink);
+  border-left: 10px solid var(--tone, var(--ink));
+  background: var(--paper);
+  color: var(--ink);
+  text-align: left;
+  font: 500 15px/1.35 var(--head);
+  box-shadow: 5px 5px 0 var(--ink);
+  cursor: pointer;
+  transition: transform 0.08s, box-shadow 0.08s;
+}
+.choice b {
+  display: block;
+  margin-bottom: 2px;
+  font: 900 24px/1.1 var(--head);
+}
+/* Map cards: the map from above on top, framed in ink, then the name and one line. */
+.choice img {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  margin: 0 0 10px;
+  border: 3px solid var(--ink);
+  background: var(--sky);
+}
+.choices.maps .choice {
+  padding: 10px 12px 12px 14px;
+}
+.choices.maps .choice b {
+  font-size: 20px;
+}
+.choices.maps .choice span {
+  font-size: 13px;
+}
+.choice .map-tag {
+  display: inline-block;
+  margin-top: 6px;
+  padding: 1px 8px;
+  border: 2px solid var(--ink);
+  background: var(--yellow);
+  font: 900 12px var(--head);
+  font-style: normal;
+}
+.choice:hover,
+.choice:focus-visible {
+  background: #fffbe9;
+  transform: translate(-2px, -2px);
+  box-shadow: 7px 7px 0 var(--ink);
+}
+.choice:active {
+  transform: translate(3px, 3px);
+  box-shadow: 2px 2px 0 var(--ink);
+}
+/* The choice made last time: the one PLAY-and-go players want. */
+.choice.last {
+  background: var(--yellow);
+}
+.choice[data-mode='online'],
+.choice[data-map='any'] {
+  --tone: var(--yellow);
+}
+.choice[data-game='tdm'] {
+  --tone: var(--blue);
+}
+/* QUICK JOIN after PLAY: the big way in; the line under it says where it goes. */
+.choice.quick {
+  padding: 22px 22px 20px 26px;
+  --tone: var(--ink);
+}
+.choice.quick b {
+  font-size: clamp(34px, 4vw, 48px);
+  letter-spacing: 0.01em;
+}
+.choice.quick b span {
+  font-size: 0.6em;
+  vertical-align: 0.15em;
+}
+.choice.quick > span {
+  font-size: 17px;
+  font-weight: 700;
+}
+.choice[data-game='gungame'] {
+  --tone: var(--red);
+}
+/* Each mode's colour, for the mode buttons. */
+[data-game='tdm'] {
+  --mode: var(--blue);
+  --mode-soft: #7ba5f4;
+}
+[data-game='ffa'] {
+  --mode: var(--green);
+  --mode-soft: #79d8aa;
+}
+[data-game='gungame'] {
+  --mode: var(--red);
+  --mode-soft: #f58484;
+}
+/* CTF and Pumpkin Bomb had no colour: their tiles were see-through (item 752 check, 2026-10-24). */
+[data-game='ctf'] {
+  --mode: #f08a2c;
+  --mode-soft: #f6b46a;
+}
+[data-game='bomb'] {
+  --mode: #8a5cd6;
+  --mode-soft: #b79af0;
+}
+.choice[data-mode='solo'],
+.choice[data-map='yard'] {
+  --tone: var(--blue);
+}
+.choice[data-mode='friends'],
+.choice[data-map='town'] {
+  --tone: var(--red);
+}
+.choice[data-map='farm'] {
+  --tone: var(--green);
+}
+.choice[data-map='depot'] {
+  --tone: var(--cyan);
+}
+/* "Any map" (online, first) spans the grid, picture left. */
+.choices.maps .choice[data-map='any'] {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: 42% 1fr;
+  column-gap: 14px;
+  align-items: center;
+}
+.choices.maps .choice[data-map='any'] img {
+  grid-row: 1 / span 2;
+  margin: 0;
+}
+.choices.maps .choice[data-map='any'] b {
+  align-self: end;
+}
+.choices.maps .choice[data-map='any'] span {
+  align-self: start;
+}
+.invite-row {
+  display: flex;
+  gap: 10px;
+}
+.invite-link {
+  flex: 1;
+  min-width: 0;
+  padding: 10px 12px;
+  border: 3px solid var(--ink);
+  background: #fff;
+  color: var(--ink);
+  font: 700 14px var(--font);
+}
+#invite-go {
+  margin-top: 20px;
+}
+/* The room code, big enough to read out over voice chat (playMenu.ts, fillInvite). */
+.room-code {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin: 0 0 8px;
+  padding: 10px 12px 10px 16px;
+  border: 3px dashed var(--ink);
+  background: #fffbe9;
+}
+.room-code span {
+  font: 900 13px var(--head);
+  letter-spacing: 0.06em;
+}
+.room-code b {
+  flex: 1;
+  font: 900 34px/1 var(--head);
+  letter-spacing: 0.18em;
+  user-select: all;
+}
+.code-hint {
+  margin: 0 0 16px;
+  font-size: 14px;
+  font-weight: 700;
+}
+/* Under the stage: the room-code ticket only. The first section is about the game alone. */
+.under-stage {
+  grid-area: code;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+/* NEW!: the newest shipped idea from the ideas board (ideasNews.ts, fillNew), as a comic
+   burst. It shares the stage's grid cell (the stage crops anything outside its frame) and
+   slides left into the empty margin: all the way where there is room, else as far as the
+   margin allows, hanging over the gun rack and never over the stickman. */
+.new-card {
+  --bw: 250px;
+  --g: max(var(--gutter), (100vw - var(--max)) / 2);
+  grid-area: stage;
+  align-self: start;
+  justify-self: start;
+  position: relative;
+  z-index: 2;
+  width: var(--bw);
+  aspect-ratio: 212 / 192;
+  margin-top: -14px;
+  translate: calc(-1 * min(var(--bw) + 14px, var(--g) - 10px)) 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  /* Of the burst's own width: a percentage would be of the stage's. */
+  padding: calc(var(--bw) * 0.15) calc(var(--bw) * 0.19) calc(var(--bw) * 0.13);
+  text-align: center;
+  background: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 212 192'><polygon points='100.0,6.0 112.2,28.8 129.2,19.0 135.2,36.2 159.2,27.6 153.9,50.0 170.8,53.9 166.1,68.7 193.6,75.4 170.3,90.0 186.1,103.4 166.1,111.3 178.2,129.9 153.9,130.0 153.7,146.6 135.2,143.8 132.5,168.9 112.2,151.2 100.0,165.6 87.8,151.2 68.8,165.8 64.9,143.8 46.9,146.0 46.1,130.0 18.6,131.6 33.9,111.3 14.9,103.3 29.7,90.0 12.1,76.3 33.9,68.7 26.8,52.6 46.1,50.0 38.9,25.7 64.8,36.2 70.8,19.0 87.8,28.8' transform='translate(5 6)' fill='%2315111c'/><polygon points='100.0,6.0 112.2,28.8 129.2,19.0 135.2,36.2 159.2,27.6 153.9,50.0 170.8,53.9 166.1,68.7 193.6,75.4 170.3,90.0 186.1,103.4 166.1,111.3 178.2,129.9 153.9,130.0 153.7,146.6 135.2,143.8 132.5,168.9 112.2,151.2 100.0,165.6 87.8,151.2 68.8,165.8 64.9,143.8 46.9,146.0 46.1,130.0 18.6,131.6 33.9,111.3 14.9,103.3 29.7,90.0 12.1,76.3 33.9,68.7 26.8,52.6 46.1,50.0 38.9,25.7 64.8,36.2 70.8,19.0 87.8,28.8' fill='%23ffd23f' stroke='%2315111c' stroke-width='4' stroke-linejoin='miter'/></svg>") center / 100% 100% no-repeat;
+  rotate: -6deg;
+  animation:
+    new-pop 0.5s cubic-bezier(0.3, 1.6, 0.5, 1) both,
+    new-wobble 2.6s 0.5s ease-in-out infinite;
+}
+@keyframes new-pop {
+  from {
+    scale: 0.2;
+  }
+}
+@keyframes new-wobble {
+  50% {
+    rotate: -2deg;
+    scale: 1.05;
+  }
+}
+.new-stamp {
+  display: inline-block;
+  padding: 1px 9px;
+  border: 3px solid var(--ink);
+  background: var(--red);
+  color: #fff;
+  box-shadow: 3px 3px 0 var(--ink);
+  font: 900 20px/1.1 var(--head);
+  letter-spacing: 0.04em;
+  rotate: -4deg;
+}
+.new-close {
+  position: absolute;
+  top: 15%;
+  right: 12%;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border: 2px solid var(--ink);
+  border-radius: 50%;
+  background: var(--paper);
+  color: var(--ink);
+  font: 900 14px/1 var(--head);
+  cursor: pointer;
+}
+.new-card h3 {
+  margin: 7px 0 3px;
+  font: 900 19px/1.05 var(--head);
+  text-transform: uppercase;
+}
+.new-card h3 a {
+  color: var(--ink);
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
+}
+/* Too long for a burst: kept for screen readers, the title links to the whole update. */
+.new-note {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+.new-credit {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.25;
+}
+.new-credit b {
+  overflow-wrap: anywhere;
+}
+@media (max-width: 1499px) {
+  .new-card {
+    --bw: 200px;
+  }
+  .new-card h3 {
+    font-size: 16px;
+  }
+  .new-stamp {
+    font-size: 17px;
+  }
+  .new-credit {
+    font-size: 11px;
+  }
+  .new-thanks {
+    display: none;
+  }
+}
+/* Little margin left: smaller, so it hangs over the gun rack and clear of the stickman's head. */
+@media (max-width: 1279px) {
+  .new-card {
+    --bw: 160px;
+  }
+  .new-credit {
+    display: none;
+  }
+  .new-card h3 {
+    font-size: 14px;
+  }
+  .new-stamp {
+    font-size: 15px;
+  }
+}
+/* Stacked, the stage spans the screen: a small sticker on its corner, the stamp and the title only. */
+@media (max-width: 860px) {
+  .new-card {
+    --bw: 150px;
+    margin-top: -10px;
+  }
+  .new-close {
+    display: none;
+  }
+  .new-card h3 {
+    margin-top: 4px;
+    font-size: 13px;
+  }
+  .new-stamp {
+    font-size: 14px;
+    padding: 0 7px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .new-card {
+    animation: none;
+  }
+}
+/* "Got a room code?": a pink ticket stuck on the stage's bottom edge, with the first step only
+   (playMenu.ts, joinByCode). The dashed inner line is the ticket's perforation. */
+.code-card {
+  position: relative;
+  z-index: 1;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: var(--menu-h);
+  margin-top: -56px;
+  padding: 18px 24px 10px;
+  background: var(--pink);
+  --tilt: -1deg;
+}
+.code-card h3 {
+  font: 900 22px/1.1 var(--head);
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  margin: 0 0 12px;
+}
+.code-join {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px 10px;
+}
+.code-join input {
+  width: 9.5em;
+  min-width: 0;
+  padding: 8px 10px;
+  border: 3px solid var(--ink);
+  background: #fff;
+  color: var(--ink);
+  font: 900 17px var(--head);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  outline: none;
+}
+.code-join input::placeholder {
+  color: #b9b0a0;
+}
+.code-join input:focus {
+  background: #fffbe9;
+  box-shadow: 0 0 0 4px var(--yellow);
+}
+.code-join .btn {
+  padding: 9px 16px;
+  font-size: 15px;
+  box-shadow: 3px 3px 0 var(--ink);
+}
+.code-or {
+  font: 800 14px var(--head);
+}
+/* The friends room's settings on the invite step: mode, map, bots. */
+.room-setup {
+  display: grid;
+  gap: 10px;
+  margin: 0 0 16px;
+  padding: 12px 14px;
+  border: 3px solid var(--ink);
+  background: #fffbe9;
+  box-shadow: 4px 4px 0 var(--ink);
+}
+.room-row {
+  display: grid;
+  grid-template-columns: 52px minmax(0, 1fr);
+  align-items: center;
+  gap: 10px;
+}
+.room-label {
+  font: 900 13px var(--head);
+  text-transform: uppercase;
+}
+.room-seg {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.room-seg button {
+  padding: 6px 11px;
+  border: 3px solid var(--ink);
+  background: var(--paper);
+  color: var(--ink);
+  font: 900 14px var(--head);
+  white-space: nowrap;
+  box-shadow: 2px 2px 0 var(--ink);
+  cursor: pointer;
+}
+.room-seg button[aria-pressed='true'] {
+  background: var(--yellow);
+}
+.room-seg button:active {
+  transform: translate(2px, 2px);
+  box-shadow: none;
+}
+/* The room's map: small square pictures in a row, the name under each (owner, 2026-10-05). */
+.room-seg .map-pick {
+  display: grid;
+  justify-items: center;
+  gap: 4px;
+  padding: 4px 4px 3px;
+  font-size: 12px;
+}
+.map-pick img {
+  display: block;
+  width: 64px;
+  height: 64px;
+  object-fit: cover;
+  border: 2px solid var(--ink);
+}
+.bots-switch.room-bots {
+  position: static;
+  justify-self: start;
+  padding: 2px 0;
+  font: 800 15px var(--head);
+  transform: none;
+}
+.code-error:empty {
+  min-height: 8px;
+}
+/* Squad: a Discord-blue ribbon tilted across the page, like a strip of tape over the play
+   menu's bottom edge (docs/design/discord.md). Wider than the page so the tilt shows no corner. */
+/* The ribbon's tilted corners stick out past the page: clip them, or phones pan sideways. */
+main {
+  overflow-x: clip;
+}
+.squad {
+  position: relative;
+  z-index: 3;
+  /* The bottom margin pulls the next section up under the ribbon, so its tilt never shows the page behind. */
+  margin: -24px -4vw -28px;
+  /* As much padding as the overhang: the row inside keeps to the page's own edges. */
+  padding: 14px 4vw;
+  background: var(--discord);
+  border-block: 3px solid var(--ink);
+  box-shadow: 0 6px 0 var(--ink);
+  color: #fff;
+  transform: rotate(-1.2deg);
+}
+@media (max-width: 600px) {
+  /* On a phone the ribbon keeps to the page: its overhang made the page 407 px wide on a 390 px screen
+     (item 509), and the tilt shows only a 1 px sliver at the edge. */
+  .squad {
+    margin-inline: 0;
+    padding-inline: 0;
+  }
+}
+.squad + .event,
+.squad + .event[hidden] + .week {
+  /* Their 72 px, plus what the ribbon covers. */
+  padding-top: 100px;
+}
+.squad-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px 28px;
+}
+.squad-text {
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 2px 16px;
+  font-weight: 700;
+}
+.squad-text b {
+  font: 900 clamp(24px, 3vw, 34px) / 1 var(--head);
+  letter-spacing: -0.5px;
+  color: var(--yellow);
+  -webkit-text-stroke: 2px var(--ink);
+  paint-order: stroke;
+  text-shadow: 3px 3px 0 var(--ink);
+}
+.social-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+.btn.discord {
+  /* As tall as the icon links beside it (40 px). */
+  padding: 6px 14px;
+  font-size: 16px;
+  box-shadow: 3px 3px 0 var(--ink);
+  background: var(--paper);
+}
+.btn.discord svg {
+  width: 22px;
+  height: 22px;
+  color: var(--discord);
+}
+.icon-link {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border: 3px solid var(--ink);
+  background: var(--paper);
+  color: var(--ink);
+  box-shadow: 3px 3px 0 var(--ink);
+}
+.icon-link:active {
+  transform: translate(3px, 3px);
+  box-shadow: none;
+}
+.icon-link svg {
+  width: 20px;
+  height: 20px;
+}

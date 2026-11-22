@@ -1,0 +1,113 @@
+/* The match select on the haven. The friends room hides the stickman and takes the middle of the page,
+   tall map cards in one row (item 307, owner pick 2026-10-14: draft C). "Ready?" keeps the room
+   and lays its buttons out like step 1 (item 415). Phones reset these in landing-touch.css.
+   Design: docs/design/play-menu-steps.md, "307", and play-menu.md, "415". */
+
+/* The stickman steps out of the friends room only; after PLAY he stays (item 415, owner 2026-10-14). */
+#gear.haven[data-step='invite'] #gear-canvas {
+  visibility: hidden;
+}
+#gear.haven[data-step='invite'] .gear-grid {
+  align-content: center;
+  padding-bottom: 24px;
+}
+
+/* "Ready?" (item 571, owner pick A, 2026-10-17; before: item 415): the room and the stickman stay.
+   Three mode tiles stand in a row over the floor, PICK A MODE above them, QUICK JOIN a slim line
+   under them, BACK a small arrow card at their left. The pink WITH FRIENDS card (the room code,
+   landing-cards.css) stands at the right. Each piece is placed against the section, as PLAY is, so
+   the card and the steps around them take no room of their own. Phones: landing-touch.css. */
+#gear.haven:not([data-layout='touch'])[data-step='start'] :is(.gear-card, .menu-steps) {
+  position: static;
+}
+#gear.haven:not([data-layout='touch']) #step-start:not(.off) {
+  position: static;
+  display: block;
+  animation: none;
+  --row-w: min(680px, 47%);
+  --quick-h: 58px;
+  --tiles-h: 204px;
+}
+#gear.haven:not([data-layout='touch']) #step-start :is(.choice.quick, .mode-tiles, .back, .pick-label) {
+  position: absolute;
+  z-index: 3;
+}
+#gear.haven:not([data-layout='touch']) #step-start .choice.quick {
+  bottom: var(--haven-lift);
+  left: 50%;
+  width: var(--row-w);
+  min-height: 0;
+  height: var(--quick-h);
+  translate: -50% 0;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  padding: 0 20px;
+}
+#gear.haven:not([data-layout='touch']) #step-start .choice.quick b {
+  font-size: 22px;
+}
+#gear.haven:not([data-layout='touch']) #step-start .choice.quick > span {
+  font-size: 14px;
+}
+#gear.haven:not([data-layout='touch']) #step-start .mode-tiles {
+  bottom: calc(var(--haven-lift) + var(--quick-h) + 18px);
+  left: 50%;
+  width: var(--row-w);
+  min-height: 0;
+  height: var(--tiles-h);
+  gap: 20px;
+  translate: -50% 0;
+}
+#gear.haven:not([data-layout='touch']) #step-start .choice.mode-tile {
+  min-height: 0;
+  height: 100%;
+}
+#gear.haven:not([data-layout='touch']) #step-start .pick-label {
+  bottom: calc(var(--haven-lift) + var(--quick-h) + 18px + var(--tiles-h) + 12px);
+  left: calc(50% - var(--row-w) / 2);
+}
+/* BACK: a small arrow card at the tiles' left, at the bottom of the row. */
+#gear.haven:not([data-layout='touch']) #step-start .back {
+  bottom: var(--haven-lift);
+  left: calc(50% - var(--row-w) / 2 - 24px - 64px);
+  width: 64px;
+  height: 64px;
+  min-height: 0;
+}
+#gear.haven:not([data-layout='touch']) #step-start .back span {
+  width: 36px;
+  height: 36px;
+}
+
+/* The friends room: the map cards stand tall in one row (a square picture over the name, the thumbnails' own shape; taller pushed PLAY below the fold at 900 px). */
+#gear.haven[data-step='invite'] .gear-card {
+  width: min(1240px, 90vw);
+}
+#gear.haven #room-maps .map-pick img {
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+}
+/* Five mode tiles (item 752): a row wider than QUICK JOIN, so a name fits its card and the one-line
+   hint shows (the 112 px square tiles of three modes cut "DEATHMATCH" and hid the hints). */
+html #gear.haven:not([data-layout='touch']) #step-start:not(.off) {
+  --tiles-h: 156px;
+}
+#gear.haven:not([data-layout='touch']) #step-start .mode-tiles {
+  width: min(980px, 72%);
+  gap: 16px;
+}
+html #gear.haven:not([data-layout='touch']) #step-start .mode-tile {
+  align-content: start;
+  padding: 12px 10px;
+}
+html #gear.haven:not([data-layout='touch']) #step-start .mode-tile .tile-blurb {
+  display: block;
+  font-size: 13px;
+}
+html #gear.haven:not([data-layout='touch']) #step-start .mode-tile .tile-name {
+  font-size: clamp(15px, 1.15vw, 20px);
+  letter-spacing: 0;
+}

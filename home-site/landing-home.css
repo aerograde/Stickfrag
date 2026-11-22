@@ -1,0 +1,1402 @@
+/* landing-home.css: part of landing.html's styles, linked from it in order (the cascade depends on the order). */
+/* While ads are off there is no hero (owner, 2026-10-06: a new picture comes later); the page's
+   h1 is in #play. */
+[data-ads='soon'] .hero {
+  display: none;
+}
+
+/* ---------- Sections ---------- */
+section {
+  padding: clamp(56px, 9vw, 104px) 0;
+}
+.sec-head {
+  max-width: 720px;
+  margin-bottom: 40px;
+}
+.sec-head h2 {
+  font: 900 clamp(32px, 4.6vw, 52px) / 1.02 var(--head);
+  letter-spacing: -1.5px;
+  margin-bottom: 14px;
+}
+.sec-head p {
+  font-size: 19px;
+  max-width: 62ch;
+}
+.page-title {
+  margin: 0 0 22px;
+  font: 900 clamp(38px, 5.6vw, 68px) / 0.95 var(--head);
+  letter-spacing: -2px;
+}
+.page-title small {
+  display: block;
+  margin-top: 12px;
+  font: 800 clamp(17px, 1.8vw, 21px) / 1.25 var(--head);
+  letter-spacing: 0;
+  color: var(--red);
+}
+
+/* Gear up: the 3D corner (client/src/lobby.ts draws it) and the name + headband + body card */
+.gear {
+  background-color: var(--sky);
+  background-image: radial-gradient(rgba(21, 17, 28, 0.12) 22%, transparent 25%);
+  background-size: 10px 10px;
+  border-bottom: 3px solid var(--ink);
+}
+/* The stage spans the page (owner, 2026-10-05); under it three small cards: the room code,
+   PLAY, the level. After PLAY the menu takes the whole row (playMenu.ts sets data-step).
+   The row's rule (2026-10-05, owner: "tidy up, cards of similar size"): three slots on the
+   stage's columns, each card fills its slot, one height (at least --menu-h), one 28 px
+   overhang, 8 px shadows, at most 1° of tilt. Small links go on a line under the row. */
+.gear-grid {
+  --menu-cols: minmax(0, 1.15fr) minmax(0, 1fr) minmax(0, 1fr);
+  --menu-gap: 36px;
+  --menu-h: 150px;
+  display: grid;
+  grid-template-columns: var(--menu-cols);
+  grid-template-areas: 'stage stage stage' 'code menu menu';
+  gap: 28px var(--menu-gap);
+  align-items: start;
+}
+.gear:not([data-step='gear']) .gear-grid {
+  grid-template-areas: 'stage stage stage' 'menu menu menu';
+}
+.gear:not([data-step='gear']) .under-stage {
+  display: none;
+}
+.gear:not([data-step='gear']) .gear-card {
+  justify-self: center;
+  width: min(100%, 860px);
+}
+/* Under the stage, each step takes its own height: the steps not shown take no room. */
+.menu-steps > .step.off {
+  display: none;
+}
+/* A comic panel: the corner is cropped by its ink frame, like a close-up. */
+.gear-stage {
+  grid-area: stage;
+  position: relative;
+  aspect-ratio: 2 / 1;
+  /* PLAY, under the stage, must stay above the fold on a laptop: a short window makes the
+     stage wider instead of taller (the camera keeps him the same size in the frame). */
+  width: 100%;
+  max-height: max(360px, 100svh - 300px);
+  overflow: hidden;
+  /* A still of the scene until lobby.ts draws it live (a different aspect crops the still). */
+  background: url('/gear-poster.webp') center / cover, linear-gradient(180deg, var(--sky), #b9def0);
+  border: 4px solid var(--ink);
+  box-shadow: 10px 10px 0 var(--ink);
+  transform: rotate(-0.4deg);
+}
+/* The live scene fades in over the still (owner, 2026-10-06: no hard swap). The still has no
+   stickman, so he fades in with the scene in his own colours, never in the default ones. */
+#gear-canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+  opacity: 0;
+  transition: opacity 0.45s ease-out;
+}
+#gear-canvas.drawn {
+  opacity: 1;
+}
+/* Faded in, the scene is transparent above the yard: the sky shows there (lobby.ts adds settled). */
+.gear-stage:has(#gear-canvas.settled) {
+  background: linear-gradient(180deg, var(--sky), #b9def0);
+}
+@media (prefers-reduced-motion: reduce) {
+  #gear-canvas {
+    transition: none;
+  }
+}
+/* The haven has no still yet: its warm dark wall until it draws, not the armory's. */
+.haven-boot .gear-stage,
+.haven-boot .gear-stage:has(#gear-canvas.settled) {
+  background: #6e3a22;
+}
+/* The first version's colour cards must not show before arrangeHaven (playMenu.ts) adds `haven`,
+   which hides them for good: a slow or retried script left them on the wall (item 182). Wherever
+   they are: a page opened under 861px wide once moved them off the stage, past every rule below. */
+.haven-boot .gear-stage > .looks,
+.haven-boot .looks {
+  display: none;
+}
+.gear-card {
+  grid-area: menu;
+  padding: 20px 24px;
+  transform: rotate(1deg);
+  box-shadow: 8px 8px 0 var(--ink);
+}
+/* Step 1 has no card of its own: the "who" card and a big PLAY hang over the stage's bottom
+   edge, like the room-code ticket beside them (owner, 2026-10-05). */
+.gear[data-step='gear'] .gear-card,
+.gear[data-step='start'] .gear-card {
+  position: relative;
+  z-index: 1;
+  margin-top: -56px;
+  padding: 0;
+  border: 0;
+  background: none;
+  box-shadow: none;
+  transform: none;
+}
+/* Step 1's three cards take one height: the row's cells stretch, and the "who" card and PLAY
+   stretch down the menu's boxes to it. */
+.gear[data-step='gear'] .under-stage,
+.gear[data-step='gear'] .gear-card {
+  align-self: stretch;
+}
+.gear[data-step='gear'] .gear-card,
+.gear[data-step='gear'] #step-gear {
+  display: flex;
+  flex-direction: column;
+}
+.gear[data-step='gear'] .menu-steps,
+.gear[data-step='gear'] .gear-join {
+  flex: 1;
+}
+/* Every card in the row is one kind of card (owner, 2026-10-05: "each card similar design,
+   same palette, on hover too"): ink border, 8 px shadow, a tilt of at most 1° (--tilt), the
+   room-code ticket's dashed perforation, ink text on a soft fill. Under the pointer a card
+   lifts and its shadow grows; a press pushes it into the page. */
+#gear .row-card {
+  position: relative;
+  border: 3px solid var(--ink);
+  color: var(--ink);
+  box-shadow: 8px 8px 0 var(--ink);
+  transform: rotate(var(--tilt, 0deg));
+  transition: transform 0.1s, box-shadow 0.1s;
+}
+/* The perforation: a pseudo-element, so the focus outline stays free for the keyboard. */
+#gear .row-card::after {
+  content: '';
+  position: absolute;
+  inset: 6px;
+  border: 2px dashed rgba(21, 17, 28, 0.4);
+  pointer-events: none;
+}
+#gear .row-card:hover,
+#gear .row-card:focus-visible {
+  transform: translate(-3px, -3px) rotate(var(--tilt, 0deg));
+  box-shadow: 11px 11px 0 var(--ink);
+}
+#gear .row-card:is(button):active {
+  transform: translate(4px, 4px) rotate(var(--tilt, 0deg));
+  box-shadow: 4px 4px 0 var(--ink);
+}
+@media (prefers-reduced-motion: reduce) {
+  #gear .row-card {
+    transition: none;
+  }
+}
+/* After PLAY (owner, 2026-10-05): no card, and the stage's three columns, so each button lands
+   where step 1 had a card: CREATE ROOM where the room code was, the modes where the "who" card
+   was, QUICK JOIN where PLAY was, all at step 1's height. BACK is the small
+   line under them. The heading stays for screen readers. */
+.gear[data-step='start'] .gear-card {
+  justify-self: stretch;
+  width: auto;
+}
+#step-start:not(.off) {
+  display: grid;
+  grid-template-columns: var(--menu-cols);
+  grid-template-areas: 'create modes quick' 'back . .';
+  gap: 22px var(--menu-gap);
+}
+#step-start .back {
+  grid-area: back;
+  justify-self: start;
+  margin: 0;
+}
+#step-start .choice.create,
+#step-start .mode-tiles,
+#step-start .choice.quick {
+  min-height: var(--menu-h);
+}
+/* Pink like the room-code ticket: rooms are the friends' way in. */
+#step-start .choice.create {
+  --tilt: -1deg;
+  grid-area: create;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-width: 0;
+  padding: 18px 24px;
+  background: var(--pink);
+}
+/* CREATE ROOM's plus, so it reads at a glance. */
+.start-icon {
+  flex: none;
+  width: 46px;
+  height: 46px;
+}
+.start-icon rect {
+  fill: var(--ink);
+}
+.start-icon .plus {
+  stroke: #fff;
+  stroke-width: 4;
+  stroke-linecap: round;
+}
+#step-start .start-text b {
+  margin-bottom: 4px;
+  font: 900 30px/1 var(--head);
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+#step-start .choice.create .start-text b {
+  font-size: 28px;
+}
+#step-start .start-text span {
+  display: block;
+  font-size: 14px;
+  font-weight: 700;
+}
+/* The mode buttons (playMenu.ts), where step 1's "who" card was: big short names in the mode's
+   colour, the humans playing under each. */
+.mode-tiles {
+  grid-area: modes;
+  display: grid;
+  grid-auto-columns: minmax(0, 1fr);
+  grid-auto-flow: column;
+  gap: 16px;
+  min-width: 0;
+}
+/* A soft tint of the mode's colour, as light as the pink and the yellow beside it. */
+#step-start .choice.mode-tile,
+#step-start .choice.mode-tile:hover,
+#step-start .choice.mode-tile:focus-visible {
+  background: var(--mode-soft);
+}
+#step-start .choice.mode-tile {
+  --tilt: 0.8deg;
+  display: grid;
+  place-content: center;
+  padding: 10px 6px;
+  text-align: center;
+}
+#step-start .choice.mode-tile:nth-child(even) {
+  --tilt: -0.8deg;
+}
+#step-start .mode-tile b {
+  margin: 0;
+  font: 900 26px/0.95 var(--head);
+  letter-spacing: 0.02em;
+}
+#step-start .mode-tile span {
+  margin-top: 6px;
+  font: 800 13px var(--head);
+}
+#step-start .mode-tile span:empty {
+  display: none;
+}
+#step-start .choice.quick {
+  --tilt: 1deg;
+  grid-area: quick;
+  display: grid;
+  place-content: center;
+  padding: 18px 20px 16px;
+  text-align: center;
+}
+#step-start .choice.quick b {
+  font-size: clamp(30px, 3vw, 40px);
+  white-space: nowrap;
+}
+#step-start .choice.quick > span {
+  display: block;
+  overflow: hidden;
+  font-size: 13px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+/* phoneMode (playMenu.ts) hides the computer's PLAY form with `hidden`; the grid below would win. */
+#gear .gear-join[hidden],
+#gear #gear-phone[hidden] {
+  display: none;
+}
+.gear-join {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: var(--menu-gap);
+}
+.who-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  --tilt: 0.6deg;
+  min-height: var(--menu-h);
+  padding: 18px 24px 8px;
+}
+.who-card input {
+  width: 100%;
+  min-width: 0;
+  margin: 0 0 12px;
+  padding: 10px 12px;
+  border: 3px solid var(--ink);
+  background: #fff;
+  color: var(--ink);
+  font: 700 20px var(--head);
+  outline: none;
+}
+.who-card input:focus {
+  box-shadow: 0 0 0 4px var(--yellow);
+}
+.who-card .gear-who {
+  margin: 0 0 10px;
+  align-items: baseline;
+}
+.who-card .gear-who b {
+  font: 900 26px/1.1 var(--head);
+  overflow-wrap: anywhere;
+}
+.who-card .xp {
+  margin: 0;
+  padding: 0;
+  gap: 10px;
+  border: 0;
+  background: none;
+  box-shadow: none;
+}
+.who-card .join-error {
+  min-height: 0;
+  margin: 0 0 6px;
+}
+.who-card .join-error:empty {
+  display: none;
+}
+/* A name that cannot be used: red frame, faded red text, and a grey PLAY that does nothing
+   (owner, 2026-10-06). The class comes from playMenu.ts, showNameError. */
+.gear-join.name-bad input {
+  border-color: #b3261e;
+  color: rgb(179 38 30 / 0.55);
+}
+.gear-join.name-bad input:focus {
+  box-shadow: 0 0 0 4px rgb(179 38 30 / 0.25);
+}
+#gear .play-big:disabled,
+#gear .play-big:disabled:hover {
+  background: #d8d3c8;
+  color: #8d877c;
+  border-color: #8d877c;
+  box-shadow: 8px 8px 0 #8d877c;
+  cursor: not-allowed;
+  transform: rotate(var(--tilt, 0deg));
+}
+#gear .play-big:disabled::after {
+  border-color: rgb(141 135 124 / 0.5);
+}
+.btn.big.play-big {
+  --tilt: 1deg;
+  min-height: var(--menu-h);
+  padding: 20px;
+  font-size: 56px;
+}
+.gear-card h2 {
+  font: 900 clamp(36px, 4.6vw, 54px) / 1 var(--head);
+  letter-spacing: -1.5px;
+  margin-bottom: 10px;
+}
+.gear-label {
+  margin: 4px 0 8px;
+  font-weight: 900;
+}
+.swatches {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.swatch {
+  width: 34px;
+  height: 34px;
+  background: var(--swatch);
+  border: 3px solid var(--ink);
+  cursor: pointer;
+}
+.swatch input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+.swatch:has(input:checked) {
+  outline: 4px solid var(--ink);
+  outline-offset: 3px;
+}
+.swatch:has(input:focus-visible) {
+  outline: 4px dashed var(--ink);
+  outline-offset: 3px;
+}
+/* Not unlocked yet (client/src/gear.ts): faded under paper, with the level that unlocks it.
+   Every colour shows, so the player sees the whole range to earn; hover still tries it on. */
+.swatch.locked {
+  display: grid;
+  place-items: center;
+  background: linear-gradient(rgba(255, 244, 220, 0.6), rgba(255, 244, 220, 0.6)), var(--swatch);
+  border-style: dashed;
+  cursor: help;
+}
+.swatch.locked span {
+  font: 900 10px var(--head, sans-serif);
+  color: var(--ink);
+}
+
+
+/* ---- The look, on the stage: two rows of colours, each with a line to the part it colours ---- */
+.looks {
+  position: relative;
+  display: grid;
+  gap: 14px;
+}
+.gear-stage > .looks {
+  position: absolute;
+  top: 4%;
+  right: 2.5%;
+  width: 37%;
+  height: 90%;
+  align-content: space-between;
+  gap: 0;
+  z-index: 2;
+}
+.look-card {
+  padding: 10px 12px 12px;
+  border: 3px solid var(--ink);
+  background: #fffbe9;
+  box-shadow: 5px 5px 0 var(--ink);
+  transform: rotate(0.8deg);
+}
+.look-card[data-part='body'] {
+  transform: rotate(-1.2deg);
+}
+.look-card .gear-label {
+  margin: 0 0 8px;
+  font: 900 18px var(--head);
+}
+.looks .swatches {
+  display: grid;
+  grid-template-columns: repeat(var(--cols, 9), minmax(0, 1fr));
+  gap: 7px;
+}
+.looks .swatch {
+  width: auto;
+  height: auto;
+  aspect-ratio: 1;
+}
+.looks .swatch:has(input:checked) {
+  outline-width: 4px;
+  outline-offset: 3px;
+}
+/* Plain squares of colour, no frame at all, locked ones included (owner, 2026-10-05). Two
+   classes deep, to beat the later .swatches label rule. The picked one keeps its ink outline. */
+.swatches .swatch {
+  border: 0;
+}
+.look-lines {
+  display: none;
+}
+.gear-stage > .looks .look-lines {
+  display: block;
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+}
+.gear-stage .look-lines polyline {
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 3;
+  stroke-dasharray: 7 5;
+}
+/* ---- The haven (the home page since 2026-10-06, client/src/havenMode.ts; owner): the 3D room fills the
+   whole first section, the controls float on it. Top middle the level stripe, his name card just
+   under it over his head; PLAY at the bottom middle, the room code to its right; the colour
+   cards left of him; the Locker column at the far left. ---- */
+.gear.haven {
+  position: relative;
+  padding: 0 !important;
+  overflow: hidden;
+}
+.gear.haven .gear-stage {
+  position: absolute;
+  inset: 0;
+  width: auto;
+  aspect-ratio: auto;
+  max-height: none;
+  border: 0;
+  box-shadow: none;
+  transform: none;
+  z-index: 0;
+}
+.gear.haven .gear-grid {
+  min-height: calc(100svh - 70px);
+  align-content: end;
+  padding: 24px 0 var(--haven-lift);
+}
+/* How far the bottom row stands off the section's bottom edge (owner, 2026-10-06: higher up). */
+.gear.haven {
+  --haven-lift: clamp(70px, 11vh, 130px);
+}
+/* After PLAY: BACK is an arrow card at the row's far left, as tall as the cards beside it. */
+.gear.haven #step-start:not(.off) {
+  /* The mode tiles get more of the row, so GUN GAME fits inside its perforation. */
+  grid-template-columns: 96px minmax(0, 1fr) minmax(0, 1.25fr) minmax(0, 0.95fr);
+  grid-template-areas: 'back create modes quick';
+}
+/* A mode tile's size and look, so it sits in the row as one of the cards. */
+#gear.haven #step-start .back {
+  justify-self: stretch;
+  align-self: stretch;
+  display: grid;
+  place-items: center;
+  min-height: var(--menu-h);
+  padding: 0;
+  background: #fffbe9;
+  font-size: 0;
+  --tilt: -0.8deg;
+}
+/* Centred on its own: the button's hidden "BACK" text would take a grid row of its own. */
+#gear.haven #step-start .back span {
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  width: 44px;
+  height: 44px;
+  font-size: 0;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2315111c' stroke-width='3.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M15 4l-8 8 8 8'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+/* Room to breathe in every card (owner, 2026-10-06): the dashed perforation sits 6 px in, and
+   text keeps at least 14 px clear of it. */
+#gear.haven .row-card {
+  --pad-y: 18px;
+  --pad-x: 22px;
+}
+#gear.haven .level-stripe,
+#gear.haven .who-card {
+  padding: 16px 24px;
+}
+#gear.haven .code-card {
+  padding: 20px 24px;
+}
+#gear.haven .side-btn {
+  padding: 16px 20px;
+}
+#gear.haven #step-start .choice.create {
+  gap: 14px;
+  padding: 20px 26px;
+}
+#gear.haven #step-start .choice.create .start-text b {
+  font-size: clamp(20px, 1.3vw, 25px);
+}
+#gear.haven #step-start .choice.quick {
+  padding: 20px 26px;
+}
+#gear.haven #step-start .choice.mode-tile {
+  padding: 16px 14px;
+}
+/* A long mode name (GUN GAME) takes a size that fits inside the perforation. */
+#gear.haven #step-start .mode-tile b {
+  font-size: clamp(18px, 1.5vw, 26px);
+}
+/* QUICK JOIN without its arrow (owner, 2026-10-06). */
+#gear.haven #start-quick b span {
+  display: none;
+}
+/* Lamplight fades into the room's corners: a soft dark rim over the 3D canvas (paint, free to draw). */
+.gear.haven .gear-stage::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(ellipse 75% 85% at 58% 48%, transparent 55%, rgba(38, 14, 6, 0.5) 100%);
+}
+.gear.haven .gear-grid > :not(.gear-stage) {
+  position: relative;
+  z-index: 1;
+}
+.gear.haven .new-card,
+.gear.haven .locker-open {
+  display: none;
+}
+#gear .haven-float {
+  position: absolute;
+  z-index: 3;
+}
+/* A phone (phoneMode in playMenu.ts): none of the computer's menu, only the "share the link" box. */
+#gear.phone-mode .haven-float,
+#gear.phone-mode .locker-side,
+#gear.phone-mode .looks,
+#gear.phone-mode .haven-right {
+  display: none;
+}
+/* After PLAY the menu's own steps take over: the floating cards and the column step aside. */
+.gear.haven:not([data-step='gear']) .haven-float,
+.gear.haven:not([data-step='gear']) .locker-side {
+  display: none;
+}
+/* The top row, in the middle: his name, then the level as a slim stripe. The two cards share one
+   width, so they shrink by the same amount on a narrow window (item 205). */
+.gear.haven .haven-toprow {
+  --top-card-w: min(340px, 23vw);
+  top: 22px;
+  left: 50%;
+  translate: -50% 0;
+  display: flex;
+  align-items: stretch;
+  gap: 20px;
+}
+.gear.haven .level-stripe {
+  width: var(--top-card-w);
+  background: #fffbe9;
+  --tilt: -0.5deg;
+}
+/* One card: the XP row's own frame goes, the stripe is its card. */
+.gear.haven .level-stripe .xp {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  box-shadow: none;
+}
+/* His name on its own card, first in the top row. */
+.gear.haven .who-card {
+  min-height: 0;
+  width: var(--top-card-w);
+  justify-content: center;
+  background: #fffbe9;
+  --tilt: 0.8deg;
+}
+.gear.haven .who-card input {
+  margin: 0;
+  font-size: 17px;
+}
+.gear.haven .gear-who {
+  margin: 0;
+  justify-content: center;
+  align-items: center;
+}
+/* "Change" as a pencil at the end of the name (playMenu.ts keeps its label for screen readers). */
+.gear.haven #gear-rename {
+  width: 26px;
+  height: 26px;
+  font-size: 0;
+  text-decoration: none;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2315111c' stroke-width='2.4' stroke-linejoin='round' stroke-linecap='round'%3E%3Cpath d='M4 20l1-4L16 5l3 3L8 19z' fill='%23ffd23f'/%3E%3Cpath d='M14 7l3 3'/%3E%3C/svg%3E") center / 22px no-repeat;
+}
+.gear.haven #gear-rename:hover {
+  transform: rotate(-12deg);
+}
+/* PLAY at the bottom middle, big; the room code, narrow, to its right. */
+.gear.haven .play-big {
+  bottom: var(--haven-lift);
+  left: 50%;
+  width: min(440px, 31%);
+  min-height: 158px;
+  font-size: clamp(56px, 5.4vw, 92px);
+  translate: -50% 0;
+}
+.gear.haven .code-card {
+  bottom: var(--haven-lift);
+  left: calc(50% + min(220px, 15.5%) + 30px);
+  width: min(290px, 20%);
+  min-height: 158px;
+  padding: 16px 18px;
+}
+.gear.haven .code-card h3 {
+  font-size: 17px;
+}
+.gear.haven .code-or {
+  display: none;
+}
+.gear.haven .code-join input {
+  flex: 1;
+  min-width: 0;
+}
+/* A phone-wide window (item 433): 20% of the width is 70 px, too little for the field and JOIN. The card
+   takes the full width on its own row just above PLAY, the field and JOIN side by side. */
+@media (max-width: 700px) {
+  #gear.haven .code-card {
+    bottom: calc(var(--haven-lift) + 158px + 14px);
+    left: 50%;
+    translate: -50% 0;
+    width: min(320px, calc(100% - 32px));
+    min-height: 0;
+    padding: 12px 18px;
+  }
+  .gear.haven .code-card h3 {
+    font-size: 16px;
+    margin-bottom: 8px;
+  }
+  .gear.haven .code-join input {
+    flex: 1 1 100px;
+  }
+  .gear.haven .code-join .btn[type='submit'] {
+    flex: none;
+  }
+}
+.gear.haven #code-create {
+  width: 100%;
+}
+/* The first page keeps the card as it was before item 631 (owner, 2026-10-20, item 695): the field and JOIN,
+   CREATE A ROOM under them. The markup now has CREATE A ROOM first, for the step after PLAY. */
+#gear.haven[data-step='gear'] .code-card:not([hidden]) {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+#gear.haven[data-step='gear'] .code-card h3 {
+  margin: 0;
+}
+#gear.haven[data-step='gear'] .code-card .code-join {
+  order: 1;
+}
+#gear.haven[data-step='gear'] .code-card #code-create {
+  order: 2;
+}
+#gear.haven[data-step='gear'] .code-card .code-error {
+  order: 3;
+  margin: 0;
+}
+/* The colour cards, the level stripe's kind of card, left of him. */
+.gear.haven .gear-stage > .looks {
+  top: 31%;
+  left: calc(2.5% + min(290px, 19%) + 22px);
+  right: auto;
+  width: 22%;
+  height: auto;
+  display: grid;
+  gap: 22px;
+  align-content: start;
+}
+.gear.haven .look-card {
+  position: relative;
+  border: 3px solid var(--ink);
+  background: #fffbe9;
+  box-shadow: 8px 8px 0 var(--ink);
+  transform: rotate(var(--tilt, 0.6deg));
+  transition: transform 0.1s, box-shadow 0.1s;
+  padding: 14px 16px 16px;
+}
+.gear.haven .look-card[data-part='body'] {
+  --tilt: -0.7deg;
+}
+.gear.haven .look-card::after {
+  content: '';
+  position: absolute;
+  inset: 6px;
+  border: 2px dashed rgba(21, 17, 28, 0.4);
+  pointer-events: none;
+}
+.gear.haven .look-card:hover {
+  transform: translate(-3px, -3px) rotate(var(--tilt, 0.6deg));
+  box-shadow: 11px 11px 0 var(--ink);
+}
+.gear.haven .look-card.flash {
+  animation: card-flash 0.9s ease-out;
+}
+@keyframes card-flash {
+  30% {
+    background: var(--yellow);
+  }
+}
+/* Top right on the haven (owner, 2026-10-11): the daily challenges, the tips under them, one column. */
+#gear .haven-right {
+  position: absolute;
+  z-index: 3;
+  top: 22px;
+  right: 2.5%;
+  width: min(330px, 21%);
+  display: grid;
+  gap: 18px;
+  justify-items: end;
+}
+#gear .haven-right > * {
+  box-sizing: border-box;
+  width: 100%;
+}
+#gear .daily-card {
+  background: #fffbe9;
+  --tilt: -0.5deg;
+}
+/* The tips card: smaller than the daily card, its keys bigger (owner, 2026-10-11). */
+#gear .tips-card {
+  width: 90%;
+  display: grid;
+  gap: 10px;
+  padding: 12px 16px 14px;
+  background: #fffbe9;
+  --tilt: 0.7deg;
+}
+.tips-card > * {
+  position: relative;
+  z-index: 1;
+}
+.tips-card .side-title {
+  margin: 0;
+  padding: 2px 10px;
+  font-size: 13px;
+}
+#gear.haven:not([data-step='gear']) .haven-right,
+#gear:not(.haven) .haven-right {
+  display: none;
+}
+/* The friends room on the haven: bigger map cards across the row, the link copied beside the code. */
+.gear.haven #room-maps {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 10px;
+  width: 100%;
+}
+.gear.haven .room-row:has(#room-maps) {
+  align-items: start;
+}
+.gear.haven .room-row:has(#room-maps) > :last-child {
+  flex: 1;
+  min-width: 0;
+}
+.gear.haven #room-maps .map-pick {
+  padding: 8px 8px 7px;
+  font-size: 16px;
+}
+.gear.haven #room-maps .map-seats {
+  font: 800 12px var(--head);
+  color: var(--ink-soft);
+}
+/* The friends room card: wider on the haven, so the maps are big. */
+.gear.haven[data-step='invite'] .gear-card {
+  width: min(1180px, 78vw);
+}
+.gear.haven #room-maps .map-pick img {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 4 / 3;
+}
+.gear.haven .invite-row {
+  display: none;
+}
+.gear.haven #invite-code-copy {
+  margin-left: auto;
+}
+.gear.haven .link-icon {
+  display: grid;
+  place-items: center;
+  width: 52px;
+  padding: 8px;
+}
+.gear.haven .link-icon svg {
+  width: 26px;
+  height: 26px;
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 2.6;
+  stroke-linecap: round;
+}
+/* The Locker column at the far left. */
+.locker-side {
+  position: absolute;
+  z-index: 3;
+  top: 22px;
+  left: 2.5%;
+  width: min(290px, 19%);
+  display: grid;
+  gap: 16px;
+}
+/* The colours live in the column now: the cards left of him go, on the stage or off it. */
+.gear.haven .gear-stage > .looks,
+.gear.haven .gear-grid > .looks {
+  display: none;
+}
+.side-title {
+  margin: 0;
+  justify-self: start;
+  padding: 3px 12px;
+  border: 3px solid var(--ink);
+  background: var(--ink);
+  color: var(--paper);
+  font: 900 15px var(--head);
+  letter-spacing: 0.1em;
+}
+#gear .side-btn {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  background: #fffbe9;
+  font: 900 15px var(--head);
+  text-align: left;
+  cursor: pointer;
+}
+.locker-side .swatches {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 6px;
+}
+.locker-side .swatch {
+  width: auto;
+  height: auto;
+  aspect-ratio: 1;
+}
+.locker-side .swatch.locked span {
+  font-size: 8px;
+}
+#gear .side-btn {
+  --tilt: 0.6deg;
+  letter-spacing: 0.04em;
+}
+#gear .side-btn svg {
+  flex: none;
+  width: 30px;
+  height: 30px;
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 2.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+#gear .side-btn.has-packs {
+  background: var(--red);
+  color: #fff;
+}
+#gear .side-btn.has-packs svg {
+  stroke: #fff;
+}
+/* The colour cards and their lines step aside while the Locker is open over them. */
+.gear.haven:has(.locker:not([hidden])) .gear-stage > .looks {
+  visibility: hidden;
+}
+/* The Locker panel opens at the far left, over the column, clear of the level stripe. */
+.gear.haven .locker {
+  left: 2.5%;
+  right: auto;
+  top: 22px;
+  z-index: 5;
+  /* It ends before the top row (left 50%, two cards of --top-card-w and a 20px gap), so the name
+     card never covers its close button on a laptop (owner, 2026-10-12). */
+  width: min(520px, 27%, calc(47.5vw - min(340px, 23vw) - 22px));
+  height: calc(100% - 210px);
+}
+
+/* ---- The Locker (client/src/locker.ts): a button on the stage, a panel over the colour cards ---- */
+.locker-open {
+  position: absolute;
+  top: 4%;
+  left: 2.5%;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 6px 12px 8px;
+  border: 3px solid var(--ink);
+  background: #fffbe9;
+  box-shadow: 5px 5px 0 var(--ink);
+  color: var(--ink);
+  font: 900 15px var(--head);
+  letter-spacing: 0.04em;
+  rotate: -1.5deg;
+  cursor: pointer;
+  transition: translate 0.08s, box-shadow 0.08s;
+}
+.locker-open:hover,
+.locker-open[aria-expanded='true'] {
+  translate: -2px -2px;
+  box-shadow: 7px 7px 0 var(--ink);
+  background: var(--yellow);
+}
+.locker-open img {
+  width: 56px;
+  height: 56px;
+}
+.locker-new,
+.tile-new {
+  position: absolute;
+  padding: 1px 7px;
+  border: 3px solid var(--ink);
+  background: var(--red);
+  color: #fff;
+  box-shadow: 3px 3px 0 var(--ink);
+  font: 900 12px/1.2 var(--head);
+  letter-spacing: 0.04em;
+  rotate: 6deg;
+}
+.locker-new {
+  top: -14px;
+  right: -18px;
+}
+.locker {
+  position: absolute;
+  top: 4%;
+  right: 2.5%;
+  z-index: 4;
+  width: 37%;
+  height: 90%;
+  display: flex;
+  flex-direction: column;
+  border: 3px solid var(--ink);
+  background: var(--paper);
+  box-shadow: 6px 6px 0 var(--ink);
+}
+.locker-head {
+  position: relative;
+  padding: 10px 50px 9px 14px;
+  border-bottom: 3px solid var(--ink);
+  background: #fffbe9;
+}
+.locker-head h2 {
+  margin: 0;
+  font: 900 22px/1.1 var(--head);
+  text-transform: uppercase;
+}
+.locker-head p {
+  margin: 3px 0 0;
+  color: var(--ink-soft);
+  font: 600 13px/1.3 var(--head);
+}
+.locker-close {
+  position: absolute;
+  top: 9px;
+  right: 10px;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 3px solid var(--ink);
+  background: var(--yellow);
+  box-shadow: 3px 3px 0 var(--ink);
+  color: var(--ink);
+  font: 900 15px/1 var(--head);
+  cursor: pointer;
+}
+.locker-tabs {
+  display: flex;
+  gap: 8px;
+  padding: 8px 14px;
+  border-bottom: 3px solid var(--ink);
+  background: #fffbe9;
+}
+.locker-tabs[hidden] {
+  display: none;
+}
+.locker-tab {
+  padding: 5px 16px;
+  border: 3px solid var(--ink);
+  background: #fff;
+  box-shadow: 3px 3px 0 var(--ink);
+  color: var(--ink);
+  font: 900 14px/1 var(--head);
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.locker-tab[aria-selected='true'] {
+  background: var(--yellow);
+}
+.locker-tab[hidden] {
+  display: none;
+}
+/* An item unlocked since the Locker was last opened (locker.ts, render). */
+.locker-tab[data-new]::after {
+  content: 'NEW';
+  margin-left: 6px;
+  padding: 1px 5px;
+  border: 2px solid var(--ink);
+  background: var(--red);
+  color: #fff;
+  font-size: 10px;
+  letter-spacing: 0.04em;
+  vertical-align: 2px;
+}
+.locker-tab:focus-visible {
+  outline: 4px dashed var(--ink);
+  outline-offset: 3px;
+}
+.locker-packs {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 8px 14px;
+  border-bottom: 3px solid var(--ink);
+  background: var(--red);
+  color: #fff;
+  font: 900 15px var(--head);
+  text-transform: uppercase;
+}
+.locker-packs .btn {
+  padding: 6px 16px;
+  font-size: 14px;
+}
+.locker-grid {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  display: grid;
+  /* 108px: the haven's panel is narrow, and with a scrollbar (the Titles list is long) two 118px columns do not fit. */
+  grid-template-columns: repeat(auto-fill, minmax(108px, 1fr));
+  align-content: start;
+  gap: 12px;
+  padding: 14px 14px 18px;
+}
+.locker-tile {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 7px 10px;
+  border: 3px solid var(--ink);
+  background: #fffbe9;
+  box-shadow: 3px 3px 0 var(--ink);
+  color: var(--ink);
+  font: inherit;
+  text-align: center;
+  cursor: pointer;
+}
+.locker-tile:hover,
+.locker-tile:focus-visible {
+  translate: -1px -1px;
+  box-shadow: 5px 5px 0 var(--ink);
+}
+.locker-tile:focus-visible {
+  outline: 4px dashed var(--ink);
+  outline-offset: 3px;
+}
+.locker-tile.worn {
+  background: var(--yellow);
+}
+.locker-tile.locked {
+  border-style: dashed;
+  background: repeating-linear-gradient(-45deg, #fffbe9 0 8px, #f6ecd6 8px 16px);
+  box-shadow: none;
+  cursor: help;
+}
+.locker-tile.locked .tile-icon {
+  filter: grayscale(0.8) opacity(0.55);
+}
+.tile-icon {
+  width: 76px;
+  height: 76px;
+}
+.locker-grid-hint {
+  grid-column: 1 / -1;
+  margin: 0;
+  color: var(--ink-soft);
+  font: 600 13px/1.3 var(--head);
+}
+/* A title's name plate (item 829): drawn from its words, wider than an icon so the words read. */
+.tile-icon.tile-plate {
+  width: 88px;
+  height: 88px;
+}
+.tile-name {
+  font: 900 13px/1.1 var(--head);
+}
+/* "No title": a plain tile with the words alone. */
+.tile-name.tile-none {
+  display: grid;
+  place-items: center;
+  min-height: 88px;
+  font-size: 15px;
+}
+.tile-rarity {
+  padding: 1px 6px;
+  border: 2px solid var(--ink);
+  background: #e6e0d4;
+  font: 900 10px/1.3 var(--head);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.tile-rarity:not([data-rarity]) {
+  visibility: hidden;
+}
+.tile-rarity[data-rarity='rare'] {
+  background: var(--blue);
+  color: #fff;
+}
+.tile-rarity[data-rarity='epic'] {
+  background: #f6b21b;
+}
+.tile-state {
+  margin-top: 2px;
+  font: 900 12px var(--head);
+  letter-spacing: 0.05em;
+}
+.locker-tile.owned .tile-state {
+  padding: 1px 8px;
+  border: 2px solid var(--ink);
+  background: var(--paper);
+}
+.tile-how {
+  color: var(--ink-soft);
+  font: 700 11px/1.25 var(--head);
+}
+.tile-bar {
+  align-self: stretch;
+  height: 9px;
+  border: 2px solid var(--ink);
+  background: #fff;
+}
+.tile-bar i {
+  display: block;
+  height: 100%;
+  background: var(--green);
+}
+.tile-owners {
+  color: var(--ink-soft);
+  font: 600 10px/1.2 var(--head);
+}
+.tile-new {
+  top: -10px;
+  left: -8px;
+  rotate: -6deg;
+  font-size: 10px;
+}
+@media (max-width: 860px) {
+  .locker-open {
+    top: 6px;
+    left: 6px;
+    padding: 3px 8px 5px;
+    font-size: 12px;
+    box-shadow: 3px 3px 0 var(--ink);
+  }
+  .locker-open img {
+    width: 40px;
+    height: 40px;
+  }
+  /* The stage is too small for a panel: the Locker covers the screen. */
+  .locker {
+    position: fixed;
+    inset: 16px;
+    z-index: 60;
+    width: auto;
+    height: auto;
+  }
+  .locker-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+/* A narrow window (item 205): the two top cards stay one size and tighten together. The level
+   card puts its bar under the two badges so the XP text keeps its line. */
+@media (max-width: 1350px) {
+  .gear.haven .haven-toprow {
+    --top-card-w: min(340px, 24vw);
+    gap: 14px;
+  }
+  #gear.haven .level-stripe,
+  #gear.haven .who-card {
+    padding: 14px 16px;
+  }
+  .gear.haven .who-card .gear-who b {
+    font-size: 21px;
+  }
+  .gear.haven .level-stripe .xp {
+    grid-template-columns: auto 1fr;
+    gap: 8px;
+  }
+  .gear.haven .level-stripe .xp-bar {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+  .gear.haven .level-stripe .xp-lv.next {
+    justify-self: end;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .locker-open,
+  .locker-tile {
+    transition: none;
+    translate: none !important;
+  }
+}
+
+/* ---------- "Works on" block (item 147): systems and browsers, plain icons ---------- */
+.works-on {
+  margin-top: 34px;
+  padding: 20px 24px;
+}
+.works-on h3 {
+  margin-bottom: 10px;
+}
+.works-cols {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px 32px;
+}
+.works-label {
+  margin: 0 0 6px;
+  font: 800 13px/1.2 var(--font);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.works-cols > div {
+  min-width: 0;
+  container-type: inline-size;
+}
+/* Equal cells: 4 across when the column is wide, else 2 x 2, so no chip ever wraps alone. */
+.works-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+@container (min-width: 540px) {
+  .works-list {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+.works-list li {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  min-width: 0;
+  padding: 5px 11px 5px 8px;
+  border: 2.5px solid var(--ink);
+  border-bottom-width: 4px;
+  background: #fff;
+  font: 800 15px/1.2 var(--head);
+  white-space: nowrap;
+}
+.works-list svg {
+  flex: none;
+  width: 22px;
+  height: 22px;
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.works-note {
+  margin: 10px 0 0;
+  font-size: 15px;
+}
+.works-note + .works-note {
+  margin-top: 2px;
+}
+@media (max-width: 700px) {
+  .works-cols {
+    grid-template-columns: 1fr;
+  }
+}
+@media (max-width: 420px) {
+  .works-on {
+    padding: 16px 16px;
+  }
+  .works-list {
+    gap: 6px;
+  }
+  .works-list li {
+    gap: 5px;
+    padding: 5px 6px 5px 5px;
+    font-size: 14px;
+  }
+  .works-list svg {
+    width: 20px;
+    height: 20px;
+  }
+}
+
+/* A calmer first hour (item 377): <html data-fh> lists the steps still closed (client/src/firstHour.ts). */
+html[data-fh~='locker'] #locker-open,
+html[data-fh~='daily'] #daily-card,
+html[data-fh~='streak'] #new-card {
+  display: none !important;
+}

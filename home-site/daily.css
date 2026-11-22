@@ -1,0 +1,103 @@
+/* Daily challenges (client/src/dailyCard.ts, item 284): the card in a match, and the shell (.daily) of the home card
+   (rewards.css, item 800), linked from landing.html and index.html. Each challenge is its own small card, so a
+   row reads as one task (owner, 2026-10-11). Where each copy sits: landing-home.css, game-hud.css. */
+.daily {
+  display: grid;
+  gap: 8px;
+  padding: 14px 16px 16px;
+  background: var(--paper);
+  color: var(--ink);
+  font: 800 13px/1.2 var(--head);
+}
+.daily[hidden] {
+  display: none;
+}
+/* Over a row card's dashed perforation (landing-home.css, .row-card::after). */
+.daily > * {
+  position: relative;
+  z-index: 1;
+}
+.daily-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px 10px;
+}
+.daily-title {
+  padding: 3px 10px;
+  background: var(--ink);
+  color: var(--paper);
+  font: 900 14px var(--head);
+  letter-spacing: 0.08em;
+}
+.daily-left {
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  color: var(--ink-soft, #4a4252);
+}
+.daily-pay {
+  margin: 0;
+  font: 700 12px/1.35 var(--head);
+  color: var(--ink-soft, #4a4252);
+}
+.daily-rows {
+  display: grid;
+  gap: 7px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.daily-row {
+  display: grid;
+  grid-template-columns: 22px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 6px 10px;
+  padding: 8px 10px 9px;
+  background: #fff;
+  border: 2px solid var(--ink);
+  box-shadow: 3px 3px 0 var(--ink);
+}
+.daily-tick {
+  grid-row: span 2;
+  box-sizing: border-box;
+  width: 22px;
+  height: 22px;
+  border: 2px solid var(--ink);
+  border-radius: 50%;
+  background: #fff;
+  font: 900 13px/18px var(--head);
+  text-align: center;
+}
+.daily-text {
+  font: 800 14px/1.2 var(--head);
+}
+.daily-count {
+  padding: 1px 6px;
+  border: 2px solid var(--ink);
+  background: var(--paper);
+  font: 900 12px var(--head);
+  font-style: normal;
+}
+.daily-bar {
+  grid-column: 2 / span 2;
+  height: 8px;
+  border: 2px solid var(--ink);
+  background: var(--paper);
+}
+.daily-bar i {
+  display: block;
+  height: 100%;
+  background: var(--blue);
+}
+.daily-row.done {
+  background: #e2f5ea;
+}
+.daily-row.done .daily-tick,
+.daily-row.done .daily-count {
+  background: var(--green);
+  color: #fff;
+}
+.daily-row.done .daily-bar i {
+  background: var(--green);
+}

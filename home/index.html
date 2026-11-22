@@ -1,0 +1,1347 @@
+<!doctype html>
+<html lang="en" data-ads="soon">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>StickFrag – Free Stickman Shooter Online | Multiplayer FPS, No Download</title>
+    <meta
+      name="description"
+      content="Play StickFrag, the free multiplayer stickman shooter in your browser. Comic-style FPS for up to 14 players: SMG, shotgun, rifle and revolver. No download, no account, works on Chromebook."
+    />
+    <link rel="canonical" href="https://stickfrag.com/" />
+    <link rel="icon" href="/favicon.ico" sizes="48x48" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <meta name="theme-color" content="#86c8ec" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="StickFrag" />
+    <meta property="og:title" content="StickFrag – the free stickman shooter in your browser" />
+    <meta property="og:description" content="No download. No mercy. Just frags. Free stickman FPS for up to 14 players, drawn like a comic." />
+    <meta property="og:url" content="https://stickfrag.com/" />
+    <meta property="og:image" content="https://stickfrag.com/og.png?v=9abf0e8334" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "Organization",
+            "@id": "https://stickfrag.com/#org",
+            "name": "StickFrag",
+            "url": "https://stickfrag.com/",
+            "logo": "https://stickfrag.com/icon-192.png",
+            "email": "hello@stickfrag.com",
+            "sameAs": [
+              "https://www.tiktok.com/@stickfrag.com",
+              "https://www.instagram.com/stickfrag/",
+              "https://www.youtube.com/@stickfrag",
+              "https://discord.gg/mTYAtjNnyd"
+            ]
+          },
+          {
+            "@type": "WebSite",
+            "@id": "https://stickfrag.com/#website",
+            "name": "StickFrag",
+            "alternateName": ["Stick Frag", "StickFPS", "stickfrag.com"],
+            "url": "https://stickfrag.com/",
+            "publisher": { "@id": "https://stickfrag.com/#org" }
+          },
+          {
+            "@type": ["VideoGame", "WebApplication"],
+            "@id": "https://stickfrag.com/#game",
+            "publisher": { "@id": "https://stickfrag.com/#org" },
+            "name": "StickFrag",
+            "alternateName": ["Stick Frag", "StickFPS", "StickFrag stickman shooter"],
+            "url": "https://stickfrag.com/play/",
+            "image": "https://stickfrag.com/og.png?v=9abf0e8334",
+            "description": "A free multiplayer stickman shooter (FPS) that runs in the browser. Team deathmatch and gun game for up to 14 players on comic-print maps.",
+            "genre": ["Shooter", "First-person shooter", "Stickman game", "Multiplayer"],
+            "playMode": "MultiPlayer",
+            "gamePlatform": "Web browser",
+            "applicationCategory": "GameApplication",
+            "operatingSystem": "Windows, macOS, Linux, ChromeOS",
+            "isAccessibleForFree": true,
+            "offers": { "@type": "Offer", "price": "0", "priceCurrency": "EUR" }
+          }
+        ]
+      }
+    </script>
+    <link rel="stylesheet" href="/landing-site.css?v=4788415712" />
+    <link rel="stylesheet" href="/landing-home.css?v=6033d7a444" />
+    <link rel="stylesheet" href="/landing-cards.css?v=2463a2137b" />
+    <link rel="stylesheet" href="/landing-servers.css?v=c3856edcb3" />
+    <link rel="stylesheet" href="/landing-menu.css?v=6785a30b6a" />
+    <link rel="stylesheet" href="/landing-sections.css?v=a05866bebb" />
+    <link rel="stylesheet" href="/landing-ads.css?v=c9a3244000" />
+    <link rel="stylesheet" href="/landing-creator.css?v=23ec76a274" />
+    <link rel="stylesheet" href="/landing-board.css?v=a68bb2defd" />
+    <link rel="stylesheet" href="/landing-touch.css?v=974477f12c" />
+    <link rel="stylesheet" href="/landing-modelist.css?v=72969079d7" />
+    <link rel="stylesheet" href="/daily.css?v=91e1bae90d" />
+    <link rel="stylesheet" href="/streak.css?v=d8db0357d1" />
+    <link rel="stylesheet" href="/rewards.css?v=51259bb9dc" />
+    <!-- The sign-up sheet and the Locker's save strip (client/src/account.ts). -->
+    <link rel="stylesheet" href="/account.css?v=60bda81af3" />
+  </head>
+  <body data-lobby="/lobby.js?v=a6bd60bff1" data-event-scene="/eventscene.js?v=d12dddfe2f" data-halo="/supportscene.js?v=d157e2a4ac">
+    <!-- The haven, the home page (client/src/havenMode.ts), must not flash the armory's still first. -->
+    <script src="/haven-boot.js?v=71f67840dc"></script>
+    <!-- Brand marks for the community links, drawn once and used by the bar, the card and the footer. -->
+    <svg width="0" height="0" style="position: absolute" aria-hidden="true">
+      <symbol id="i-discord" viewBox="0 0 24 24">
+        <path fill="currentColor" d="M20.317 4.37a19.79 19.79 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.865-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.74 19.74 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 0 0-.041-.106 13.1 13.1 0 0 1-1.872-.892.077.077 0 0 1-.008-.128c.126-.094.252-.192.372-.291a.074.074 0 0 1 .078-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.3 12.3 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.84 19.84 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z" />
+      </symbol>
+      <symbol id="i-tiktok" viewBox="0 0 24 24">
+        <path fill="currentColor" d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z" />
+      </symbol>
+      <symbol id="i-instagram" viewBox="0 0 24 24">
+        <rect x="2.5" y="2.5" width="19" height="19" rx="5.5" fill="none" stroke="currentColor" stroke-width="2.6" />
+        <circle cx="12" cy="12" r="4.4" fill="none" stroke="currentColor" stroke-width="2.6" />
+        <circle cx="17.6" cy="6.4" r="1.5" fill="currentColor" />
+      </symbol>
+      <symbol id="i-youtube" viewBox="0 0 24 24">
+        <path fill="currentColor" fill-rule="evenodd" d="M5.5 4h13A4.5 4.5 0 0 1 23 8.5v7a4.5 4.5 0 0 1-4.5 4.5h-13A4.5 4.5 0 0 1 1 15.5v-7A4.5 4.5 0 0 1 5.5 4zM9.6 8.4v7.2l6.2-3.6z" />
+      </symbol>
+    </svg>
+    <header class="bar">
+      <div class="wrap">
+        <a class="logo" href="#top">STICKFRAG<span class="tld">.COM</span></a>
+        <nav aria-label="Main">
+          <a class="opt" href="#play">How to play</a>
+          <a class="opt" href="/leaderboard/">Leaderboard</a>
+          <a class="opt" href="/ideas/">Ideas</a>
+          <a class="discord-link" href="https://discord.gg/mTYAtjNnyd" target="_blank" rel="noopener" aria-label="Discord"><svg aria-hidden="true"><use href="#i-discord" /></svg><span>Discord</span></a>
+          <a class="live-only" href="#advertise">Advertise</a>
+          <a class="opt live-only" href="#prices">Prices</a>
+          <!--donate--><a class="soon-only" href="/support/">Support us</a><!--/donate-->
+        </nav>
+        <button class="btn paper fb-btn open-feedback" type="button" title="Tell us what you think" aria-label="Feedback">
+          <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linejoin="round"><path d="M4 5h16v11H11l-5 4v-4H4z" /></svg>
+          <span>Feedback</span>
+        </button>
+        <a class="btn js-play" href="/play/">PLAY</a>
+      </div>
+    </header>
+
+    <main id="top">
+      <!-- ================= PLAY MENU: your stickman in 3D (client/src/lobby.ts) and one question
+           per step (client/src/playMenu.ts, docs/design/play-menu.md) ================= -->
+      <section id="gear" class="gear">
+        <div class="wrap gear-grid">
+          <div class="gear-stage">
+            <canvas id="gear-canvas" role="img" aria-label="Your stickman sitting on a crate in front of a container in the armory corner of the yard"></canvas>
+            <!-- The look, on the stage: a row of colours per part, a dashed line from each to the part
+                 it colours (lobby.ts, lookLines). Narrow screens move it under the cards (playMenu.ts). -->
+            <div class="looks" id="looks">
+              <svg class="look-lines" id="look-lines" aria-hidden="true"><polyline id="look-line-band" /><polyline id="look-line-body" /></svg>
+              <div class="look-card" data-part="band">
+                <div class="look-main">
+                  <p class="gear-label" id="gear-swatches-label">Headband</p>
+                  <div class="swatches" id="gear-swatches" role="radiogroup" aria-labelledby="gear-swatches-label"></div>
+                </div>
+              </div>
+              <div class="look-card" data-part="body">
+                <div class="look-main">
+                  <p class="gear-label" id="gear-skins-label">Body</p>
+                  <div class="swatches" id="gear-skins" role="radiogroup" aria-labelledby="gear-skins-label"></div>
+                </div>
+              </div>
+            </div>
+            <!-- The Locker (client/src/locker.ts, docs/design/locker.md): the hat worn, every hat to
+                 earn. Its panel covers the colour cards, so the stickman stays in view to try hats on. -->
+            <button class="locker-open" id="locker-open" type="button" aria-controls="locker" aria-expanded="false">
+              <img id="locker-hat" src="/items/hat.none.webp" alt="" width="56" height="56" />
+              <span>LOCKER</span>
+              <b class="locker-new" id="locker-new" hidden>NEW</b>
+            </button>
+            <div class="locker" id="locker" role="region" aria-labelledby="locker-title" hidden>
+              <header class="locker-head">
+                <h2 id="locker-title">Hats</h2>
+                <p>Wear one: everyone sees it in every match. More are out there, in card packs and in matches.</p>
+                <button class="locker-close" id="locker-close" type="button" aria-label="Close the Locker">✕</button>
+              </header>
+              <!-- Hats, Skins (item 561: shown once the player has a skin) and Titles (item 829: always shown, titles are goals). -->
+              <div class="locker-tabs" id="locker-tabs" role="tablist" aria-label="What to wear">
+                <button class="locker-tab" type="button" role="tab" data-tab="hat" aria-selected="true">Hats</button>
+                <button class="locker-tab" type="button" role="tab" data-tab="outfit" aria-selected="false" hidden>Skins</button>
+                <button class="locker-tab" type="button" role="tab" data-tab="title" aria-selected="false">Titles</button>
+              </div>
+              <div class="locker-packs" id="locker-packs" hidden>
+                <b id="locker-packs-text"></b>
+                <button class="btn" id="locker-packs-open" type="button">OPEN</button>
+              </div>
+              <!-- Sign-up (client/src/account.ts, docs/design/accounts.md): hidden while sign-up is off. -->
+              <div class="locker-save" id="locker-save" hidden>
+                <b id="locker-save-text"></b>
+                <span class="locker-save-btns">
+                  <button class="btn" id="locker-save-later" type="button" hidden>NOT NOW</button>
+                  <button class="btn" id="locker-save-undo" type="button" hidden>UNDO</button>
+                  <button class="btn" id="locker-save-btn" type="button">SAVE IT</button>
+                </span>
+              </div>
+              <!-- Creator rewards (client/src/lockerCreator.ts, creator-packs.md, item 564). -->
+              <div class="locker-creator-row">
+                <button class="btn" id="locker-creator-open" type="button" aria-controls="locker-creator" aria-expanded="false">POSTED A VIDEO? CLAIM A REWARD</button>
+              </div>
+              <section class="locker-creator" id="locker-creator" aria-labelledby="cr-title" hidden>
+                <h3 id="cr-title">Creator rewards</h3>
+                <p>Post a StickFrag video with <b>#stickfrag</b>, paste its link, and put the code we give you in the caption. We check it and send packs. <a href="/creators/">Read the rules</a></p>
+                <form id="cr-form" class="cr-form">
+                  <input id="cr-link" type="url" inputmode="url" maxlength="300" placeholder="https://www.tiktok.com/@you/video/…" aria-label="Link of your video" autocomplete="off" />
+                  <button class="btn" type="submit">GET MY CODE</button>
+                </form>
+                <p class="cr-message" id="cr-message" role="status"></p>
+                <ul class="cr-claims" id="cr-claims" hidden></ul>
+                <h4>Rewards</h4>
+                <ul class="cr-tiers" id="cr-tiers"></ul>
+              </section>
+              <div class="locker-grid" id="locker-grid"></div>
+            </div>
+            <!-- Top right on the haven (owner, 2026-10-11): the rewards card (client/src/rewardsCard.ts,
+                 items 284, 800: dailies and streak, the Haunted hunts and pass on a second tab), then the tips: the keys new players miss, with pictures from the game
+                 (scripts/tipPics.mjs makes them). On a phone the daily card moves into the column (playMenuTouch.ts). -->
+            <div class="haven-right">
+              <div class="daily daily-card row-card" id="daily-card" hidden></div>
+              <!-- One tip at a time (client/src/havenTips.ts, item 571): a key cap, a title, a line, arrows and dots. -->
+              <aside class="tips-card row-card" id="tips-card" aria-labelledby="tips-title" hidden>
+                <div class="tip-top">
+                  <p class="tip-count" id="tips-title">TIP 1 OF 5</p>
+                  <span class="tip-arrows"><button type="button" id="tip-prev" aria-label="Previous tip">‹</button><button type="button" id="tip-next" aria-label="Next tip">›</button></span>
+                </div>
+                <div class="tip-body" aria-live="polite">
+                  <kbd class="tip-key" id="tip-key">T</kbd>
+                  <p><b id="tip-title"></b><span id="tip-line"></span></p>
+                </div>
+                <div class="tip-dots" id="tip-dots"></div>
+              </aside>
+            </div>
+            <!-- The haven's left column (client/src/havenMode.ts): what is
+                 on his head (a hat, or the headband and its colour when he wears none), the hats,
+                 the packs. locker.ts fills it. -->
+            <div class="locker-side" id="locker-side" hidden>
+              <!-- LOCKER: one card; a click opens the Locker panel in place (HEAD, HATS and BODY tabs; locker.ts, havenCards.ts). -->
+              <button class="lk-card row-card" id="side-locker" type="button" aria-controls="locker">
+                <span class="lk-head">
+                  <img id="side-head-hat" src="/items/hat.none.webp" alt="" width="60" height="60" hidden />
+                  <svg id="side-head-band" class="side-band" viewBox="0 0 72 72" aria-hidden="true">
+                    <circle cx="36" cy="38" r="24" fill="#1f7a8c" stroke="#15111c" stroke-width="3" />
+                    <path id="side-band-fill" d="M12 33 Q36 22 60 33 L60 41 Q36 30 12 41 Z" fill="#ef4d4d" stroke="#15111c" stroke-width="3" stroke-linejoin="round" />
+                    <path d="M58 37 L70 30 M58 39 L68 46" stroke="#15111c" stroke-width="3" stroke-linecap="round" />
+                  </svg>
+                </span>
+                <span class="lk-text">
+                  <b>LOCKER</b>
+                  <small>Headband, hats, body</small>
+                  <span class="lk-chips" aria-hidden="true"><i id="lk-chip-band"></i><i id="lk-chip-body"></i><i id="lk-chip-hat"></i></span>
+                </span>
+                <span class="lk-go" aria-hidden="true">›</span>
+              </button>
+              <!-- PACKS: one red line when packs wait (locker.ts, showSide). The icon is a placeholder until the owner picks one. -->
+              <button class="side-btn row-card" id="side-packs" type="button">
+                <svg viewBox="0 0 32 32" aria-hidden="true"><rect x="9" y="4" width="17" height="23" rx="2" transform="rotate(10 17 16)" /><rect x="6" y="6" width="17" height="23" rx="2" /><path d="M12 14q2-3 4 0t-2 4v2M14 23v.5" /></svg>
+                <span id="side-packs-text">No packs</span>
+                <b class="lk-go" aria-hidden="true">›</b>
+              </button>
+              <!-- SIGN IN: one small orange button until the player has saved the progress; then a card with one line (havenSignIn.ts, account.ts). -->
+              <section class="signin-card" id="signin-card" aria-labelledby="signin-title" hidden>
+                <h3 id="signin-title">SAVE YOUR PROGRESS</h3>
+                <p class="signin-why" id="signin-why">You play as a guest. Sign in and your level, hats and packs follow you to any device.</p>
+                <div class="signin-btns" id="signin-btns">
+                  <button class="btn side-btn row-card signin-email" id="signin-email" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2.5" y="5" width="19" height="14" /><path d="M3 6l9 7 9-7" /></svg>Sign in with email</button>
+                </div>
+                <p class="signin-note" id="signin-note">No password. Email sends a 6-digit code.</p>
+                <button class="signin-line" id="signin-line" type="button" hidden><b>✓</b><span id="signin-line-text"></span><i aria-hidden="true">›</i></button>
+              </section>
+              <!-- EVENT & NEWS: one slot (havenEvent.ts): the event's poster from GET /events, the newest release under it. -->
+              <div class="ev-slot" id="slot">
+                <p class="side-title">EVENT &amp; NEWS</p>
+                <!-- Overwatch: a small teaser card over the poster until players can review cases (item 443). -->
+                <div class="slot-ow row-card" id="slot-ow" hidden></div>
+                <a class="slot-poster row-card" id="slot-poster" href="#event" hidden></a>
+                <a class="slot-news row-card" id="slot-news" href="/updates/"></a>
+              </div>
+            </div>
+          </div>
+          <!-- The newest idea from the ideas board that shipped, for every visitor (ideasNews.ts, showIdeaNews):
+               a small card on the stage's top-left corner. Hidden unless one shipped in the last IDEA_NEW_DAYS days. -->
+          <aside class="new-card" id="new-card" aria-label="New in the game" hidden></aside>
+          <div class="under-stage">
+            <!-- A room code a friend read out: straight into their match (playMenu.ts, joinByCode).
+                 Its own card under the stage, shown with the first step only. -->
+            <aside class="code-card panel row-card" id="code-card" aria-labelledby="code-title" hidden>
+              <h3 id="code-title">Got a room code?</h3>
+              <button class="btn" type="button" id="code-create">CREATE A ROOM</button>
+              <p class="code-or">or join with a room code</p>
+              <form class="code-join" id="code-join" autocomplete="off">
+                <label class="sr-only" for="code-input">Room code</label>
+                <input id="code-input" maxlength="200" placeholder="K7QX2M" spellcheck="false" autocapitalize="characters" />
+                <button class="btn paper" type="submit">JOIN</button>
+              </form>
+              <p class="join-error code-error" id="code-error" role="alert"></p>
+            </aside>
+          </div>
+          <div class="gear-card panel" id="menu">
+            <div id="shipped-news" role="status" hidden></div>
+
+            <div class="menu-steps">
+              <div class="step" id="step-gear">
+                <p class="gear-invite" id="gear-invite" hidden>A friend invited you to their match on <b id="gear-invite-map"></b>.</p>
+                <!-- Under the stage: who you are (name and level, or the name field) and a big PLAY. -->
+                <form class="gear-join" id="gear-join" autocomplete="off">
+                  <div class="who-card panel row-card">
+                    <!-- Above the field, where the eye is while typing. A message also greys out PLAY (playMenu.ts, showNameError). -->
+                    <p class="join-error" id="gear-error" role="alert"></p>
+                    <label class="sr-only" for="gear-name">Nickname</label>
+                    <input id="gear-name" name="name" maxlength="16" placeholder="nickname" spellcheck="false" aria-describedby="gear-error" />
+                    <p class="gear-who" id="gear-who" hidden>
+                      <b id="gear-who-name"></b>
+                      <button class="linkish" id="gear-rename" type="button">Change</button>
+                    </p>
+                    <!-- Level and XP from the last session (playMenu.ts, showLevel); the next level's
+                         badge names what it unlocks in its tooltip. -->
+                    <div class="xp" id="gear-xp">
+                      <span class="xp-lv" id="xp-lv">LV 1</span>
+                      <div class="xp-bar" role="progressbar" aria-label="XP to the next level" id="xp-bar">
+                        <div class="xp-fill" id="xp-fill"></div>
+                        <span id="xp-text"></span>
+                      </div>
+                      <span class="xp-lv next" id="xp-next">LV 2</span>
+                    </div>
+                  </div>
+                  <button class="btn big play-big row-card" type="submit">PLAY</button>
+                </form>
+                <div id="gear-phone" hidden>
+                  <a class="btn big js-play" href="/play/">PLAY</a>
+                  <p class="phone-note">Play on a computer. Mobile coming soon. Share the link with friends.</p>
+                </div>
+              </div>
+
+              <!-- After PLAY: one button into the busiest match, or the full choice (docs/design/quick-join.md). -->
+              <!-- After PLAY: laid out like step 1, so CREATE ROOM lands where the room code was, the
+                   modes where the "who" card was, QUICK JOIN where PLAY was. BACK is the small line under them.
+                   The haven (landing-home.css) puts QUICK JOIN where PLAY was, CREATE ROOM where the room code
+                   was, the modes in a small row above QUICK JOIN (item 415). -->
+              <div class="step off" id="step-start" inert>
+                <h2 class="sr-only">Ready?</h2>
+                <p class="pick-label">PICK A MODE · YOU JOIN AT ONCE</p>
+                <button class="choice create row-card" id="start-create" type="button" aria-label="Create a room: a private match for you and your friends">
+                  <svg class="start-icon" viewBox="0 0 32 32" aria-hidden="true">
+                    <rect x="3" y="3" width="26" height="26" rx="2" />
+                    <path class="plus" d="M16 9v14M9 16h14" />
+                  </svg>
+                  <span class="start-text">
+                    <b>CREATE ROOM</b>
+                    <span>Play with friends</span>
+                  </span>
+                </button>
+                <!-- One button per mode (playMenu.ts fills it): the busiest room of that mode, or the
+                     always-on one with bots. -->
+                <div class="mode-tiles" id="start-modes" role="group" aria-label="Game mode"></div>
+                <button class="choice quick last row-card" id="start-quick" type="button">
+                  <b>QUICK JOIN <span aria-hidden="true">▶</span></b>
+                  <span id="start-quick-line">Finds the busiest match.</span>
+                </button>
+                <button class="back" type="button" data-back><span aria-hidden="true">‹</span> BACK</button>
+                <!-- Every server with its players, map, mode and ping (playMenuServers.ts, item 631). -->
+                <button class="btn paper" id="start-servers" type="button"><svg class="servers-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3.5" width="18" height="5" rx="1" /><rect x="3" y="9.5" width="18" height="5" rx="1" /><rect x="3" y="15.5" width="18" height="5" rx="1" /><circle cx="6.5" cy="6" r="1" /><circle cx="6.5" cy="12" r="1" /><circle cx="6.5" cy="18" r="1" /></svg>ALL SERVERS <span aria-hidden="true">›</span></button>
+              </div>
+
+              <!-- The server list, as before item 415: one row card per server, the mode chips filter it. -->
+              <div class="step off" id="step-servers" inert>
+                <button class="back" type="button" data-back><span aria-hidden="true">‹</span> BACK</button>
+                <h2>Pick a server</h2>
+                <div class="server-head">
+                  <p class="server-title"><span id="server-title"></span> <select class="server-region" id="server-region" aria-label="Region" hidden></select></p>
+                  <span id="server-nobots-slot"></span>
+                  <button id="server-quick" class="btn" type="button">QUICK JOIN</button>
+                </div>
+                <div class="mode-chips" id="server-modes" role="group" aria-label="Game mode" hidden></div>
+                <input class="server-find" id="server-find" type="search" maxlength="24" placeholder="Find a friend by name" aria-label="Find a friend by name" autocomplete="off" spellcheck="false">
+                <div class="server-cols" aria-hidden="true"><span>Mode</span><span>Server</span><span>Match</span><span>Players</span><span>Ping</span></div>
+                <div class="servers" id="server-rows"></div>
+              </div>
+
+              <div class="step off" id="step-game" inert>
+                <button class="back" type="button" data-back><span aria-hidden="true">‹</span> BACK</button>
+                <h2>What do you want to play?</h2>
+                <div class="choices" id="game-choices"></div>
+              </div>
+
+              <div class="step off" id="step-how" inert>
+                <button class="back" type="button" data-back><span aria-hidden="true">‹</span> BACK</button>
+                <h2>How do you want to play?</h2>
+                <div class="choices" id="how-choices"></div>
+              </div>
+
+              <div class="step off" id="step-map" inert>
+                <button class="back" type="button" data-back><span aria-hidden="true">‹</span> BACK</button>
+                <h2>Pick a map</h2>
+                <div class="choices maps" id="map-choices"></div>
+              </div>
+
+              <div class="step off" id="step-invite" inert>
+                <button class="back" type="button" data-back><span aria-hidden="true">‹</span> BACK</button>
+                <h2>Your friends room</h2>
+                <!-- The room's mode, map and bots, changeable here (playMenu.ts, fillInvite); the link follows. -->
+                <div class="room-setup">
+                  <div class="room-row"><span class="room-label">Mode</span><div class="room-seg" id="room-games" role="group" aria-label="Game mode"></div></div>
+                  <div class="room-row"><span class="room-label">Map</span><div class="room-seg" id="room-maps" role="group" aria-label="Map"></div></div>
+                  <label class="bots-switch room-bots" title="Bots fill the empty slots">
+                    <input type="checkbox" id="room-bots" />
+                    <span class="track" aria-hidden="true"></span>
+                    <span>Bots fill the empty slots</span>
+                  </label>
+                </div>
+                <div class="room-code">
+                  <span>ROOM CODE</span>
+                  <b id="invite-code"></b>
+                  <button id="invite-code-copy" class="btn paper" type="button">COPY</button>
+                  <!-- The haven (dev): the link copies from here, as on the game's pause card, and the long
+                       link field below goes. -->
+                  <button id="invite-link-copy" class="btn paper link-icon" type="button" title="Copy the invite link" aria-label="Copy the invite link" hidden>
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 13.5a4.5 4.5 0 0 0 6.4.4l3-3a4.5 4.5 0 0 0-6.4-6.4l-1.2 1.2" /><path d="M14 10.5a4.5 4.5 0 0 0-6.4-.4l-3 3a4.5 4.5 0 0 0 6.4 6.4l1.2-1.2" /></svg>
+                  </button>
+                </div>
+                <p class="code-hint">Friends type it under <b>Got a room code?</b> on <span id="invite-host"></span>. It works once you are in the match.</p>
+                <div class="invite-row">
+                  <input id="invite-link" class="invite-link" readonly aria-label="Invite link" />
+                  <button id="invite-copy" class="btn paper" type="button">COPY</button>
+                </div>
+                <button id="invite-go" class="btn big" type="button">PLAY</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Friends Weekend (item 184): shown by weekendHome.ts only while the event is on in the player's region.
+             The "NOW ON MOBILE!" sticker that sat above it is gone (owner, 2026-10-17). -->
+        <div class="wrap event-row">
+          <a class="event-card row-card" id="event-card" href="#event" hidden>
+            <span class="event-text">
+              <small>SPECIAL EVENT</small>
+              <b>FRIENDS WEEKEND</b>
+              <em id="event-card-dates"></em>
+            </span>
+            <svg viewBox="0 0 48 56" aria-hidden="true"><path d="M16 4h16v22h12L24 50 4 26h12z" /></svg>
+          </a>
+        </div>
+      </section>
+
+      <!-- ================= SQUAD: a thin tilted ribbon with Discord and the clip channels
+           (docs/design/discord.md). It overlaps the play menu's bottom edge on purpose. ================= -->
+      <aside class="squad" aria-labelledby="squad-title">
+        <div class="wrap squad-row">
+          <p class="squad-text"><b id="squad-title">JOIN THE SQUAD!</b> <span>Find team mates on Discord.</span></p>
+          <div class="social-row">
+            <a class="btn discord" href="https://discord.gg/mTYAtjNnyd" target="_blank" rel="noopener"><svg aria-hidden="true"><use href="#i-discord" /></svg>DISCORD</a>
+            <a class="icon-link" href="https://www.tiktok.com/@stickfrag.com" target="_blank" rel="noopener" aria-label="TikTok @stickfrag.com" title="TikTok"><svg aria-hidden="true"><use href="#i-tiktok" /></svg></a>
+            <a class="icon-link" href="https://www.instagram.com/stickfrag/" target="_blank" rel="noopener" aria-label="Instagram @stickfrag" title="Instagram"><svg aria-hidden="true"><use href="#i-instagram" /></svg></a>
+            <a class="icon-link" href="https://www.youtube.com/@stickfrag" target="_blank" rel="noopener" aria-label="YouTube @stickfrag" title="YouTube"><svg aria-hidden="true"><use href="#i-youtube" /></svg></a>
+          </div>
+        </div>
+      </aside>
+
+      <!-- ================= FRIENDS WEEKEND: the event (docs/design/friends-weekend.md). Hidden until the
+           event is on; weekendHome.ts fills the numbers from the server's GET /event. ================= -->
+      <section id="event" class="event" aria-labelledby="event-title" hidden>
+        <div class="wrap event-grid">
+          <div class="event-intro">
+            <p class="event-kicker">SPECIAL EVENT</p>
+            <h2 id="event-title">Friends Weekend</h2>
+            <p class="event-when"><span id="event-dates"></span></p>
+          </div>
+          <canvas class="event-canvas" id="event-canvas" role="img" aria-label="Three friends in a private lounge: one leans on the back wall, two sit on a velvet sofa and a pouf"></canvas>
+          <ul class="event-steps">
+            <li><b><span id="event-players"></span> or more players</b><span>Private room. No bots.</span></li>
+            <li><b>1 limited edition pack</b><span>Every player gets one after every private match. Up&nbsp;to&nbsp;<span id="event-per-day"></span>&nbsp;a&nbsp;day.</span></li>
+          </ul>
+          <a class="btn big event-make" id="event-make" href="/play/">MAKE A ROOM <span aria-hidden="true">›</span></a>
+          <p class="event-fine"><b>Playing solo?</b> If you played 3 matches before the weekend, 1 surprise pack waits for you in a public match. Active players only: no reward when idle or playing in more than one browser.</p>
+          <p class="event-rare"><b>Never again</b><span>These hats will never drop again.</span></p>
+        </div>
+      </section>
+
+      <!-- ================= THREE ROWS under the event (item 212, docs/design/play-menu.md).
+           Row 1: this week's top (leaderboard.ts, showWeeklyTop; the row stays hidden until the server
+           answers). ================= -->
+      <section class="duo news-row" aria-label="This week">
+        <div class="wrap duo-grid">
+          <div class="week" id="week-card" hidden>
+            <h2 id="week-title">Top players this week</h2>
+            <p>Kills, headshots and finished matches give XP.</p>
+            <div class="scoreboard">
+              <ol class="week-rows"></ol>
+              <p class="week-empty" hidden>Nobody has XP this week yet. Play a match and take first place!</p>
+              <p class="week-me" hidden></p>
+            </div>
+            <!-- The last epic and limited drops (dropTicker.ts, showDrops); hidden until there are some. -->
+            <div class="drops" id="drops" hidden>
+              <h3>Latest drops</h3>
+              <ol class="drop-rows"></ol>
+            </div>
+            <div class="week-links">
+              <a class="btn paper" href="/leaderboard/">FULL LEADERBOARD</a>
+              <span class="week-reset"></span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Row 2: the thank-you card of /support/ with his halo stickman (src/supportScene.ts, loaded
+           when the row comes near), beside every player quote (src/quotes.ts, written at build time).
+           Without DONATE_URL build.mjs cuts the tip; the thank-you stays. No rewards for a tip: a
+           reward makes it a sale (docs/business/donations-sweden.md). -->
+      <section class="duo thanks-row" id="thanks-row" aria-label="Thank you">
+        <div class="wrap duo-grid">
+          <div class="thanks-col">
+            <div class="sits"><canvas id="halo-man" role="img" aria-label="A stickman with a halo lies on the edge of the card below"></canvas></div>
+            <div class="thanks">
+              <h2>Thank you for playing</h2>
+              <p>
+                StickFrag is free: no pop-ups, no video breaks, nothing to buy for power. Every match you play, every
+                idea you send and every friend you bring is the reason it keeps going.
+              </p>
+              <!--donate-->
+              <p>A small tip pays for the servers. You get nothing extra in the game for it, on purpose.</p>
+              <a class="btn big paper" href="https://ko-fi.com/stickfrag" target="_blank" rel="noopener">Buy me a coffee</a>
+              <p class="tip-note">Under 18? Ask a parent first. The tip page is run by another company and opens in a new tab.</p>
+              <!--/donate-->
+            </div>
+          </div>
+          <div class="quotes-col">
+            <h2>What players say</h2>
+            <div class="quotes">
+<figure class="quote"><blockquote>I like this game, thanks for making it &#60;3</blockquote><figcaption>a player</figcaption></figure><figure class="quote"><blockquote>I think the game is great and has a lot of potential, thanks for the experience!</blockquote><figcaption>a player</figcaption></figure><figure class="quote"><blockquote>Amazing game... hooked instantly.</blockquote><figcaption>a player</figcaption></figure><figure class="quote"><blockquote>Gotta say its a super nice game!</blockquote><figcaption>a player</figcaption></figure><figure class="quote"><blockquote>this is really neat reminds me of the old days.</blockquote><figcaption>a player</figcaption></figure><figure class="quote"><blockquote>nice game keep the good work</blockquote><figcaption>a player</figcaption></figure>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Row 3 (owner, 2026-10-16): the latest updates (src/updates.ts, written at build time), a
+           row of their own under the thank-you row, open to every player from the first visit. -->
+      <section class="duo updates-row" aria-labelledby="updates-title">
+        <div class="wrap">
+          <div class="latest">
+            <h2 id="updates-title">Latest updates</h2>
+            <div class="releases">
+<article class="release">
+        <h3><a href="/updates/#2026-11-16">Smoother aim, fixes from your feedback</a></h3>
+        <p class="when"><span class="name">Update 1.17</span> · <time datetime="2026-11-16">16 November 2026</time></p>
+        <ul><li>Recoil climbs as hard as ever, but each shot moves your camera smoothly instead of yanking it.</li><li>Your gun no longer shows through walls when you stand close to one, and you no longer slide sideways after you spawn.</li></ul>
+        <p class="more"><a href="/updates/#2026-11-16">and 5 more</a></p>
+      </article><article class="release">
+        <h3><a href="/updates/#2026-11-11">Pick your sight, a faster home page</a></h3>
+        <p class="when"><span class="name">Update 1.15</span> · <time datetime="2026-11-11">11 November 2026</time></p>
+        <ul><li>The loadout screen shows the sight on each gun. Click a gun and pick red dot, dot sight or iron sights in its SIGHT row.</li><li>The home page shows its 3D room much sooner on your first visit, and no longer freezes while it loads.</li></ul>
+        <p class="more"><a href="/updates/#2026-11-11">and 2 more</a></p>
+      </article>
+            </div>
+            <a class="btn paper" href="/updates/">ALL UPDATES</a>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= HERO: the yard scene with its billboards, shown only with ads on sale
+           ================= -->
+      <div class="hero">
+        <svg
+          class="scene live-only"
+          viewBox="-170 140 1940 580"
+          preserveAspectRatio="xMidYMax slice"
+          role="img"
+          aria-labelledby="scene-title"
+        >
+          <title id="scene-title">
+            Two stickmen fight in a sunny military yard. A truck, a container, a blimp and a billboard carry
+            brand logos.
+          </title>
+          <defs>
+            <pattern id="dots" width="9" height="9" patternUnits="userSpaceOnUse">
+              <circle cx="4.5" cy="4.5" r="1.9" fill="#15111c" opacity="0.28" />
+            </pattern>
+            <pattern id="link" width="16" height="16" patternUnits="userSpaceOnUse">
+              <path d="M0 0L16 16M16 0L0 16" stroke="#15111c" stroke-width="1.4" opacity="0.35" />
+            </pattern>
+            <symbol id="cloud" viewBox="0 0 200 90" overflow="visible">
+              <path
+                d="M24 78a22 22 0 0 1 6-40a30 30 0 0 1 52-18a36 36 0 0 1 62 4a26 26 0 0 1 40 26a18 18 0 0 1-6 28z"
+                fill="#fff"
+                stroke="#15111c"
+                stroke-width="5"
+                stroke-linejoin="round"
+              />
+            </symbol>
+            <symbol id="pine" viewBox="-30 -90 60 90" overflow="visible">
+              <path d="M0-88L26-22H12L30 0H-30L-12-22H-26Z" fill="#2f7d6d" stroke="#15111c" stroke-width="4" stroke-linejoin="round" />
+            </symbol>
+            <g id="tagbox">
+              <rect x="6" y="6" width="330" height="58" fill="#15111c" />
+              <rect width="330" height="58" fill="#ffd23f" stroke="#15111c" stroke-width="4" />
+            </g>
+          </defs>
+
+          <!-- Sun with ink ring -->
+          <circle cx="1680" cy="220" r="62" fill="#ffd23f" stroke="#15111c" stroke-width="6" />
+          <circle cx="1680" cy="220" r="62" fill="url(#dots)" opacity="0.5" />
+
+          <!-- Sky life: the only idle motion (rule 2 of living-yard-and-ads.md) -->
+          <g class="cloud"><use href="#cloud" x="470" y="175" width="200" height="90" /></g>
+          <g class="cloud slow"><use href="#cloud" x="1530" y="300" width="150" height="68" /></g>
+          <g class="cloud slow"><use href="#cloud" x="560" y="290" width="130" height="58" /></g>
+
+          <a class="spot" href="#prices" data-slot="blimp" aria-label="Blimp ad slot. See prices.">
+            <!-- Slim hero: the blimp flies low and small, between the water tower and the billboard. -->
+            <g transform="translate(350 101) scale(0.7)"><g class="blimp">
+              <path d="M840 112l-40-34h34l30 26z" fill="#ef4d4d" stroke="#15111c" stroke-width="4" stroke-linejoin="round" />
+              <path d="M840 136l-40 34h34l30-26z" fill="#ef4d4d" stroke="#15111c" stroke-width="4" stroke-linejoin="round" />
+              <ellipse class="hit" cx="1000" cy="124" rx="170" ry="54" fill="#fff4dc" stroke="#15111c" stroke-width="5" />
+              <path d="M860 150a170 54 0 0 0 290 0z" fill="url(#dots)" />
+              <rect x="884" y="104" width="232" height="40" fill="#ef4d4d" stroke="#15111c" stroke-width="4" />
+              <text class="t" x="1000" y="132" text-anchor="middle" font-size="20" fill="#fff4dc">DOODLE DELIVERY</text>
+              <rect x="975" y="176" width="54" height="20" fill="#2f4a8a" stroke="#15111c" stroke-width="4" />
+              <path d="M985 176l-6-8M1020 176l6-8" stroke="#15111c" stroke-width="4" />
+              <g class="tag" transform="translate(835 206)">
+                <use href="#tagbox" />
+                <text class="t" x="165" y="37" text-anchor="middle" font-size="19" fill="#15111c" data-tag="blimp"></text>
+              </g>
+            </g></g>
+          </a>
+
+          <!-- Hills, billboard on poles, pines, fence -->
+          <path
+            d="M-200 452C-120 430 -60 440 0 470C160 404 300 404 460 448C620 384 820 392 980 446C1140 396 1320 384 1600 436C1680 418 1740 424 1800 440V520H-200Z"
+            fill="#9fd49a"
+            stroke="#15111c"
+            stroke-width="5"
+          />
+          <a class="spot" href="#prices" data-slot="billboard" aria-label="Highway billboard ad slot. See prices.">
+            <path d="M1250 330V470M1430 330V470" stroke="#15111c" stroke-width="12" />
+            <path d="M1250 330V470M1430 330V470" stroke="#8a8398" stroke-width="5" />
+            <rect class="hit" x="1170" y="214" width="340" height="120" fill="#fff4dc" stroke="#15111c" stroke-width="5" />
+            <rect x="1170" y="306" width="340" height="28" fill="#2fae72" stroke="#15111c" stroke-width="5" />
+            <text class="t" x="1340" y="280" text-anchor="middle" font-size="40" fill="#15111c" letter-spacing="-1">GRAPHITE GYM</text>
+            <path d="M1430 214h80v92h-80z" fill="url(#dots)" />
+            <g class="tag" transform="translate(1175 140)">
+              <use href="#tagbox" />
+              <text class="t" x="165" y="37" text-anchor="middle" font-size="19" fill="#15111c" data-tag="billboard"></text>
+            </g>
+          </a>
+          <g>
+            <use href="#pine" x="-30" y="-90" width="60" height="90" transform="translate(-120 476) scale(1.1)" />
+            <use href="#pine" x="-30" y="-90" width="60" height="90" transform="translate(40 478)" />
+            <use href="#pine" x="-30" y="-90" width="60" height="90" transform="translate(150 470) scale(1.2)" />
+            <use href="#pine" x="-30" y="-90" width="60" height="90" transform="translate(470 474) scale(.9)" />
+            <use href="#pine" x="-30" y="-90" width="60" height="90" transform="translate(600 476) scale(1.15)" />
+            <use href="#pine" x="-30" y="-90" width="60" height="90" transform="translate(1040 476) scale(1.05)" />
+            <use href="#pine" x="-30" y="-90" width="60" height="90" transform="translate(1150 478) scale(.85)" />
+            <use href="#pine" x="-30" y="-90" width="60" height="90" transform="translate(1540 474) scale(1.2)" />
+            <use href="#pine" x="-30" y="-90" width="60" height="90" transform="translate(1720 472) scale(.95)" />
+          </g>
+          <rect x="-200" y="446" width="2000" height="54" fill="url(#link)" />
+          <path d="M-200 446H1800" stroke="#15111c" stroke-width="5" />
+          <path
+            d="M-160 440V500M-64 440V500M32 440V500M128 440V500M224 440V500M320 440V500M416 440V500M512 440V500M608 440V500M704 440V500M800 440V500M896 440V500M992 440V500M1088 440V500M1184 440V500M1280 440V500M1376 440V500M1472 440V500M1568 440V500M1664 440V500M1760 440V500"
+            stroke="#15111c"
+            stroke-width="6"
+          />
+
+          <!-- Ground -->
+          <rect x="-200" y="496" width="2000" height="264" fill="#f0d9a8" />
+          <path d="M-200 496H1800" stroke="#15111c" stroke-width="4" />
+
+          <!-- Long diagonal sun shadows, printed as violet shade plus dots -->
+          <g fill="#cdb59f">
+            <path d="M60 620H400L520 700H180Z" />
+            <path d="M430 652H712L820 720H540Z" />
+            <path d="M960 670H1200L1300 735H1060Z" />
+            <path d="M1220 620H1580L1600 640V700H1340Z" />
+            <path d="M700 612H940L1010 650H770Z" />
+          </g>
+          <g fill="url(#dots)">
+            <path d="M60 620H400L520 700H180Z" />
+            <path d="M430 652H712L820 720H540Z" />
+            <path d="M960 670H1200L1300 735H1060Z" />
+            <path d="M1220 620H1580L1600 640V700H1340Z" />
+          </g>
+
+          <!-- Water tower: the band keeps the game name (open decision 1) -->
+          <g stroke="#15111c" stroke-width="7" stroke-linecap="round">
+            <path d="M760 408L736 600M880 408L904 600M800 408L794 600M840 408L846 600" />
+            <path d="M752 470L888 530M888 470L752 530" stroke-width="4" />
+          </g>
+          <rect x="700" y="596" width="240" height="20" fill="#e2dccb" stroke="#15111c" stroke-width="5" />
+          <rect x="740" y="290" width="160" height="122" fill="#e9e1cf" stroke="#15111c" stroke-width="5" />
+          <rect x="864" y="290" width="36" height="122" fill="#c7bfd6" />
+          <rect x="864" y="290" width="36" height="122" fill="url(#dots)" />
+          <rect x="740" y="290" width="160" height="122" fill="none" stroke="#15111c" stroke-width="5" />
+          <path d="M728 292L820 246L912 292Z" fill="#2f4a8a" stroke="#15111c" stroke-width="5" stroke-linejoin="round" />
+          <rect x="740" y="328" width="160" height="40" fill="#fff" stroke="#15111c" stroke-width="4" />
+          <text class="t" x="820" y="358" text-anchor="middle" font-size="24" fill="#ef4d4d" stroke="#15111c" stroke-width="1.5" letter-spacing="-1">STICKFRAG</text>
+
+          <!-- Barracks A (cyan) and B (coral) -->
+          <g stroke="#15111c" stroke-width="5" stroke-linejoin="round">
+            <rect x="60" y="470" width="330" height="150" fill="#4fb3d9" />
+            <rect x="330" y="470" width="60" height="150" fill="#3c87a6" />
+            <rect x="330" y="470" width="60" height="150" fill="url(#dots)" stroke="none" />
+            <path d="M40 472L215 392L410 472Z" fill="#2f4a8a" />
+            <rect x="96" y="512" width="56" height="40" fill="#2a3550" />
+            <rect x="248" y="512" width="56" height="40" fill="#2a3550" />
+            <rect x="172" y="540" width="56" height="80" fill="#2a3550" />
+            <rect x="1236" y="470" width="340" height="150" fill="#ef6f6c" />
+            <rect x="1236" y="470" width="60" height="150" fill="#b4505a" />
+            <rect x="1236" y="470" width="60" height="150" fill="url(#dots)" stroke="none" />
+            <path d="M1216 472L1406 392L1596 472Z" fill="#7a2f4f" />
+            <rect x="1330" y="512" width="56" height="40" fill="#2a3550" />
+            <rect x="1470" y="512" width="56" height="40" fill="#2a3550" />
+          </g>
+
+          <!-- Container (pink) -->
+          <a class="spot" href="#prices" data-slot="containers" aria-label="Container ad slot. See prices.">
+            <rect class="hit" x="960" y="560" width="240" height="112" fill="#f28fb1" stroke="#15111c" stroke-width="5" />
+            <path
+              d="M980 566V666M1000 566V666M1020 566V666M1140 566V666M1160 566V666M1180 566V666"
+              stroke="#15111c"
+              stroke-width="2.5"
+              opacity="0.45"
+            />
+            <rect x="1030" y="582" width="100" height="70" fill="#fff4dc" stroke="#15111c" stroke-width="4" />
+            <text class="t" x="1080" y="612" text-anchor="middle" font-size="25" fill="#15111c">STIK</text>
+            <text class="t" x="1080" y="640" text-anchor="middle" font-size="25" fill="#ef4d4d">CHIPS</text>
+            <path d="M960 640H1200V672H960Z" fill="url(#dots)" />
+            <!-- Ink splat from a missed shot -->
+            <path
+              d="M1172 598c6-10 18-4 14 4c10-2 12 10 2 12c6 8-4 16-10 8c-4 10-16 6-12-2c-10 2-12-10-2-12c-6-6 2-14 8-10z"
+              fill="#15111c"
+            />
+            <g class="tag" transform="translate(915 494)">
+              <use href="#tagbox" />
+              <text class="t" x="165" y="37" text-anchor="middle" font-size="19" fill="#15111c" data-tag="containers"></text>
+            </g>
+          </a>
+
+          <!-- Box truck -->
+          <a class="spot" href="#prices" data-slot="trucks" aria-label="Truck ad slot. See prices.">
+            <g stroke="#15111c" stroke-width="5" stroke-linejoin="round">
+              <rect class="hit" x="430" y="532" width="206" height="120" fill="#4c6ef5" />
+              <rect x="448" y="548" width="170" height="86" fill="#fff4dc" stroke-width="4" />
+              <rect x="448" y="620" width="170" height="14" fill="#ef4d4d" stroke-width="4" />
+              <path d="M636 576H690L716 610V652H636Z" fill="#fff4dc" />
+              <path d="M652 588H684L702 610H652Z" fill="#86c8ec" stroke-width="4" />
+              <path d="M430 632H716V652H430Z" fill="url(#dots)" stroke="none" />
+              <circle cx="480" cy="656" r="21" fill="#15111c" />
+              <circle cx="590" cy="656" r="21" fill="#15111c" />
+              <circle cx="682" cy="656" r="21" fill="#15111c" />
+            </g>
+            <g fill="#e9e1cf">
+              <circle cx="480" cy="656" r="7" />
+              <circle cx="590" cy="656" r="7" />
+              <circle cx="682" cy="656" r="7" />
+            </g>
+            <text class="t" x="533" y="602" text-anchor="middle" font-size="32" fill="#15111c" letter-spacing="-1">INK COLA</text>
+            <g class="tag" transform="translate(368 466)">
+              <use href="#tagbox" />
+              <text class="t" x="165" y="37" text-anchor="middle" font-size="19" fill="#15111c" data-tag="trucks"></text>
+            </g>
+          </a>
+
+          <!-- Stickman A: running, red headband, firing -->
+          <g transform="translate(270 742) scale(1.15)" stroke="#15111c" stroke-width="10" stroke-linecap="round" stroke-linejoin="round" fill="none">
+            <path d="M-34 0L0-70L30-2" />
+            <path d="M0-70L6-126" />
+            <path d="M4-118L44-110L78-114M4-116L34-98L66-104" />
+            <rect x="58" y="-122" width="56" height="14" fill="#15111c" stroke-width="3" />
+            <rect x="74" y="-110" width="10" height="20" fill="#15111c" stroke-width="3" />
+            <circle cx="10" cy="-150" r="22" fill="#15111c" stroke="none" />
+            <path d="M-11-156H31" stroke="#ef4d4d" stroke-width="8" />
+            <path d="M-11-156L-30-146L-42-158" stroke="#ef4d4d" stroke-width="6" />
+            <path d="M120-130L130-114L146-118L132-108L140-92L124-102L114-90L116-108Z" fill="#ffd23f" stroke-width="3" />
+          </g>
+          <!-- Stickman B: crouched behind the container, blue headband -->
+          <g transform="translate(1290 744) scale(-1.1 1.1)" stroke="#15111c" stroke-width="10" stroke-linecap="round" stroke-linejoin="round" fill="none">
+            <path d="M-26 0L-6-42L22-46L26 0" />
+            <path d="M-6-42L4-98" />
+            <path d="M2-90L40-84L70-88M2-88L30-72L60-78" />
+            <rect x="52" y="-96" width="56" height="14" fill="#15111c" stroke-width="3" />
+            <circle cx="10" cy="-122" r="22" fill="#15111c" stroke="none" />
+            <path d="M-11-128H31" stroke="#3d7cf2" stroke-width="8" />
+            <path d="M-11-128L-30-118L-40-130" stroke="#3d7cf2" stroke-width="6" />
+          </g>
+        </svg>
+
+        <p class="sale-hint">
+          <span class="live-only">Every logo in this picture is for sale. <a href="#advertise">Advertise in the yard</a></span>
+        </p>
+      </div>
+
+      <!-- ================= PLAYERS: what the game is. Also the page's keyword text for search
+           (docs/business/seo-plan.md): keep "free stickman shooter", "stickman FPS", "multiplayer",
+           "Chromebook", the guns, the maps and the links to the four guides. ================= -->
+      <section id="play">
+        <div class="wrap">
+          <div class="sec-head">
+            <!-- The page's h1 (the hero card's until 2026-10-06): search reads it first. -->
+            <h1 class="page-title">
+              No download. No mercy. Just frags.
+              <small>StickFrag: the free stickman shooter in your browser</small>
+            </h1>
+            <h2>A stickman FPS you can play anywhere</h2>
+            <p>
+              StickFrag is a free online multiplayer stickman shooter. You see the fight through your stickman's
+              eyes, but the whole world is drawn like a printed comic: fat ink lines, flat colours and halftone
+              shadows. You join a match that is already running, and bots fill it when few people are online.
+            </p>
+            <p>
+              Team deathmatch and gun game for up to 14 players. No download, no account, and it works on a school
+              Chromebook.
+            </p>
+          </div>
+
+          <div class="modes">
+            <div class="panel" style="--c: var(--blue)">
+              <h3>Team deathmatch</h3>
+              <p>
+                Blue against red, eight against eight. Pick a main gun, a sidearm and a grenade for every life:
+                any of the twelve guns, from the SMG to the RPG. The sniper, the machine gun and the hand cannon
+                wait between the two halves of the map.
+              </p>
+            </div>
+            <div class="panel" style="--c: var(--yellow)">
+              <h3>Gun game</h3>
+              <p>
+                Every two kills give you the next gun: M4, AK, machine gun, SMG, shotgun, sniper, hand cannon,
+                revolver, pistol and the silenced pistol. Then the knife: one knife kill wins.
+              </p>
+            </div>
+            <div class="panel" style="--c: var(--green)">
+              <h3>Five maps</h3>
+              <p>
+                A fenced yard, a main street, a farm, a huge rail depot and a sea port. Up to 14 players fight in
+                each match, 20 on the depot. <a href="/maps/">See the maps</a>
+              </p>
+            </div>
+          </div>
+
+          <div class="controls panel">
+            <h3>Controls</h3>
+            <ul class="keys">
+              <li><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> Move</li>
+              <li><kbd>Mouse</kbd> Aim</li>
+              <li><kbd>Click</kbd> Fire</li>
+              <li><kbd>Right-click</kbd> Aim down sights</li>
+              <li><kbd>R</kbd> Reload</li>
+              <li><kbd>T</kbd> Change sight (red dot)</li>
+              <li><kbd>Space</kbd> Jump</li>
+              <li><kbd>C</kbd> Crouch</li>
+              <li><kbd>Shift</kbd> Sprint</li>
+              <li><kbd>1</kbd><kbd>2</kbd> Gun or knife (<kbd>Q</kbd> swaps)</li>
+              <li><kbd>Tab</kbd> Scores</li>
+            </ul>
+          </div>
+
+          <div class="facts">
+            <div>
+              <h3>Free, and fair</h3>
+              <p>Money never buys power. Every gun is open to every player from the first match, and the server decides every hit.</p>
+            </div>
+            <div>
+              <h3>No account, no tracking</h3>
+              <p>You only pick a nickname. We set no cookies and build no profiles.</p>
+            </div>
+            <div>
+              <h3>Any computer, no download</h3>
+              <p>
+                <a href="#works-on">Works on</a> Windows, Mac, Linux and <a href="/chromebook/">Chromebook</a>, in
+                Chrome, Edge, Firefox or Safari. You need a keyboard and a mouse; phones come later.
+              </p>
+            </div>
+          </div>
+
+          <div class="works-on panel" id="works-on">
+            <h3>Works on</h3>
+            <div class="works-cols">
+              <div>
+                <p class="works-label">System</p>
+                <ul class="works-list">
+              <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 4h8v7H3zM13 4h8v7h-8zM3 13h8v7H3zM13 13h8v7h-8z"/></svg><span>Windows</span></li>
+              <li><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="12" rx="1.5"/><path d="M8 20h8M12 16v4"/></svg><span>macOS</span></li>
+              <li><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 9l4 3-4 3M13 15h4"/></svg><span>Linux</span></li>
+              <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5h14v10H5zM2 19h20"/></svg><span>ChromeOS</span></li>
+                </ul>
+              </div>
+              <div>
+                <p class="works-label">Browser</p>
+                <ul class="works-list">
+              <li><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3.5"/><path d="M12 8.5h8M8.9 14l-4-7M15.1 14l-4 7"/></svg><span>Chrome</span></li>
+              <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 13a8 8 0 1 0-3 6.2M8 13h12a4 4 0 0 0-4-5"/></svg><span>Edge</span></li>
+              <li><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M6 14c0-4 3-7 7-7 0 3 3 3 3 6a4 4 0 0 1-8 1"/></svg><span>Firefox</span></li>
+              <li><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M15.5 8.5l-2 5-5 2 2-5z"/></svg><span>Safari</span></li>
+                </ul>
+              </div>
+            </div>
+            <p class="works-note">Keyboard and mouse. Phones: coming later.</p>
+            <p class="works-note">Safari: mouse aim feels best in Chrome.</p>
+          </div>
+
+          <div class="more">
+            <p>
+              New here? Read <a href="/how-to-play/">how to play</a>, see <a href="/maps/">the maps</a>, or
+              compare <a href="/weapons/">every gun's damage</a>.
+            </p>
+            <p class="creators">Make videos of StickFrag? <a href="/creators/">Earn packs for them</a>.</p>
+            <p class="tiktok">
+              <strong>Saw StickFrag on TikTok?</strong> This is the game. Press PLAY and you are in the same
+              yard in ten seconds.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= One line for brands (while ads are off). The tip card moved up to the
+           thank-you row (item 212). ================= -->
+      <section id="support" class="support soon-only">
+        <div class="wrap">
+          <p class="brands-line">
+            <b>For brands:</b> the billboards, trucks and blimp in our maps carry made-up brands today. We open
+            them to real brands once StickFrag has a real player base. Write to
+            <!-- email_off: Cloudflare's email obfuscation added a script that threw on this page (2026-10-07). -->
+            <a href="mailto:hello@stickfrag.com?subject=Ad%20space%20in%20StickFrag">hello@stickfrag.com</a>.
+          </p>
+        </div>
+      </section>
+
+      <!-- ================= ADVERTISERS (CONFIG.adsLive) ================= -->
+      <section id="advertise" class="plate live-only">
+        <div class="burst" aria-hidden="true">
+          <svg viewBox="0 0 100 100">
+            <path
+              d="M50 2l8 16 17-8-2 18 18 1-12 13 14 11-17 6 7 17-18-3-2 18-13-12-13 12-2-18-18 3 7-17-17-6 14-11-12-13 18-1-2-18 17 8z"
+              fill="#ffd23f"
+              stroke="#15111c"
+              stroke-width="3"
+              stroke-linejoin="round"
+            />
+          </svg>
+          <span class="js-burst">Founding sponsors pay half</span>
+        </div>
+        <div class="wrap">
+          <div class="sec-head">
+            <h2>Put your brand on the truck everyone hides behind</h2>
+            <p>
+              StickFrag has no pop-ups and no video breaks. Brands are part of the yard: on the trucks, the
+              containers, the blimp and the big screen. Players see them in every fight and call positions by
+              them: “behind the cola truck!”
+            </p>
+          </div>
+
+          <div class="why">
+            <div class="panel">
+              <h3>Part of the world, not in the way</h3>
+              <p>
+                Your logo gets the same ink lines, sun shadows and halftone dots as everything else in the game.
+                Send us your logo and we redraw it in the comic style, free.
+              </p>
+            </div>
+            <div class="panel">
+              <h3>No tracking</h3>
+              <p>No cookies, no profiles, no targeting. Every player in a match sees the same brand.</p>
+            </div>
+            <div class="panel">
+              <h3 class="live-only">A flat weekly price</h3>
+              <p class="js-why-price live-only">
+                Prices start at a few euros a day. If fewer players come than we forecast, we add free days.
+              </p>
+              <h3 class="soon-only">Founding sponsors first</h3>
+              <p class="soon-only">
+                The first brands in the yard get a founding price. Join the list and we write to you before
+                anyone else.
+              </p>
+            </div>
+          </div>
+
+          <!-- Calculator -->
+          <div class="calc live-only" id="prices">
+            <div class="calc-left">
+              <div class="picker panel">
+                <h3>1. Pick your slots</h3>
+                <p class="hint">Each slot is yours alone for the weeks you book.</p>
+                <fieldset class="slots" id="slots">
+                  <legend class="sr-only">Ad slots</legend>
+                </fieldset>
+                <p class="tower-note">
+                  The water tower band is the top slot on the map. It carries the game name for now.
+                  <a href="#book">Ask us</a> if you want it.
+                </p>
+              </div>
+
+              <div class="mapbox panel">
+                <h3>Where your brand goes</h3>
+                <p class="hint">The yard from above, north at the top. Picked slots turn yellow.</p>
+                <svg class="yardmap" id="yardmap" viewBox="-44 -48 88 92" role="img" aria-label="Top-down map of the yard with the ad slots">
+                  <rect x="-35" y="-35" width="70" height="70" fill="#f0d9a8" stroke="#15111c" stroke-width="0.9" />
+                  <g stroke="#15111c" stroke-width="0.45">
+                    <rect x="-27" y="-8" width="8" height="16" fill="#4fb3d9" />
+                    <rect x="19" y="-8" width="8" height="16" fill="#ef6f6c" />
+                    <rect x="-14" y="24" width="28" height="7" fill="#ffcf5a" />
+                    <rect x="-3.5" y="-3.5" width="7" height="7" fill="#e2dccb" />
+                    <circle r="2.6" fill="#e9e1cf" />
+                    <rect x="25" y="-29" width="4" height="4" fill="#e8833a" />
+                    <circle cx="22" cy="21" r="2.2" fill="#ef4d4d" />
+                    <circle cx="27" cy="25" r="2.2" fill="#ef4d4d" />
+                    <rect x="-28" y="18" width="2.4" height="2.4" fill="#e8833a" />
+                    <rect x="-23" y="22" width="2.4" height="2.4" fill="#e8833a" />
+                    <rect x="-27" y="27" width="2.4" height="2.4" fill="#e8833a" />
+                    <rect x="-20" y="17" width="2.4" height="2.4" fill="#e8833a" />
+                  </g>
+                  <text class="t" x="-23" y="11" text-anchor="middle">Barracks A</text>
+                  <text class="t" x="23" y="11" text-anchor="middle">Barracks B</text>
+                  <text class="t" x="0" y="34.5" text-anchor="middle">Canteen</text>
+                  <text class="t" x="0" y="6.8" text-anchor="middle">Tower</text>
+                  <text class="t" x="27" y="-30.5" text-anchor="middle">Guard</text>
+                  <text class="t" x="24.5" y="30.5" text-anchor="middle">Fuel</text>
+                  <text class="t" x="-24" y="33" text-anchor="middle">Crates</text>
+
+                  <g data-map="trucks">
+                    <rect class="m" x="-13" y="-24.2" width="6" height="2.4" />
+                    <rect class="m" x="3" y="-28.2" width="6" height="2.4" />
+                    <text class="t" x="-2" y="-18.5" text-anchor="middle">Trucks</text>
+                  </g>
+                  <g data-map="containers">
+                    <rect class="m" x="-32" y="-32" width="6" height="2.4" />
+                    <rect class="m" x="-32" y="-28.5" width="6" height="2.4" />
+                    <rect class="m" x="-24.4" y="-32" width="2.4" height="6" />
+                    <text class="t" x="-27" y="-22.5" text-anchor="middle">Containers</text>
+                  </g>
+                  <g data-map="jumbotron">
+                    <rect class="m" x="-3.4" y="21.6" width="6.8" height="1.8" />
+                    <text class="t" x="0" y="20.4" text-anchor="middle">Big screen</text>
+                  </g>
+                  <g data-map="canteen">
+                    <rect class="m" x="-12.8" y="27" width="1.6" height="1.6" />
+                    <rect class="m" x="11.2" y="27" width="1.6" height="1.6" />
+                    <rect class="m" x="-6" y="28.6" width="1.4" height="1.4" />
+                    <rect class="m" x="4.6" y="28.6" width="1.4" height="1.4" />
+                    <rect class="m" x="-24" y="-10.4" width="1.6" height="1.6" />
+                    <rect class="m" x="22.4" y="-10.4" width="1.6" height="1.6" />
+                  </g>
+                  <g data-map="pitchside">
+                    <rect class="m" x="-30" y="-35.8" width="12" height="1.6" />
+                    <rect class="m" x="18" y="34.2" width="12" height="1.6" />
+                    <rect class="m" x="-35.8" y="-6" width="1.6" height="12" />
+                    <rect class="m" x="34.2" y="-6" width="1.6" height="12" />
+                    <circle class="m" cx="-11" cy="-14" r="0.9" />
+                    <circle class="m" cx="11" cy="14" r="0.9" />
+                    <circle class="m" cx="11" cy="-14" r="0.9" />
+                    <circle class="m" cx="-11" cy="16" r="0.9" />
+                  </g>
+                  <g data-map="billboard">
+                    <rect class="m" x="6" y="-42.5" width="14" height="3.4" />
+                    <text class="t" x="13" y="-44" text-anchor="middle">Billboard, outside the fence</text>
+                  </g>
+                  <g data-map="blimp">
+                    <ellipse class="m" cx="-28" cy="-41" rx="6" ry="2.4" />
+                    <text class="t" x="-28" y="-44.6" text-anchor="middle">Blimp, in the sky</text>
+                  </g>
+                </svg>
+              </div>
+            </div>
+
+            <div class="result panel" aria-live="polite">
+              <h3>2. Pick how long</h3>
+              <div class="ctl">
+                <div class="ctl-label"><span>Weeks</span><span class="num" id="weeks-out">2 weeks</span></div>
+                <div class="stepper">
+                  <button type="button" id="weeks-dec" aria-label="One week less">–</button>
+                  <input type="range" id="weeks" min="1" max="12" value="2" aria-label="Weeks" />
+                  <button type="button" id="weeks-inc" aria-label="One week more">+</button>
+                </div>
+              </div>
+              <div class="ctl">
+                <div class="ctl-label"><span>How busy the game is</span></div>
+                <div class="seg" id="scenario"></div>
+                <p class="scenario-note" id="scenario-note"></p>
+              </div>
+
+              <div id="outputs">
+                <div class="big-out">
+                  <div class="n" id="o-reach">0</div>
+                  <div class="l">players see your brand</div>
+                </div>
+                <dl class="outs">
+                  <div>
+                    <dt>Views in total</dt>
+                    <dd id="o-views">0</dd>
+                  </div>
+                  <div>
+                    <dt>Views per player</dt>
+                    <dd id="o-freq">0</dd>
+                  </div>
+                  <div>
+                    <dt>You pay per 1,000 views</dt>
+                    <dd id="o-cpm">€0</dd>
+                  </div>
+                  <div>
+                    <dt>You pay per day</dt>
+                    <dd id="o-day">€0</dd>
+                  </div>
+                </dl>
+                <div class="chart">
+                  <h4 id="chart-title">Players reached, day by day</h4>
+                  <svg id="chart" viewBox="0 0 560 170" aria-labelledby="chart-title chart-desc"><desc id="chart-desc"></desc></svg>
+                  <div class="tip" id="tip"></div>
+                </div>
+                <div class="bill" id="bill"></div>
+                <p class="compare" id="compare"></p>
+                <a class="btn big book" id="book-btn" href="#book">Book this campaign</a>
+                <p class="book-note">Opens an email with your campaign filled in. Nothing is charged yet.</p>
+              </div>
+              <div class="empty" id="empty" hidden>Pick at least one slot on the left to see your numbers.</div>
+            </div>
+          </div>
+
+          <!-- Logo preview -->
+          <div class="preview">
+            <div class="panel">
+              <h3><span class="live-only">3. </span>See your brand in the yard</h3>
+              <p class="hint">A rough preview. We redraw the final art in the game's style, free.</p>
+              <label class="field">
+                Brand name
+                <input type="text" id="pv-name" maxlength="22" value="YOUR BRAND" spellcheck="false" />
+              </label>
+              <div class="field">
+                Or your logo
+                <span class="file">
+                  <span class="btn paper">Choose an image</span>
+                  <input type="file" id="pv-file" accept="image/png,image/jpeg,image/svg+xml,image/webp" aria-label="Choose a logo image" />
+                </span>
+              </div>
+              <div class="field">
+                <span id="pv-paint-label">Stripe colour</span>
+                <div class="swatches" role="radiogroup" aria-labelledby="pv-paint-label" id="pv-paint"></div>
+              </div>
+              <p class="privacy-line">Your image stays on your computer. This page uploads nothing.</p>
+            </div>
+            <div class="preview-stage">
+              <svg viewBox="0 0 720 400" role="img" aria-label="Preview of your brand on a box truck in the yard">
+                <defs>
+                  <pattern id="pdots" width="9" height="9" patternUnits="userSpaceOnUse">
+                    <circle cx="4.5" cy="4.5" r="1.9" fill="#15111c" opacity="0.3" />
+                  </pattern>
+                  <!-- Step 1 of the creative pipeline: flatten to a few paints -->
+                  <filter id="flat" color-interpolation-filters="sRGB">
+                    <feComponentTransfer>
+                      <feFuncR type="discrete" tableValues="0.08 0.55 0.94 1" />
+                      <feFuncG type="discrete" tableValues="0.07 0.45 0.82 0.96" />
+                      <feFuncB type="discrete" tableValues="0.11 0.42 0.66 0.86" />
+                    </feComponentTransfer>
+                  </filter>
+                  <clipPath id="pv-clip"><rect x="98" y="116" width="344" height="150" /></clipPath>
+                </defs>
+                <circle cx="640" cy="64" r="40" fill="#ffd23f" stroke="#15111c" stroke-width="5" />
+                <use href="#cloud" x="60" y="20" width="150" height="68" />
+                <path d="M0 300H720" stroke="#15111c" stroke-width="4" />
+                <rect x="0" y="300" width="720" height="100" fill="#f0d9a8" />
+                <path d="M70 336H560L660 400H160Z" fill="#cdb59f" />
+                <path d="M70 336H560L660 400H160Z" fill="url(#pdots)" />
+                <g stroke="#15111c" stroke-width="6" stroke-linejoin="round">
+                  <rect x="70" y="90" width="400" height="230" fill="#4c6ef5" />
+                  <rect x="86" y="104" width="368" height="198" fill="#fff4dc" stroke-width="5" />
+                  <rect id="pv-stripe" x="86" y="276" width="368" height="26" fill="#ef4d4d" stroke-width="5" />
+                  <path d="M470 172H580L630 238V320H470Z" fill="#fff4dc" />
+                  <path d="M496 192H568L604 238H496Z" fill="#86c8ec" stroke-width="5" />
+                  <circle cx="160" cy="326" r="34" fill="#15111c" />
+                  <circle cx="380" cy="326" r="34" fill="#15111c" />
+                  <circle cx="560" cy="326" r="34" fill="#15111c" />
+                </g>
+                <g fill="#e9e1cf">
+                  <circle cx="160" cy="326" r="11" />
+                  <circle cx="380" cy="326" r="11" />
+                  <circle cx="560" cy="326" r="11" />
+                </g>
+                <g clip-path="url(#pv-clip)">
+                  <text id="pv-text" class="t" x="270" y="210" text-anchor="middle" dominant-baseline="middle" fill="#15111c" stroke="#15111c" stroke-width="1.5">YOUR BRAND</text>
+                  <image id="pv-img" x="108" y="122" width="324" height="140" preserveAspectRatio="xMidYMid meet" filter="url(#flat)" hidden />
+                </g>
+                <!-- Sun shadow across the panel: the halftone falls on your art too -->
+                <path d="M300 104H454V302H220Z" fill="#6d5f99" opacity="0.18" />
+                <path d="M300 104H454V302H220Z" fill="url(#pdots)" />
+                <rect x="86" y="104" width="368" height="198" fill="none" stroke="#15111c" stroke-width="5" />
+                <rect x="408" y="112" width="38" height="20" fill="#fff" stroke="#15111c" stroke-width="2.5" />
+                <text x="427" y="127" text-anchor="middle" font-size="12" font-weight="900" font-family="system-ui, sans-serif" fill="#15111c">AD</text>
+              </svg>
+            </div>
+          </div>
+
+          <ol class="steps live-only" id="book">
+            <li><strong>Pick</strong>Choose slots and weeks with the calculator, then press “Book this campaign”.</li>
+            <li><strong>Send your logo</strong>A PNG or SVG is enough. We turn it into comic art.</li>
+            <li><strong>Check the preview</strong>Within 2 working days you get screenshots from the game.</li>
+            <li><strong>Pay the invoice</strong>By bank transfer or card. Your campaign starts on your date.</li>
+            <li><strong>Get a weekly report</strong>Every Monday: players, views and fresh screenshots.</li>
+          </ol>
+        </div>
+      </section>
+
+      <!-- ================= RULES + FAQ ================= -->
+      <section class="after live-only">
+        <div class="wrap">
+          <div class="sec-head">
+            <h2>What we accept</h2>
+            <p>Many of our players are teenagers. These rules protect them, and they keep your brand next to a game parents are happy with.</p>
+          </div>
+          <div class="rules">
+            <div class="panel">
+              <h3><i style="background: var(--green)"></i>Good fit</h3>
+              <ul>
+                <li>Games and gaming gear</li>
+                <li>Headphones and tech</li>
+                <li>Clothing and shoes</li>
+                <li>Streaming and apps</li>
+                <li>Water and sugar-free drinks</li>
+              </ul>
+            </div>
+            <div class="panel">
+              <h3><i style="background: var(--yellow)"></i>Ask us first</h3>
+              <ul>
+                <li>Sugary drinks and snacks: the rules differ by country</li>
+                <li>Energy drinks</li>
+              </ul>
+            </div>
+            <div class="panel">
+              <h3><i style="background: var(--red)"></i>Never</h3>
+              <ul>
+                <li>Alcohol, tobacco, vapes, nicotine</li>
+                <li>Gambling, betting, loot boxes, crypto, trading</li>
+                <li>Weapons and firearm shops</li>
+                <li>Political or religious campaigns</li>
+              </ul>
+            </div>
+          </div>
+          <div class="art-rules">
+            <p>
+              <strong>Art rules, so the game stays fair:</strong> no people or stickmen at life size, no shapes
+              like a crosshair or a hit marker, no flashing, and no red splashes that look like a hit.
+            </p>
+          </div>
+
+          <div class="faq">
+            <h2>Questions from brands</h2>
+            <details>
+              <summary>How do you count a view?</summary>
+              <p>
+                A view is one sighting: your art is on screen, big enough to read, not behind a wall, for at
+                least one second. The game counts views and our server checks and caps the numbers. Views come
+                from players' browsers, so our reports call them estimates. Player numbers come from our servers.
+              </p>
+            </details>
+            <details>
+              <summary>Where do the forecast numbers come from?</summary>
+              <p class="js-forecast-faq">
+                From our daily players, the average play time and how many players come back. You can see the
+                exact numbers we use below the calculator.
+              </p>
+            </details>
+            <details>
+              <summary>What if fewer players come than you forecast?</summary>
+              <p>
+                We add free days to your campaign until it reaches the views we forecast when you booked. You
+                never pay more than the price you agreed.
+              </p>
+            </details>
+            <details>
+              <summary>Do you track players or use cookies?</summary>
+              <p>
+                No. We set no ad cookies and build no profiles, and we do not target anybody. Every player in a
+                match sees the same brand. That also keeps your campaign clear of the EU ban on profiling-based
+                ads to minors.
+              </p>
+            </details>
+            <details>
+              <summary>Who plays StickFrag?</summary>
+              <p>
+                Players on desktop browsers, mostly in Europe and North America. Many are teenagers and young
+                adults. They play in short sessions, often with friends.
+              </p>
+            </details>
+            <details>
+              <summary>Can I change my art during a campaign?</summary>
+              <p>Yes, once a week, free. Send the new art by Thursday and it goes live the next Monday.</p>
+            </details>
+            <details>
+              <summary>Is there a minimum?</summary>
+              <p>One slot for one week. No contract after that, and no automatic renewal.</p>
+            </details>
+            <details>
+              <summary>Will players see an “AD” mark?</summary>
+              <p>
+                Yes. Paid art carries a small “AD” mark, and the game menu lists our sponsors. The law requires
+                that players can tell an ad from the game.
+              </p>
+            </details>
+          </div>
+
+          <div class="final">
+            <div>
+              <h2>Want a slot? Send us your pick</h2>
+              <p>We answer within one working day. You only pay after you approve the preview.</p>
+            </div>
+            <a class="btn big" id="final-btn" href="#prices">Email us</a>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <div class="wrap">
+        <a class="logo" href="#top">STICKFRAG</a>
+        <div class="footer-social">
+          <a href="https://discord.gg/mTYAtjNnyd" target="_blank" rel="noopener" aria-label="Discord" title="Discord"><svg aria-hidden="true"><use href="#i-discord" /></svg></a>
+          <a href="https://www.tiktok.com/@stickfrag.com" target="_blank" rel="noopener" aria-label="TikTok @stickfrag.com" title="TikTok"><svg aria-hidden="true"><use href="#i-tiktok" /></svg></a>
+          <a href="https://www.instagram.com/stickfrag/" target="_blank" rel="noopener" aria-label="Instagram @stickfrag" title="Instagram"><svg aria-hidden="true"><use href="#i-instagram" /></svg></a>
+          <a href="https://www.youtube.com/@stickfrag" target="_blank" rel="noopener" aria-label="YouTube @stickfrag" title="YouTube"><svg aria-hidden="true"><use href="#i-youtube" /></svg></a>
+        </div>
+        <nav aria-label="Footer">
+          <a class="js-play" href="/play/">Play</a>
+          <a href="/how-to-play/">How to play</a>
+          <a href="/maps/">Maps</a>
+          <a href="/weapons/">Weapons</a>
+          <a href="/chromebook/">Chromebook</a>
+          <a href="/leaderboard/">Leaderboard</a>
+          <a href="/ideas/">Ideas board</a>
+          <a href="/creators/">Creators</a>
+          <a href="/updates/">Updates</a>
+          <!--donate--><a class="soon-only" href="/support/">Support us</a><!--/donate-->
+          <a class="live-only" href="#advertise">Advertise</a>
+          <a class="soon-only" href="#support">For brands</a>
+          <a href="imprint.html">Imprint</a>
+          <a href="privacy.html">Privacy</a>
+          <a href="terms.html">Terms</a>
+          <a class="live-only" href="ad-terms.html">Ad terms</a>
+        </nav>
+        <small>© 2026 StickFrag. All rights reserved. The game, its characters, maps, art and code are ours. Do not copy them.<span class="live-only"> Prices exclude VAT.</span></small>
+      </div>
+    </footer>
+
+    <div id="feedback" class="panel" role="dialog" aria-modal="true" aria-labelledby="fb-title" hidden>
+      <h2 id="fb-title">Tell us</h2>
+      <p class="fb-lead">What do you like? What should we build next? Found a bug?</p>
+      <div class="fb-kinds">
+        <label><input type="radio" name="fb-kind" value="like" checked /> I like…</label>
+        <label><input type="radio" name="fb-kind" value="idea" /> I want…</label>
+        <label><input type="radio" name="fb-kind" value="bug" /> Bug</label>
+      </div>
+      <textarea id="fb-text" maxlength="1000" rows="5" placeholder="Type here. 10 characters or more." aria-label="Your message"></textarea>
+      <p id="fb-status" role="status"></p>
+      <div class="fb-row">
+        <button id="fb-close" type="button" class="btn paper">CLOSE</button>
+        <button id="fb-send" type="button" class="btn">SEND</button>
+      </div>
+      <p class="fb-note">Good ideas go on the public <a href="/ideas/">ideas board</a>, where players like them. If we build your idea, we may thank you by your nickname. Do not write personal details.</p>
+    </div>
+
+    <script src="/retry.js?v=06dd2ace69"></script>
+    <script type="module" src="/playmenu.js?v=15f5cce3d0"></script>
+    <script type="module" src="/signup.js?v=37b18f08b7"></script>
+    <script type="module" src="/landing.js?v=be3fd702f2"></script>
+  </body>
+</html>

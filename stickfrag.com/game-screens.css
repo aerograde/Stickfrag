@@ -1,0 +1,551 @@
+/* game-screens.css: part of index.html's styles, linked from it in order (the cascade depends on the order). */
+/* Loading screen (loading.ts). Every animation here is a transform, which the browser runs
+   off the main thread, so the reticle keeps turning while the game compiles its shaders. */
+#loading,
+#name-ask {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  background:
+    radial-gradient(rgba(21, 17, 28, 0.13) 1.6px, transparent 1.8px) 0 0 / 14px 14px,
+    var(--sky);
+  transition: opacity 0.35s;
+}
+/* The map's picture fills the screen, dimmed so the card reads; the card sits at the bottom (item 799).
+   --loading-pic comes from loadingMap(); a map without a picture keeps the dotted sky. */
+#loading {
+  align-items: end;
+  padding-bottom: max(16px, env(safe-area-inset-bottom));
+  background:
+    linear-gradient(rgba(21, 17, 28, 0.25), rgba(21, 17, 28, 0.55)),
+    var(--loading-pic, none) center / cover,
+    radial-gradient(rgba(21, 17, 28, 0.13) 1.6px, transparent 1.8px) 0 0 / 14px 14px,
+    var(--sky);
+}
+#loading.done {
+  opacity: 0;
+  pointer-events: none;
+}
+.loading-card {
+  width: min(340px, 100%);
+  padding: 22px 26px 18px;
+  text-align: center;
+  background: var(--paper);
+  border: 4px solid var(--ink);
+  box-shadow: 10px 10px 0 var(--ink);
+  transform: rotate(-1deg);
+}
+.loading-logo {
+  font: 900 34px/1 var(--head);
+  letter-spacing: -1px;
+  color: var(--red);
+  -webkit-text-stroke: 2px var(--ink);
+  paint-order: stroke;
+  text-shadow: 3px 3px 0 var(--ink);
+}
+.loading-reticle {
+  display: block;
+  width: 64px;
+  height: 64px;
+  margin: 18px auto 10px;
+  animation: loading-spin 1.6s linear infinite;
+  will-change: transform;
+}
+@keyframes loading-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.loading-title {
+  margin: 0 0 12px;
+  font: 900 20px/1.1 var(--head);
+  letter-spacing: 1px;
+}
+.loading-map {
+  color: var(--red);
+}
+.loading-bar {
+  position: relative;
+  height: 16px;
+  border: 3px solid var(--ink);
+  background: #fff;
+  overflow: hidden;
+}
+.loading-fill {
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(-45deg, var(--yellow) 0 8px, #f2b81f 8px 16px);
+  transform: scaleX(0.04);
+  transform-origin: left;
+  transition: transform 0.4s ease-out;
+}
+/* A light band sweeping the bar: it moves even when a step takes a while. */
+.loading-bar::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  width: 40%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.7), transparent);
+  animation: loading-sweep 1.2s ease-in-out infinite;
+  will-change: transform;
+}
+@keyframes loading-sweep {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(250%);
+  }
+}
+.loading-step {
+  margin: 10px 0 0;
+  font-size: 13px;
+  font-weight: 800;
+  opacity: 0.75;
+}
+/* On the loading screen the card is a wide strip along the bottom: reticle, logo and map name in
+   one row, the bar long and tall under them (owner, 2026-10-25). The name card keeps the small card. */
+#loading .loading-card {
+  width: min(1100px, 100%);
+  padding: 14px 22px 12px;
+  display: grid;
+  grid-template-columns: auto auto 1fr;
+  grid-template-areas:
+    'reticle logo title'
+    'bar bar bar'
+    'step step step';
+  align-items: center;
+  column-gap: 12px;
+  text-align: left;
+  transform: rotate(-0.4deg);
+}
+#loading .loading-logo {
+  grid-area: logo;
+  font-size: 30px;
+}
+#loading .loading-reticle {
+  grid-area: reticle;
+  width: 40px;
+  height: 40px;
+  margin: 0;
+}
+#loading .loading-title {
+  grid-area: title;
+  margin: 0;
+  text-align: right;
+}
+#loading .loading-bar {
+  grid-area: bar;
+  height: 30px;
+  margin-top: 12px;
+  border-width: 4px;
+}
+#loading .loading-fill {
+  background: repeating-linear-gradient(-45deg, var(--yellow) 0 12px, #f2b81f 12px 24px);
+}
+#loading .loading-bar::after {
+  width: 20%;
+  animation: loading-sweep-long 1.8s ease-in-out infinite;
+}
+@keyframes loading-sweep-long {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(500%);
+  }
+}
+#loading .loading-step {
+  grid-area: step;
+  margin-top: 8px;
+}
+/* A phone: the map name drops under the logo. */
+@media (max-width: 560px) {
+  #loading .loading-card {
+    grid-template-columns: auto 1fr;
+    grid-template-areas:
+      'reticle logo'
+      'title title'
+      'bar bar'
+      'step step';
+  }
+  #loading .loading-logo {
+    font-size: 26px;
+  }
+  #loading .loading-title {
+    margin-top: 8px;
+    text-align: left;
+    font-size: 17px;
+  }
+  #loading .loading-bar {
+    height: 24px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .loading-reticle,
+  .loading-bar::after,
+  #loading .loading-bar::after {
+    animation: none;
+  }
+}
+
+button {
+  padding: 10px 18px;
+  border: 3px solid var(--ink);
+  background: var(--yellow);
+  color: var(--ink);
+  font: 900 16px var(--head);
+  cursor: pointer;
+  box-shadow: 4px 4px 0 var(--ink);
+}
+button:active {
+  transform: translate(3px, 3px);
+  box-shadow: 1px 1px 0 var(--ink);
+}
+
+/* XP: bar, gains, level-up stamp */
+#xpbar {
+  left: 50%;
+  bottom: 14px;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: min(360px, calc(100vw / var(--hud-scale, 1) - 560px));
+  min-width: 200px;
+  font-weight: 800;
+  font-size: 11px;
+}
+/* The owner's level (glitch.ts): the level badge's own colours, two flickering characters
+   instead of a number (owner, 2026-10-06). */
+.glitch {
+  display: inline-block;
+  min-width: 2ch;
+  font-family: var(--font);
+  text-align: center;
+}
+#xpbar .lv,
+.lv-badge {
+  padding: 1px 6px;
+  background: var(--yellow);
+  border: 2px solid var(--ink);
+  box-shadow: 2px 2px 0 var(--ink);
+  font: 900 12px var(--head);
+  white-space: nowrap;
+}
+/* A score row's head with the hat worn (headPics.ts), and the hat's rarity tag. */
+.sb-head {
+  display: inline-block;
+  width: 32px;
+  height: 32px;
+  margin: -8px 6px -8px 0;
+  vertical-align: middle;
+}
+/* A worn title after the name on the score table (item 830): small, dim, no box. */
+.sb-title {
+  margin-left: 4px;
+  font: 800 10px/1.4 var(--head);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  opacity: 0.6;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+.hat-tag {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 0 5px;
+  border: 2px solid var(--ink);
+  background: #e6e0d4;
+  color: var(--ink);
+  font: 900 10px/1.4 var(--head);
+  letter-spacing: 0.06em;
+  vertical-align: middle;
+  white-space: nowrap;
+  cursor: help;
+}
+.hat-tag[data-rarity='rare'] {
+  background: var(--blue);
+  color: #fff;
+}
+.hat-tag[data-rarity='epic'] {
+  background: #f6b21b;
+  box-shadow: 0 0 8px #ffd84a;
+}
+#xpbar .track {
+  flex: 1;
+  height: 10px;
+  background: var(--paper);
+  border: 2px solid var(--ink);
+}
+#xpbar .fill {
+  height: 100%;
+  width: 0;
+  background: var(--blue);
+  transition: width 0.4s;
+}
+#xpbar .txt {
+  -webkit-text-stroke: 3px var(--paper);
+  paint-order: stroke;
+  white-space: nowrap;
+}
+#xpfeed {
+  left: calc(50% + 34px);
+  top: calc(50% - 12px);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.xpgain {
+  font: 900 15px var(--head);
+  color: var(--blue);
+  -webkit-text-stroke: 3px var(--paper);
+  paint-order: stroke;
+  animation: xpgain 1.4s ease-out forwards;
+}
+/* XP taken away: a team kill with friendly fire. */
+.xpgain.loss {
+  color: var(--red);
+}
+@keyframes xpgain {
+  0% { opacity: 0; transform: translateX(-8px); }
+  15% { opacity: 1; transform: translateX(0); }
+  75% { opacity: 1; }
+  100% { opacity: 0; transform: translateY(-14px); }
+}
+#levelup {
+  left: 50%;
+  top: 26%;
+  padding: 10px 26px;
+  background: var(--yellow);
+  border: 4px solid var(--ink);
+  box-shadow: 6px 6px 0 var(--ink);
+  font: 900 34px var(--head);
+  transform: translateX(-50%) rotate(-3deg);
+  animation: levelup 2.4s ease-out forwards;
+}
+@keyframes levelup {
+  0% { opacity: 0; transform: translateX(-50%) rotate(-3deg) scale(0.3); }
+  12% { opacity: 1; transform: translateX(-50%) rotate(-3deg) scale(1.2); }
+  22% { transform: translateX(-50%) rotate(-3deg) scale(1); }
+  85% { opacity: 1; }
+  100% { opacity: 0; transform: translateX(-50%) rotate(-3deg) scale(1); }
+}
+button.ghost {
+  background: var(--paper);
+  box-shadow: 3px 3px 0 var(--ink);
+  font-size: 13px;
+  padding: 6px 12px;
+}
+
+/* RESET ALL SETTINGS asks once (settingsReset.ts). */
+.reset-confirm:not([hidden]) {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  font-weight: 800;
+}
+
+/* FEEDBACK and REPORT: views of the pause card, like SETTINGS. One shows in place of the main view, and the
+   card keeps the main view's size (hud.holdPauseSize). */
+#pause:has(> .pause-view:not([hidden])) > #pause-main {
+  display: none;
+}
+/* The held height goes to the text box and the player list, so BACK sits at the card's bottom as on the main view. */
+#pause:has(> .pause-view:not([hidden])),
+#pause > .pause-view:not([hidden]) {
+  display: flex;
+  flex-direction: column;
+}
+#pause > .pause-view:not([hidden]) {
+  flex: 1;
+}
+#pause #fb-text {
+  flex: 1;
+}
+#pause #report-close {
+  margin-top: auto;
+}
+#pause .fb-kinds label {
+  margin: 0;
+}
+#pause .fb-row button {
+  flex: 1;
+  margin-top: 0;
+}
+#pause .report-row button {
+  width: auto;
+  margin-top: 0;
+}
+.fb-lead {
+  margin: 0 0 10px;
+  font-weight: 700;
+}
+.fb-kinds {
+  display: flex;
+  gap: 14px;
+  margin-bottom: 8px;
+  font-weight: 800;
+}
+#fb-text {
+  width: 100%;
+  padding: 8px;
+  border: 3px solid var(--ink);
+  font: 14px var(--font);
+  resize: vertical;
+}
+#fb-status {
+  min-height: 18px;
+  margin: 6px 0;
+  font-weight: 800;
+}
+.fb-row {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+.fb-note {
+  margin: 10px 0 0;
+  font-size: 11px;
+  opacity: 0.7;
+}
+
+/* Report view */
+#report-list {
+  max-height: 50vh;
+  overflow-y: auto;
+  margin-bottom: 10px;
+}
+.report-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 0;
+  border-bottom: 1px dashed rgba(21, 17, 28, 0.3);
+}
+.report-name {
+  flex: 1;
+  font-weight: 800;
+  overflow-wrap: anywhere;
+}
+.report-row button {
+  padding: 4px 8px;
+  font-size: 11px;
+}
+.report-row .report-ban {
+  color: #b3261e;
+}
+.report-done,
+.report-empty {
+  font-weight: 800;
+  opacity: 0.7;
+}
+
+/* The votekick card (voteKick.ts): middle top, tilted like the death card, over the scoreboard. */
+#votekick {
+  top: 16%;
+  z-index: 25;
+  min-width: 0;
+  width: min(320px, calc(100vw - 32px));
+  text-align: center;
+  transform: translate(-50%, -50%) rotate(1.5deg);
+}
+#votekick h2 {
+  font-size: 20px;
+  overflow-wrap: anywhere;
+}
+#votekick kbd {
+  display: inline-block;
+  margin: 0 4px 0 8px;
+  padding: 0 8px;
+  border: 2px solid var(--ink);
+  background: var(--yellow);
+  font: 900 15px var(--head);
+}
+.vk-keys {
+  margin: 0 0 6px;
+  font: 800 15px var(--head);
+}
+.vk-count {
+  margin: 0;
+  font-size: 12px;
+  opacity: 0.8;
+}
+
+/* "Enter your name" for a room link without a saved name (nameCard.ts): the loading card, over the
+   loading screen's backdrop (#name-ask shares the #loading rule), with the home page's name field,
+   error line and PLAY (landing-home.css .who-card, landing-site.css .join-error and .btn.big). */
+#name-ask {
+  z-index: 60;
+}
+.name-card .loading-logo {
+  margin-bottom: 16px;
+}
+.name-card .loading-step {
+  margin: 0 0 14px;
+}
+.name-card .join-error {
+  margin: 0 0 8px;
+  color: #b3261e;
+  font: 800 15px var(--head);
+}
+.name-card .join-error:empty {
+  display: none;
+}
+.name-card input {
+  display: block;
+  width: 100%;
+  margin: 0 0 16px;
+  padding: 10px 12px;
+  border: 3px solid var(--ink);
+  background: #fff;
+  color: var(--ink);
+  font: 700 20px var(--head);
+  text-align: center;
+  outline: none;
+  user-select: text;
+}
+.name-card input:focus {
+  box-shadow: 0 0 0 4px var(--yellow);
+}
+.name-card.name-bad input {
+  border-color: #b3261e;
+  color: rgb(179 38 30 / 0.55);
+}
+.name-card.name-bad input:focus {
+  box-shadow: 0 0 0 4px rgb(179 38 30 / 0.25);
+}
+.name-card .btn.big {
+  display: block;
+  width: 100%;
+  padding: 14px 34px;
+  font: 900 26px/1 var(--head);
+  box-shadow: 6px 6px 0 var(--ink);
+}
+.name-card .btn.big:disabled {
+  background: #d8d3c8;
+  color: #8d877c;
+  border-color: #8d877c;
+  box-shadow: 6px 6px 0 #8d877c;
+  cursor: not-allowed;
+  transform: none;
+}
+/* A dead player's row, until they are back (item 767): dimmed, with a DEAD tag. */
+tr.dead td,
+#mini-board .dead {
+  opacity: 0.5;
+}
+.sb-dead {
+  margin-left: 6px;
+  padding: 0 5px;
+  border: 2px solid var(--ink);
+  background: #e8343a;
+  color: #fff;
+  font: 900 10px/1.4 var(--head);
+  letter-spacing: 0.06em;
+}

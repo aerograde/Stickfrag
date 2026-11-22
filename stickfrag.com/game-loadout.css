@@ -1,0 +1,673 @@
+/* game-loadout.css: part of index.html's styles, linked from it in order (the cascade depends on the order). */
+/*
+ * The loadout strip (hud.ts, showLoadout): the death box and countdown at the top, four slots
+ * and the deploy button along the bottom, so the kill cam stays in view. Design: heavy-weapons.md.
+ */
+#loadout {
+  inset: 0;
+}
+/* The strip takes the bottom of the screen: the fight's panels there wait until it closes. */
+body.lo-open #vitals,
+body.lo-open #health,
+body.lo-open #gear,
+body.lo-open #xpbar {
+  visibility: hidden;
+}
+#loadout::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 300px;
+  background: linear-gradient(transparent, rgba(21, 17, 28, 0.6) 40%);
+}
+#loadout button {
+  pointer-events: auto;
+  font-family: inherit;
+  color: var(--ink);
+  cursor: pointer;
+}
+#loadout kbd {
+  display: inline-block;
+  padding: 0 6px;
+  border: 2px solid var(--ink);
+  background: var(--yellow);
+  color: var(--ink);
+  font: 900 12px var(--head);
+}
+/*
+ * Over the middle of the strip: who killed you, and on its own card how much of their health
+ * you took. While a slot's choices are open they step up, clear of the choices.
+ */
+#loadout .lo-top {
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 48px);
+  transform: translateX(-50%);
+  display: grid;
+  gap: 10px;
+  width: 300px;
+  transition: bottom 0.15s;
+}
+#loadout .lo-strip.popped .lo-top {
+  bottom: calc(100% + 190px);
+}
+#loadout .lo-card {
+  padding: 8px 14px 10px;
+  border: 3px solid var(--ink);
+  background: var(--paper);
+  box-shadow: 4px 4px 0 var(--ink);
+  color: var(--ink);
+  text-align: center;
+}
+#loadout .lo-card small {
+  display: block;
+  font: 800 11px var(--font);
+  letter-spacing: 0.1em;
+  opacity: 0.75;
+}
+#loadout .lo-card .name {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font: 900 28px var(--head);
+  line-height: 1.15;
+}
+#loadout .lo-card .name > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+/* The killer's colour, beside the name: coloured letters were hard to read. */
+#loadout .lo-dot {
+  flex: none;
+  width: 14px;
+  height: 14px;
+  border: 2px solid var(--ink);
+  border-radius: 50%;
+}
+#loadout .lo-bot {
+  flex: none;
+  padding: 1px 5px;
+  border: 2px solid var(--ink);
+  font: 800 10px var(--font);
+  letter-spacing: 0.08em;
+}
+#loadout .lo-card .detail {
+  font: 700 13px var(--font);
+}
+#loadout .lo-dealt-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  white-space: nowrap;
+  font: 800 11px var(--font);
+  letter-spacing: 0.06em;
+}
+#loadout .lo-dealt-row b {
+  font: 900 16px var(--head);
+}
+#loadout .lo-dealt-bar {
+  height: 14px;
+  margin-top: 5px;
+  border: 2px solid var(--ink);
+  background: #e3d9c2;
+}
+#loadout .lo-dealt-bar i {
+  display: block;
+  height: 100%;
+  background: var(--red);
+}
+#loadout .lo-strip {
+  position: absolute;
+  left: 50%;
+  bottom: 40px;
+  transform: translateX(-50%);
+  width: min(1050px, calc(100vw / var(--hud-scale, 1) - 32px));
+  height: 124px;
+  display: flex;
+  gap: 12px;
+}
+#loadout .lo-slots {
+  flex: 6;
+  display: flex;
+  gap: 12px;
+  min-width: 0;
+}
+#loadout .lo-slot {
+  position: relative;
+  display: flex;
+  min-width: 0;
+  flex: 1.25;
+}
+#loadout .lo-slot.primary {
+  flex: 1.45;
+}
+#loadout .lo-slot.heavy {
+  flex: 1.75;
+}
+#loadout .lo-slot.nade {
+  flex: 1;
+}
+#loadout .lo-chip {
+  flex: 1;
+  min-width: 0;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  justify-items: center;
+  padding: 8px 12px;
+  border: 3px solid var(--ink);
+  background: var(--paper);
+  box-shadow: 4px 4px 0 var(--ink);
+}
+#loadout .lo-chip:hover {
+  background: #fff3c4;
+}
+#loadout .lo-slot.open .lo-chip {
+  background: var(--yellow);
+  transform: translateY(-4px);
+  box-shadow: 4px 6px 0 var(--ink);
+}
+#loadout .lo-label {
+  justify-self: stretch;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font: 800 11px var(--font);
+  letter-spacing: 0.1em;
+}
+#loadout .lo-pic {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 0;
+}
+#loadout .lo-pic img {
+  max-width: 100%;
+  max-height: 52px;
+}
+#loadout .lo-chip b {
+  font: 900 19px var(--head);
+  white-space: nowrap;
+}
+/* The heavy slot: dark, a ring of kills, the weapon greyed until it is earned. */
+#loadout .lo-slot.heavy .lo-chip {
+  grid-template-columns: 56px minmax(0, 1fr);
+  grid-template-rows: none;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: #3a3236;
+  color: var(--paper);
+}
+#loadout .lo-slot.heavy .lo-chip:hover,
+#loadout .lo-slot.heavy.open .lo-chip {
+  background: #4d4249;
+}
+#loadout .lo-slot.heavy.ready .lo-chip {
+  box-shadow: 0 0 0 3px var(--yellow), 4px 4px 0 3px var(--ink);
+}
+#loadout .lo-heavy {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+  text-align: left;
+}
+#loadout .lo-heavy .lo-label kbd {
+  background: transparent;
+  border-color: var(--paper);
+  color: var(--paper);
+}
+#loadout .lo-heavy .lo-pic {
+  justify-content: flex-start;
+  padding: 0;
+}
+#loadout .lo-heavy .lo-pic img {
+  max-height: 32px;
+  filter: grayscale(1) brightness(1.6);
+  opacity: 0.6;
+}
+#loadout .lo-slot.heavy.ready .lo-heavy .lo-pic img {
+  filter: none;
+  opacity: 1;
+}
+#loadout .lo-heavy b,
+#loadout .lo-heavy .sub {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+#loadout .lo-heavy b {
+  font-size: 14px;
+}
+#loadout .lo-heavy .sub {
+  font: 700 9px var(--font);
+  color: var(--yellow);
+}
+#loadout .lo-ring {
+  position: relative;
+  width: 56px;
+  height: 56px;
+}
+#loadout .lo-ring svg {
+  position: absolute;
+  inset: 0;
+  transform: rotate(-90deg);
+}
+#loadout .lo-ring circle {
+  fill: none;
+  stroke-width: 8;
+}
+#loadout .lo-ring .track {
+  stroke: #6b6066;
+}
+#loadout .lo-ring .fill {
+  stroke: var(--yellow);
+}
+#loadout .lo-ring > span {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font: 900 12px var(--head);
+}
+/* The open slot's choices, above it, with a notch pointing down at it. */
+#loadout .lo-pop {
+  position: absolute;
+  left: 0;
+  bottom: calc(100% + 18px);
+  display: grid;
+  gap: 8px;
+  width: max-content;
+  max-width: calc(100vw / var(--hud-scale, 1) - 32px);
+  padding: 10px;
+  background: var(--paper);
+  border: 3px solid var(--ink);
+  box-shadow: 4px 4px 0 var(--ink);
+  color: var(--ink);
+}
+#loadout .lo-slot.right .lo-pop {
+  left: auto;
+  right: 0;
+}
+#loadout .lo-pop::after {
+  content: '';
+  position: absolute;
+  left: 40px;
+  bottom: -13px;
+  width: 20px;
+  height: 20px;
+  background: var(--paper);
+  border-right: 3px solid var(--ink);
+  border-bottom: 3px solid var(--ink);
+  transform: rotate(45deg);
+}
+#loadout .lo-slot.right .lo-pop::after {
+  left: auto;
+  right: 40px;
+}
+#loadout .lo-tiles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+#loadout .lo-tile {
+  min-width: 96px;
+  box-shadow: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 6px 4px;
+  border: 2px solid var(--ink);
+  background: #fffbe9;
+}
+#loadout .lo-tile:hover {
+  background: #fff3c4;
+}
+#loadout .lo-tile.on {
+  background: var(--yellow);
+}
+#loadout .lo-tile .pic {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 88px;
+  height: 34px;
+}
+#loadout .lo-tile .pic img {
+  max-width: 100%;
+  max-height: 100%;
+}
+#loadout .lo-tile b {
+  font: 900 12px var(--head);
+  white-space: nowrap;
+}
+#loadout .lo-tile .cost {
+  font: 700 10px var(--font);
+}
+#loadout .lo-info {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 6px 14px;
+  max-width: 520px;
+  font: 600 11px var(--font);
+}
+#loadout .bars {
+  display: grid;
+  gap: 2px;
+  width: 180px;
+  font: 800 9px var(--head);
+  letter-spacing: 0.04em;
+}
+#loadout .bars span {
+  display: grid;
+  grid-template-columns: 50px 1fr;
+  align-items: center;
+}
+#loadout .bars i {
+  height: 7px;
+  border: 2px solid var(--ink);
+  background: linear-gradient(90deg, var(--ink) var(--v), #fffbe9 var(--v));
+}
+/* The sight on a gun (item 860): under the name on the chip, and a row of sights in the pop-up. */
+#loadout .lo-sight,
+#loadout .lo-sightchip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font: 800 11px var(--head);
+  letter-spacing: 0.03em;
+}
+#loadout .lo-sight svg,
+#loadout .lo-sightchip svg {
+  width: 28px;
+  height: 20px;
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 2.2;
+  stroke-linejoin: round;
+}
+#loadout .lo-sight .dot,
+#loadout .lo-sightchip .dot {
+  fill: #ff2a4d;
+  stroke: none;
+}
+#loadout .lo-sightrow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+#loadout .lo-sightrow.none {
+  font: 800 11px var(--head);
+}
+#loadout .lo-sightlabel {
+  font: 900 10px var(--head);
+  letter-spacing: 0.06em;
+}
+#loadout .lo-sightchip {
+  padding: 3px 8px 3px 4px;
+  background: #fffbe9;
+  border: 2px solid var(--ink);
+  color: var(--ink);
+  cursor: pointer;
+}
+#loadout .lo-sightchip:hover {
+  background: #fff;
+}
+#loadout .lo-sightchip.on {
+  background: var(--yellow);
+}
+#loadout .go {
+  flex: 1.3;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border: 3px solid var(--ink);
+  background: var(--red);
+  box-shadow: 4px 4px 0 var(--ink);
+  font: 900 24px var(--head);
+  color: #fff !important;
+}
+#loadout .go:hover:not(:disabled) {
+  background: #ff6464;
+}
+#loadout .go:disabled {
+  background: #8c4f4f;
+  cursor: default;
+  font-size: 17px;
+}
+#loadout .go .lo-wait {
+  font-size: 40px;
+  line-height: 1;
+}
+/* The key on the button is big enough to read at a glance (owner, 2026-10-09). */
+#loadout .go kbd {
+  padding: 2px 14px;
+  border-width: 3px;
+  font-size: 22px;
+  line-height: 1.1;
+}
+#loadout .keys {
+  position: absolute;
+  left: 16px;
+  right: 16px;
+  bottom: 10px;
+  margin: 0;
+  text-align: center;
+  color: var(--paper);
+  font: 600 12px var(--font);
+}
+#loadout .keys kbd {
+  margin-right: 3px;
+  padding: 0 4px;
+  font-size: 11px;
+}
+/* Narrow screens: the slots wrap two to a line, the button below them. */
+@media (max-width: 820px) {
+  #loadout .lo-strip {
+    height: auto;
+    flex-direction: column;
+  }
+  #loadout .lo-slots {
+    flex-wrap: wrap;
+  }
+  #loadout .lo-slot,
+  #loadout .lo-slot.primary,
+  #loadout .lo-slot.heavy,
+  #loadout .lo-slot.nade {
+    flex: 1 1 45%;
+    height: 110px;
+  }
+  #loadout .go {
+    padding: 8px;
+  }
+  #loadout .keys {
+    display: none;
+  }
+  /* The choices open above the whole strip, which is as wide as the screen. */
+  #loadout .lo-slot {
+    position: static;
+  }
+  #loadout .lo-slot .lo-pop,
+  #loadout .lo-slot.right .lo-pop {
+    left: 0;
+    right: auto;
+  }
+  #loadout .lo-pop::after {
+    display: none;
+  }
+}
+/* The heavy-weapon meter above the ammo; yellow once the weapon is earned. */
+#heavyhint {
+  padding: 4px 10px;
+  text-align: right;
+  font: 800 13px var(--head);
+}
+#heavyhint.ready {
+  background: var(--yellow);
+}
+#heavyhint kbd {
+  margin-left: 4px;
+  padding: 0 6px;
+  border: 2px solid var(--ink);
+  background: var(--paper);
+  font: 900 12px var(--head);
+}
+/* Team score in the timer: each side in its team's colour. */
+#timer .tscore {
+  display: inline-block;
+  padding: 0 8px;
+  border: 2px solid var(--ink);
+  background: var(--team);
+  color: #fff;
+  font-size: 16px;
+  vertical-align: 3px;
+  -webkit-text-stroke: 3px var(--ink);
+  paint-order: stroke;
+}
+/* Fixed widths, so the centred bar does not shift each second or when a score gains a digit. */
+#timer .tscore b {
+  display: inline-block;
+  min-width: 2ch;
+  font-size: 20px;
+}
+#timer .tclock {
+  display: inline-block;
+  min-width: 4ch;
+}
+/* "BLUE TAKES THE LEAD": one line under the timer for two seconds. */
+#banner {
+  left: 50%;
+  top: 78px;
+  transform: translateX(-50%);
+  font: 900 26px var(--head);
+  color: var(--yellow);
+  -webkit-text-stroke: 5px var(--ink);
+  paint-order: stroke;
+  /* One line, until it is wider than the screen (an unlock banner names the kind and where to find it): then it wraps. */
+  width: max-content;
+  max-width: calc(92vw / var(--hud-scale, 1));
+  text-align: center;
+  opacity: 0;
+}
+#banner.show {
+  animation: banner 2.2s ease-out;
+}
+/* The next match's countdown (hud.ts, setCountdown): a big number that pops in each second. */
+#countdown {
+  left: 50%;
+  top: 34%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  color: var(--yellow);
+  -webkit-text-stroke: 6px var(--ink);
+  paint-order: stroke;
+  pointer-events: none;
+}
+#countdown[hidden] {
+  display: none;
+}
+#countdown small {
+  display: block;
+  font: 900 24px var(--head);
+  letter-spacing: 0.08em;
+  -webkit-text-stroke: 5px var(--ink);
+}
+#countdown b {
+  display: block;
+  font: 900 120px/1 var(--head);
+}
+#countdown.tick b {
+  animation: countdown-pop 0.6s ease-out;
+}
+@keyframes countdown-pop {
+  0% { transform: scale(1.6); opacity: 0; }
+  25% { transform: scale(0.95); opacity: 1; }
+  40% { transform: scale(1); }
+  100% { transform: scale(1); }
+}
+/* A map drop's banner stays longer: it is the match's one event to run for (game.ts, 'drop'). */
+#banner.show.long {
+  animation-duration: 4s;
+}
+@keyframes banner {
+  0% { opacity: 0; transform: translateX(-50%) scale(0.7); }
+  10% { opacity: 1; transform: translateX(-50%) scale(1.1); }
+  18% { transform: translateX(-50%) scale(1); }
+  80% { opacity: 1; }
+  100% { opacity: 0; transform: translateX(-50%) scale(1); }
+}
+/* Team mates' names over their heads, those in view only (game.ts, nameTags). */
+#tags {
+  inset: 0;
+  overflow: hidden;
+}
+/* White with ink reads on any wall; the team colour is the chip under the name. */
+#tags div {
+  position: absolute;
+  left: 0;
+  top: 0;
+  padding-bottom: 5px;
+  border-bottom: 4px solid var(--team);
+  color: #fff;
+  font: 800 12px var(--head);
+  -webkit-text-stroke: 3px var(--ink);
+  paint-order: stroke;
+  white-space: nowrap;
+}
+
+#debug {
+  left: 12px;
+  top: calc(12px + var(--tl-shift, 0px));
+  padding: 4px 8px;
+  white-space: pre;
+  font-size: 11px;
+  background: rgba(255, 244, 220, 0.85);
+  border: 2px solid var(--ink);
+}
+/* "Show FPS" in the settings: top left, coloured by speed, under the small scoreboard (--tl-shift, game-hud.css). */
+#fps {
+  left: 12px;
+  top: calc(12px + var(--tl-shift, 0px));
+  padding: 2px 8px;
+  font: 900 13px var(--head);
+  box-shadow: 3px 3px 0 var(--ink);
+}
+#fps.good {
+  background: var(--green);
+  color: #fff;
+}
+#fps.ok {
+  background: var(--yellow);
+}
+#fps.bad {
+  background: var(--red);
+  color: #fff;
+}
+/* The high-ping note (pingNote.ts): orange, under the fps counter when it shows, only while the ping is over 200 ms. */
+#ping-note {
+  left: 12px;
+  top: calc(12px + var(--tl-shift, 0px) + var(--tl-fps, 0px));
+  padding: 2px 8px;
+  font: 900 13px var(--head);
+  background: #ff9a1f;
+  box-shadow: 3px 3px 0 var(--ink);
+}
+#status {
+  left: 50%;
+  top: 62%;
+  transform: translateX(-50%);
+  padding: 6px 14px;
+  font-weight: 800;
+}

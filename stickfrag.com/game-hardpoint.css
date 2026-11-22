@@ -1,0 +1,147 @@
+/* Hardpoint on the game page (hardpointClient.ts, item 287): the A B C bar under the top bar, a line for what you do on a
+   point, and a mark for each point on the top of the screen. --own is the colour of the team that holds the point,
+   --fill the colour of the side the capture leads for, --amount how far the capture has gone. Set by the script. */
+.hp-strip {
+  position: fixed;
+  top: 52px;
+  left: 50%;
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  transform: translateX(-50%);
+  pointer-events: none;
+  font: 900 12px var(--head);
+  color: #fff;
+  text-shadow:
+    -1px -1px 0 var(--ink),
+    1px 1px 0 var(--ink),
+    1px -1px 0 var(--ink),
+    -1px 1px 0 var(--ink);
+}
+.hp-strip[hidden],
+.hp-line[hidden],
+.hp-mark[hidden] {
+  display: none;
+}
+.hp-points {
+  display: flex;
+  gap: 6px;
+}
+/* One point: a box with the letter in the holder's colour, and a bar under it that fills with the capture. */
+.hp-point {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 34px;
+  overflow: hidden;
+  border: 3px solid var(--ink);
+  background: rgba(30, 24, 44, 0.72);
+}
+.hp-point b {
+  position: relative;
+  z-index: 1;
+  font-size: 18px;
+  color: var(--own);
+}
+.hp-point[data-owner='-1'] b {
+  color: #fff;
+}
+.hp-point i {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: var(--amount);
+  height: 7px;
+  background: var(--fill);
+  border-top: 2px solid var(--ink);
+  transition: width 0.12s linear;
+}
+/* A point that is taken pulses; a contested one blinks amber. */
+.hp-point[data-status='capturing'] i {
+  animation: hp-pulse 0.7s ease-in-out infinite alternate;
+}
+.hp-point[data-status='contested'] {
+  border-color: #ffb43a;
+  animation: hp-pulse 0.5s ease-in-out infinite alternate;
+}
+.hp-line {
+  padding: 2px 10px;
+  border: 3px solid var(--ink);
+  background: var(--yellow);
+  color: var(--ink);
+  text-shadow: none;
+}
+.hp-mark {
+  position: fixed;
+  /* Under the line, which shows below the A B C bar. */
+  top: 120px;
+  left: 50%;
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  transform: translateX(-50%);
+  pointer-events: none;
+  font: 900 12px var(--head);
+  color: #fff;
+  text-shadow:
+    -1px -1px 0 var(--ink),
+    1px 1px 0 var(--ink),
+    1px -1px 0 var(--ink),
+    -1px 1px 0 var(--ink);
+}
+.hp-mark .gem {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border: 3px solid var(--own);
+  border-radius: 50%;
+  background: rgba(30, 24, 44, 0.72);
+  box-shadow: 0 0 0 2px var(--ink);
+  font-size: 12px;
+}
+.hp-mark[data-status='contested'] .gem,
+.hp-mark[data-status='capturing'] .gem {
+  animation: hp-pulse 0.6s ease-in-out infinite alternate;
+}
+.hp-mark[data-arrow='left'] .gem {
+  border-left-width: 7px;
+}
+.hp-mark[data-arrow='right'] .gem {
+  border-right-width: 7px;
+}
+@keyframes hp-pulse {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0.5;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hp-point[data-status='capturing'] i,
+  .hp-point[data-status='contested'],
+  .hp-mark .gem {
+    animation: none;
+  }
+}
+/* A phone is short: the bar shrinks and the marks sit a little higher. */
+@media (max-height: 460px) {
+  .hp-point {
+    width: 30px;
+    height: 26px;
+  }
+  .hp-point b {
+    font-size: 14px;
+  }
+  .hp-mark {
+    top: 104px;
+  }
+}

@@ -1,0 +1,770 @@
+/* landing-cards.css: the haven's cards of item 571 (owner's pick, draft A "Three cards and a slot",
+   docs/design/play-menu.md, "571"). Linked after landing-home.css, before landing-touch.css.
+   Left column: LOCKER, PACKS, SIGN IN, EVENT & NEWS. Right: today's list and one tip. After PLAY:
+   three mode tiles and the pink WITH FRIENDS card. All of them are the game's cards (.row-card). */
+
+/* ---- The left column ---- */
+#gear .locker-side {
+  width: min(330px, 23vw);
+  gap: 18px;
+}
+#gear .lk-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 18px;
+  background: #fffbe9;
+  color: var(--ink);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  --tilt: -0.8deg;
+}
+.lk-head img,
+.lk-head svg {
+  display: block;
+  flex: none;
+  width: 60px;
+  height: 60px;
+}
+.lk-text {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  flex: 1;
+  gap: 3px;
+  min-width: 0;
+}
+.lk-text b {
+  font: 900 22px/1 var(--head);
+  letter-spacing: 0.04em;
+}
+.lk-text small {
+  font: 700 13px var(--head);
+  color: var(--ink-soft);
+}
+.lk-chips {
+  display: flex;
+  gap: 5px;
+  margin-top: 4px;
+}
+.lk-chips i {
+  width: 18px;
+  height: 18px;
+  border: 2px solid var(--ink);
+}
+.lk-chips i.none {
+  border-style: dashed;
+  background: none !important;
+}
+.lk-go {
+  flex: none;
+  font: 900 28px/1 var(--head);
+}
+/* PACKS: one line; red once packs wait (locker.ts). */
+#gear .side-btn {
+  padding: 14px 18px;
+}
+#gear .side-btn .lk-go {
+  margin-left: auto;
+}
+#gear .side-btn:not(.has-packs) .lk-go {
+  display: none;
+}
+
+/* ---- SIGN IN: one small orange button until the progress is saved (owner, 2026-10-17) ---- */
+.signin-card {
+  display: grid;
+  align-self: start;
+  padding: 0;
+}
+.signin-card #signin-title,
+.signin-card .signin-why,
+.signin-card .signin-note {
+  display: none;
+}
+/* The button is the PACKS line's twin (.side-btn .row-card: width, height, perforation, tilt, shadow, font),
+   filled with the yellow of the top bar's PLAY (--yellow; the owner calls it orange, 2026-10-17). */
+#gear .signin-btns .side-btn {
+  width: 100%;
+  box-sizing: border-box;
+  justify-content: flex-start;
+  background: var(--yellow);
+  --tilt: -0.5deg;
+}
+/* Saved: one line with the account, a tick and a way into the sheet. */
+.signin-card.saved {
+  padding: 0;
+  background: #fffbe9;
+}
+.signin-line {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 18px;
+  border: 0;
+  background: none;
+  color: var(--ink);
+  font: 900 15px var(--head);
+  text-align: left;
+  cursor: pointer;
+}
+.signin-line[hidden] {
+  display: none;
+}
+.signin-line b {
+  color: var(--green);
+  font-size: 18px;
+}
+.signin-line i {
+  margin-left: auto;
+  font: 900 24px/1 var(--head);
+}
+
+/* ---- EVENT & NEWS: one slot, the poster of the event on or coming, the newest release under it ---- */
+.ev-slot {
+  display: grid;
+  gap: 12px;
+}
+/* Bottom left of the room, level with PLAY (owner, 2026-10-17). */
+.gear.haven .ev-slot.haven-float {
+  bottom: var(--haven-lift);
+  left: 2.5%;
+  width: min(330px, 23vw);
+}
+.ev-slot .side-title {
+  margin: 0;
+}
+.slot-poster {
+  display: grid;
+  gap: 8px;
+  min-height: 150px;
+  padding: 16px 18px;
+  overflow: hidden;
+  background: radial-gradient(120% 90% at 70% 0%, #6b3fa0 0%, #2b1e3f 60%);
+  color: var(--paper);
+  text-decoration: none;
+  --tilt: 0.5deg;
+}
+.slot-poster[hidden] {
+  display: none;
+}
+.slot-poster:not([href]) {
+  cursor: default;
+}
+.slot-poster.poster-room {
+  cursor: pointer;
+}
+.poster-line {
+  /* Clear of the ghost and the pumpkin in the corner. */
+  padding-right: 64px;
+  font: 700 13px/1.2 var(--head);
+  color: var(--paper);
+}
+.poster-pill {
+  justify-self: start;
+  padding: 5px 7px;
+  background: #b9f26b;
+  color: var(--ink);
+  font: 800 12px/1 ui-monospace, 'SF Mono', Menlo, monospace;
+  letter-spacing: 0.05em;
+}
+.poster-name {
+  display: grid;
+  font: 400 32px/0.95 'Bowlby One', 'Arial Black', Impact, sans-serif;
+  color: #b9f26b;
+  -webkit-text-stroke: 1.5px var(--ink);
+  text-shadow: 3px 3px 0 var(--ink);
+}
+.poster-dates {
+  font: 700 13px var(--head);
+  color: rgba(255, 244, 220, 0.9);
+}
+/* The artifact's ghost (WBXJE5aC9crFk5WbmaPxHa, draft A): a rounded sheet with two eyes, and a pumpkin
+   beside it; CSS only, no picture to load. */
+.poster-ghost {
+  position: absolute;
+  right: 20px;
+  bottom: 18px;
+  width: 54px;
+  height: 66px;
+  box-sizing: border-box;
+  border: 3px solid var(--ink);
+  border-radius: 27px 27px 6px 6px;
+  background: rgba(229, 255, 214, 0.9);
+}
+.poster-ghost::before,
+.poster-ghost::after {
+  content: '';
+  position: absolute;
+  top: 22px;
+  width: 8px;
+  height: 11px;
+  border-radius: 50%;
+  background: var(--ink);
+}
+.poster-ghost::before {
+  left: 13px;
+}
+.poster-ghost::after {
+  right: 13px;
+}
+.poster-pumpkin {
+  position: absolute;
+  right: 82px;
+  bottom: 18px;
+  width: 40px;
+  height: 32px;
+  box-sizing: border-box;
+  border: 3px solid var(--ink);
+  border-radius: 50% 50% 46% 46%;
+  background: #ff8a1f;
+}
+.poster-pumpkin::before {
+  content: '';
+  position: absolute;
+  left: 13px;
+  top: -9px;
+  width: 7px;
+  height: 8px;
+  border: 2px solid var(--ink);
+  background: #2fae72;
+}
+/* The small Overwatch teaser over the poster (havenEvent.ts, drawOverwatch): night blue, a red pill, a scope. */
+.slot-ow {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 6px 10px;
+  padding: 12px 16px;
+  background: radial-gradient(120% 120% at 80% 0%, #2a5d78 0%, #0f1d2b 65%);
+  color: var(--paper);
+  --tilt: -0.4deg;
+}
+.slot-ow[hidden] {
+  display: none;
+}
+.slot-ow > * {
+  position: relative;
+  z-index: 1;
+}
+.ow-pill {
+  grid-column: 1;
+  background: #ff4d4d;
+  color: #fff;
+}
+.ow-text {
+  grid-column: 1;
+  font: 900 14px/1.25 var(--head);
+  color: #ffd23f;
+}
+/* A sniper scope: a ring, the cross and a red dot on its middle; CSS only. */
+.ow-scope {
+  grid-column: 2;
+  grid-row: 1 / 3;
+  width: 40px;
+  height: 40px;
+  box-sizing: border-box;
+  border: 3px solid var(--ink);
+  border-radius: 50%;
+  background:
+    radial-gradient(circle, #ff4d4d 0 3px, transparent 4px),
+    linear-gradient(var(--ink), var(--ink)) center / 2px 100% no-repeat,
+    linear-gradient(var(--ink), var(--ink)) center / 100% 2px no-repeat,
+    rgba(214, 240, 255, 0.85);
+}
+/* The live card (reviewCard.ts, item 443): the teaser becomes one link to the case page. */
+.slot-ow.live {
+  display: block;
+  padding: 0;
+}
+.ow-link {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 6px 10px;
+  padding: 12px 16px;
+  color: inherit;
+  text-decoration: none;
+}
+.ow-link:hover .ow-text,
+.ow-link:focus-visible .ow-text {
+  text-decoration: underline;
+}
+.ow-go {
+  grid-column: 1;
+  font: 700 12px/1.2 var(--head);
+  color: var(--paper);
+}
+.ow-note {
+  grid-column: 1;
+  font: 700 12px/1.2 var(--head);
+  color: #ff9d9d;
+}
+.ow-thanks {
+  grid-template-columns: 1fr auto;
+}
+.ow-thanks .ow-scope {
+  display: none;
+}
+.ow-open {
+  grid-column: 2;
+  grid-row: 2 / 4;
+  align-self: center;
+  padding: 6px 12px;
+  border: 3px solid var(--ink);
+  background: var(--paper);
+  color: var(--ink);
+  font: 900 13px/1 var(--head);
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.slot-ow.live .ow-scope {
+  grid-row: 1 / 4;
+}
+/* Short screens: the slot grows up from PLAY's level into the left column, so the teaser goes first
+   (below 960 px: at 1600x900 its label sat on the Sign in card, item 805), the poster gets compact
+   (below 820 px), and below 830 px the news card keeps its title line only (at 1366x768 the label
+   sat on the Sign in card). */
+@media (max-height: 960px) {
+  #gear.haven .slot-ow:not(.live) {
+    display: none;
+  }
+  /* The live review card (item 443) takes the news card's place: both do not fit. */
+  #gear.haven:has(.slot-ow.live:not([hidden])) .slot-news {
+    display: none;
+  }
+}
+@media (max-height: 830px) {
+  #gear.haven .news-lines {
+    display: none;
+  }
+}
+@media (max-height: 820px) {
+  #gear.haven .slot-poster {
+    min-height: 0;
+    padding: 12px 16px;
+  }
+  #gear.haven .slot-poster .poster-name {
+    font-size: 26px;
+  }
+}
+.slot-news {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 13px 18px;
+  background: #fffbe9;
+  color: var(--ink);
+  text-decoration: none;
+  --tilt: -0.6deg;
+}
+.slot-news[hidden] {
+  display: none;
+}
+.news-pill {
+  flex: none;
+  padding: 5px 7px;
+  background: var(--blue);
+  color: #fff;
+  font: 800 12px/1 ui-monospace, 'SF Mono', Menlo, monospace;
+  letter-spacing: 0.05em;
+}
+/* The pill sits on the name's line; the three lines hang under the name (owner, 2026-10-18). */
+#gear .slot-news {
+  align-items: flex-start;
+}
+.news-body {
+  position: relative;
+  z-index: 1;
+  flex: 1;
+  min-width: 0;
+  display: grid;
+  gap: 5px;
+}
+.news-text {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font: 900 14px/1.3 var(--head);
+}
+.news-lines {
+  display: grid;
+  gap: 3px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.news-lines li {
+  position: relative;
+  padding-left: 13px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font: 700 12.5px/1.3 var(--head);
+  color: rgba(21, 17, 28, 0.82);
+}
+.news-lines li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0.5em;
+  width: 6px;
+  height: 6px;
+  background: var(--blue);
+}
+.news-go {
+  align-self: center;
+}
+.news-go {
+  flex: none;
+  font: 900 22px/1 var(--head);
+}
+/* The old Friends Weekend card gave way to the poster; its section below is still opened from the poster. */
+#gear.haven .event-card {
+  display: none !important;
+}
+
+/* ---- The Locker panel: tabs HEAD / HATS / BODY ---- */
+.lk-tabs {
+  display: flex;
+  border-bottom: 3px solid var(--ink);
+}
+.lk-tab {
+  flex: 1;
+  margin: 0 0 0 -3px;
+  padding: 12px 6px;
+  border: 0;
+  border-left: 3px solid var(--ink);
+  background: #fff;
+  color: var(--ink);
+  font: 900 15px/1 var(--head);
+  letter-spacing: 0.04em;
+  cursor: pointer;
+}
+.lk-tab:first-child {
+  border-left: 0;
+}
+.lk-tab[aria-selected='true'] {
+  background: var(--ink);
+  color: var(--yellow);
+}
+.lk-pane {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  padding: 0;
+}
+.lk-pane[hidden] {
+  display: none;
+}
+.lk-pane[data-tab] {
+  overflow-y: auto;
+}
+.lk-label {
+  margin: 0;
+  padding: 16px 16px 8px;
+  font: 900 15px var(--head);
+}
+.lk-hint {
+  margin: 0;
+  padding: 4px 16px 0;
+  font: 700 13px/1.35 var(--head);
+  color: var(--ink-soft);
+}
+.lk-hint[hidden] {
+  display: none;
+}
+.lk-pane .swatches {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 8px;
+  padding: 0 16px 8px;
+}
+.lk-pane .swatch {
+  width: auto;
+  height: auto;
+  aspect-ratio: 1;
+}
+.lk-pane .swatch.locked span {
+  font-size: 9px;
+}
+
+/* ---- Right side: today's list (no bars) and one tip ---- */
+#gear .daily-card {
+  display: grid;
+  gap: 12px;
+  padding: 16px 18px;
+}
+#gear .daily-card .daily-head {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+#gear .daily-card .daily-title {
+  padding: 5px 9px;
+  background: var(--ink);
+  color: var(--paper);
+  font: 800 12px/1 ui-monospace, 'SF Mono', Menlo, monospace;
+  letter-spacing: 0.13em;
+}
+#gear .daily-card .daily-left {
+  margin-left: auto;
+  font: 700 12px var(--head);
+  color: var(--ink-soft);
+}
+#gear .daily-card .daily-rows {
+  display: grid;
+  gap: 11px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+#gear .daily-card .daily-row {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 0;
+  border: 0;
+  background: none;
+  box-shadow: none;
+  font: 800 15px/1.2 var(--head);
+}
+#gear .daily-card .daily-bar {
+  display: none;
+}
+#gear .daily-card .daily-tick {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 24px;
+  height: 24px;
+  border: 3px solid var(--ink);
+  border-radius: 50%;
+  background: #fff;
+  font-size: 14px;
+}
+#gear .daily-card .daily-row.done .daily-tick {
+  background: var(--green);
+  color: #fff;
+}
+#gear .daily-card .daily-row.done .daily-text {
+  text-decoration: line-through;
+  opacity: 0.55;
+}
+#gear .daily-card .daily-text {
+  flex: 1;
+  min-width: 0;
+}
+#gear .daily-card .daily-count {
+  flex: none;
+  padding: 3px 5px;
+  border: 2px solid var(--ink);
+  background: #fff;
+  font: 800 12px/1 ui-monospace, 'SF Mono', Menlo, monospace;
+  font-style: normal;
+}
+#gear .daily-card .daily-pay {
+  margin: 0;
+  font: 700 12.5px/1.35 var(--head);
+  color: var(--ink-soft);
+}
+/* One tip at a time: a big key cap, a title, one line; arrows and dots. */
+#gear .tips-card {
+  width: 100%;
+  gap: 10px;
+  padding: 14px 18px;
+}
+.tip-top {
+  display: flex;
+  align-items: center;
+}
+.tip-count {
+  margin: 0;
+  padding: 5px 9px;
+  background: var(--ink);
+  color: var(--paper);
+  font: 800 12px/1 ui-monospace, 'SF Mono', Menlo, monospace;
+  letter-spacing: 0.13em;
+}
+.tip-arrows {
+  margin-left: auto;
+  display: flex;
+  gap: 4px;
+}
+.tip-arrows button {
+  width: 32px;
+  height: 28px;
+  border: 0;
+  background: none;
+  color: var(--ink);
+  font: 900 24px/1 var(--head);
+  cursor: pointer;
+}
+.tip-body {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.tip-key {
+  display: grid;
+  place-items: center;
+  flex: none;
+  min-width: 56px;
+  height: 56px;
+  padding: 0 8px;
+  border: 3px solid var(--ink);
+  border-bottom-width: 6px;
+  border-radius: 8px;
+  background: #fff;
+  font: 900 24px/1 var(--head);
+}
+.tip-key.long {
+  font-size: 15px;
+}
+.tip-body p {
+  display: grid;
+  gap: 3px;
+  margin: 0;
+}
+.tip-body b {
+  font: 900 19px/1.15 var(--head);
+}
+.tip-body span {
+  font: 700 13px/1.3 var(--head);
+  color: var(--ink-soft);
+}
+.tip-dots {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+}
+.tip-dots button {
+  width: 11px;
+  height: 11px;
+  padding: 0;
+  border: 2px solid var(--ink);
+  border-radius: 50%;
+  background: #fff;
+  cursor: pointer;
+}
+.tip-dots button.on {
+  background: var(--ink);
+}
+
+/* ---- After PLAY on the haven: PICK A MODE, three tiles that join at once, WITH FRIENDS ---- */
+.pick-label {
+  display: none;
+}
+#gear.haven:not([data-layout='touch']) .pick-label {
+  display: block;
+  margin: 0;
+  padding: 7px 10px;
+  background: var(--ink);
+  color: var(--paper);
+  font: 800 13px/1 ui-monospace, 'SF Mono', Menlo, monospace;
+  letter-spacing: 0.13em;
+  white-space: nowrap;
+}
+/* CREATE ROOM is the pink card's button now (WITH FRIENDS); QUICK JOIN stays, a slim line. */
+#gear.haven:not([data-layout='touch']) #start-create {
+  display: none;
+}
+#gear.haven .mode-tiles .mode-tile {
+  align-content: start;
+  justify-items: start;
+  gap: 8px;
+  min-height: 0;
+  padding: 16px 16px 14px;
+  text-align: left;
+}
+#gear.haven .mode-tiles .mode-tile > b:not(.tile-name) {
+  display: none;
+}
+#gear.haven .mode-tile .tile-name {
+  display: block;
+  font: 900 clamp(22px, 1.9vw, 30px)/1.02 var(--head);
+  letter-spacing: 0.02em;
+}
+#gear.haven .mode-tile .tile-blurb {
+  margin: 0;
+  font: 700 14px/1.3 var(--head);
+}
+#gear.haven .mode-tile .tile-live {
+  margin: 0;
+  padding: 5px 8px;
+  background: var(--ink);
+  color: var(--paper);
+  font: 800 12px/1 ui-monospace, 'SF Mono', Menlo, monospace;
+  letter-spacing: 0.05em;
+}
+#gear.haven .mode-tile .tile-live::before {
+  content: '';
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  margin-right: 6px;
+  border-radius: 50%;
+  background: #57e38f;
+}
+#gear.haven .mode-tile .tile-live:empty {
+  display: none;
+}
+#gear.haven .mode-tile .tile-join {
+  align-self: end;
+  justify-self: stretch;
+  margin: auto 0 0;
+  padding: 13px 10px;
+  border: 3px solid var(--ink);
+  background: var(--yellow);
+  box-shadow: 3px 3px 0 var(--ink);
+  font: 900 18px/1 var(--head);
+  text-align: center;
+}
+#gear:not(.haven) .tile-name,
+#gear:not(.haven) .tile-blurb,
+#gear:not(.haven) .tile-join {
+  display: none;
+}
+#gear.haven .tile-name,
+#gear.haven .tile-blurb,
+#gear.haven .tile-join {
+  display: block;
+}
+/* The pink card beside the tiles: the room-code card, shown here with the pick. */
+#gear.haven[data-step='start'] #code-card {
+  display: block;
+  position: absolute;
+  left: auto;
+  right: 4%;
+  bottom: var(--haven-lift);
+  translate: none;
+  width: min(300px, 21%);
+  min-height: 0;
+}
+.gear.haven[data-step='start'] .haven-float:is(.play-big, .haven-toprow) {
+  display: none;
+}
+
+/* Short screens (update 1.7 check, 2026-10-24): the right column stacks four cards and the room-code
+   card floats over its lower ones, so the lowest go first; at 720 px the news card goes too, or the
+   EVENT & NEWS label sits on the Sign in card. */
+@media (max-height: 960px) {
+  #gear.haven #hunt-card {
+    display: none;
+  }
+}
+@media (max-height: 830px) {
+  #gear.haven #pass-strip {
+    display: none;
+  }
+}
+@media (max-height: 740px) {
+  #gear.haven #streak-card,
+  #gear.haven .slot-news {
+    display: none;
+  }
+}

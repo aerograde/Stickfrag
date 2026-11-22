@@ -1,0 +1,14 @@
+/* game-minimap.css: the small map top left (minimapView.ts, docs/design/minimap.md). It stands first in the corner's stack; its
+   height goes to --minimap-h, and game-hud.css moves the board, the counters and the cards under it. */
+.minimap {
+  left: 12px;
+  top: calc(12px / var(--hud-scale, 1));
+  box-sizing: content-box;
+  border: 2px solid var(--ink);
+  box-shadow: 2px 2px 0 rgba(21, 17, 28, 0.5);
+  zoom: var(--hud-scale, 1);
+}
+/* Hold Tab: the whole map grows in place, over the stack under it, left of the scoreboard (minimapView.ts, place). */
+.minimap.whole {
+  z-index: 4;
+}
