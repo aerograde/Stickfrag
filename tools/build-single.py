@@ -106,28 +106,55 @@ P2P_CSS = """
 #sf-p2p button.dark { background: #15111c; color: #fff4dc; }
 """
 
-# The landing page ships as a long, scrolling site: the hero, then a news row, a
-# week card, a pricing block and a footer. This build is one screen, so everything
-# below the hero is not part of it and the page does not scroll at all.
+# The home page is the real site: it scrolls, and everything below the hero is
+# part of it. Nothing here may lock it to one screen -- that was the bug that made
+# a small window clip the menu with no way to reach the rest of it.
 #
-# The layout itself is left to the page: its gear screen is a grid whose stage has
-# a fixed 2:1 aspect ratio, and overriding those heights squashes the menu cards.
-# The only thing added here is that the stage gives up its height once a step is
-# open, because the mode list needs it to stay above the fold.
-HOME_LOCK_CSS = """
-html, body { height: 100%; overflow: hidden; }
-#sf-home-root { height: 100%; overflow: hidden; background: var(--sky, #b9def0); }
-#sf-home-root main { height: 100%; overflow: hidden; }
-#sf-home-root main > :not(.gear) { display: none !important; }
-#sf-home-root #gear { min-height: 100%; }
-/* The server browser step is not part of this build, so its entry point would
-   open a blank screen. Everything else on the start step stays. */
-#sf-home-root #start-servers { display: none !important; }
-#sf-home-root footer, #sf-home-root nav[aria-label="Footer"] { display: none !important; }
-#sf-home-root #gear:not([data-step='gear']) .gear-stage {
-  aspect-ratio: auto;
-  height: 26vh;
-  min-height: 130px;
+# What is added is scoped to the single-file wrapper only:
+#   * #sf-home-root is the page's own body content, so give it the body's flow.
+#   * The server-browser entry point is hidden: its step is not part of this build.
+SF_HOME_CSS = """
+#sf-home-root { display: block; }
+"""
+
+# The HUD panels are sized for a desktop window: #health is 220 px wide, the ammo
+# card 260 px and #vitals at least 150 px. On a narrow screen they collide and spill
+# off the edge. These cap the widths to the viewport; nothing about colour, font or
+# geometry changes.
+#
+# The panels carry `zoom: var(--hud-scale)` (game-hud.css), and zoom multiplies a
+# length, so a width that has to fit the screen divides 100vw by the scale -- the
+# same rule the site's own narrow-screen HUD rules use.
+NARROW_HUD_CSS = """
+@media (max-width: 720px) {
+  #health { width: min(220px, calc(46vw / var(--hud-scale, 1))); }
+  #vitals { right: 10px; bottom: 10px; }
+  #ammo { width: min(260px, calc(62vw / var(--hud-scale, 1))); }
+  /* The toast is rotated -3deg, which pushes its box a few pixels wider than its
+     computed width, so it keeps a margin from the edge. */
+  #toast {
+    right: 16px;
+    bottom: calc(124px / var(--hud-scale, 1));
+    max-width: calc(100vw / var(--hud-scale, 1) - 40px);
+  }
+  /* #xpbar is sized to sit between the health bar and the ammo card:
+     calc(100vw - 560px). Below 560px of usable width that is negative, and its
+     min-width: 200px then makes it overlap both corners. Give it the width it is
+     centred in, and lift it clear of both. */
+  #xpbar {
+    bottom: calc(84px / var(--hud-scale, 1));
+    width: min(360px, calc(100vw / var(--hud-scale, 1) - 20px));
+    max-width: none;
+    min-width: 0;
+  }
+  /* The sight hint sits over the ammo card; on a short screen it lands on the
+     weapon bar instead. */
+  #sightkey { display: none; }
+}
+@media (max-width: 460px) {
+  #health { width: min(220px, calc(50vw / var(--hud-scale, 1))); }
+  #ammo { width: min(260px, calc(66vw / var(--hud-scale, 1))); }
+  #xpbar { bottom: calc(92px / var(--hud-scale, 1)); }
 }
 """
 
@@ -302,7 +329,15 @@ SHELL = r"""
   // The game reads its boot parameters from the query string when the module
   // starts, so they have to be in place before the blob is imported.
   const applyBootParams = () => {
-    const p = new URLSearchParams(location.search);
+    // Inside the SVG's inline frame the document URL is a blob, so it has no query
+    // string of its own. The wrapper passes the SVG's query by postMessage and it
+    // is merged in here, before anything reads the parameters.
+    let extra = '';
+    try {
+      if (window.parent && window.parent !== window) extra = window.__SF_PARENT_QUERY || '';
+    } catch {}
+    const p = new URLSearchParams(extra);
+    new URLSearchParams(location.search).forEach((v, k) => p.set(k, v));
     gq.forEach((v, k) => p.set(k, v));
     const peer = p.get('peer');
     if (peer) p.delete('offline'); else p.set('offline', '');
@@ -329,28 +364,75 @@ SHELL = r"""
     } catch {}
   };
 
-  const startGame = async () => {
-    if (started) return true;
-    started = true;
+  let gameNodes = [];
+  let gameSource = null;
 
-    // Swap the screens. The home markup leaves the document entirely, so its
-    // stylesheet and ids cannot reach the game; the game markup arrives from
-    // the inert template.
-    // Keep the markup, hide it. The landing bundle has a few writes scheduled
-    // two animation frames out (the XP bar, for one); if the nodes are gone it
-    // dereferences null. Hidden is enough to take the screen out of play.
+  // The home page and the game share six element ids (#gear, #feedback, #fb-close,
+  // #fb-send, #fb-status, #fb-text) and the game resolves its HUD with
+  // document.getElementById, which returns the FIRST match in document order.
+  // Inserting the game's markup *before* the home root therefore makes every
+  // shared id resolve to the game's node while a match runs, so the game never
+  // writes into the hidden menu. Hiding the home alone is not enough: the HUD
+  // used to empty the whole #gear section and going HOME landed on a blank page.
+  const swapToGame = () => {
+    gameCss.disabled = false;
+    document.body.classList.add('sf-playing');
+    const frag = gameTpl.content.cloneNode(true);
+    gameNodes = [...frag.children];
+    document.body.insertBefore(frag, homeRoot);
     homeRoot.style.display = 'none';
     homeRoot.setAttribute('aria-hidden', 'true');
     homeCss.disabled = true;
     const homeLock = document.getElementById('sf-home-lock');
     if (homeLock) homeLock.disabled = true;
-    gameCss.disabled = false;
-    document.body.appendChild(gameTpl.content.cloneNode(true));
-    document.body.classList.add('sf-playing');
+    // The haven's 3D room holds its own WebGL context. Let it go before the game
+    // asks for one: two live contexts on a weak GPU is the difference between a
+    // playable match and a slideshow. The lobby rebuilds itself on HOME.
+    window.__sfLobbyRelease?.();
+  };
 
-    const src = gameSrc.textContent;
+  const swapToHome = () => {
+    for (const node of gameNodes) node.remove();
+    gameNodes = [];
+    // The game leaves inline style on <body> and the root (HUD zoom, cursor).
+    document.body.removeAttribute('style');
+    document.body.classList.remove('sf-playing');
+    homeRoot.style.display = '';
+    homeRoot.removeAttribute('aria-hidden');
+    homeCss.disabled = false;
+    const homeLock = document.getElementById('sf-home-lock');
+    if (homeLock) homeLock.disabled = false;
+    gameCss.disabled = true;
+    window.scrollTo(0, 0);
+    window.__sfLobbyRestore?.();
+    // A second PLAY has to be able to boot a fresh module: the old one is gone
+    // with its markup.
+    started = false;
+  };
+
+  // The game's HOME / "leave" paths all do location.replace('/#gear'), which in a
+  // single file would re-parse the whole document (and in the SVG wrapper would
+  // leave it entirely). They call this instead.
+  window.__sfHome = () => {
+    swapToHome();
+    const url = new URLSearchParams(location.search);
+    for (const k of ['peer', 'room', 'mode', 'map', 'bots', 'nobots'])
+      url.delete(k);
+    try {
+      const q = url.toString();
+      history.replaceState(null, '', location.pathname + (q ? '?' + q : ''));
+    } catch {}
+    return true;
+  };
+
+  const startGame = async () => {
+    if (started) return true;
+    started = true;
+
+    swapToGame();
+    gameSource ??= gameSrc.textContent;
     gameSrc.remove();
-    const url = URL.createObjectURL(new Blob([src], { type: 'text/javascript' }));
+    const url = URL.createObjectURL(new Blob([gameSource], { type: 'text/javascript' }));
     try {
       return await import(url);
     } finally {
@@ -414,6 +496,39 @@ SHELL = r"""
       // real match object (mode, scoreboard, team scores, ability pickups)
       // instead of the bare offline sandbox.
       if (!params.get('peer')) params.set('peer', 'host');
+      // Remember the room so the server browser can list it. There is no
+      // matchmaking to ask, so this local record is what exists.
+      if (params.get('peer') === 'host') {
+        try {
+          const code = params.get('room') || 'LOCAL1';
+          const key = 'sf:rooms';
+          const list = JSON.parse(localStorage.getItem(key) || '[]')
+            .filter((r) => r.code !== code);
+          list.unshift({
+            code,
+            mode: params.get('mode') || 'ffa',
+            map: params.get('map') || 'yard',
+            players: 1,
+          });
+          localStorage.setItem(key, JSON.stringify(list.slice(0, 8)));
+        } catch {}
+        // The map can be "any" until the game resolves it, so correct the record
+        // from the live match once it exists.
+        const settle = (tries) => {
+          const map = globalThis.__sfGame?.match?.map;
+          if (map) {
+            try {
+              const key = 'sf:rooms';
+              const list = JSON.parse(localStorage.getItem(key) || '[]');
+              for (const room of list) if (room.map === 'any') room.map = map;
+              localStorage.setItem(key, JSON.stringify(list));
+            } catch {}
+            return;
+          }
+          if (tries > 0) setTimeout(() => settle(tries - 1), 500);
+        };
+        setTimeout(() => settle(60), 800);
+      }
       params.forEach((v, k) => gq.set(k, v));
       applyBootParams();
       startGame().catch((err) => console.error('could not start the game', err));
@@ -560,16 +675,29 @@ def game_js() -> str:
     return js.replace("</script", "<\\/script")
 
 
-def home_body() -> str:
-    """The landing page's body markup, minus its scripts (the bundle replaces them)."""
+def home_body() -> tuple[str, str, str]:
+    """The landing page's body markup, and the attributes of its html/body.
+
+    The page's `<html>` carries `data-ads="soon"`, which its own stylesheet uses to
+    hide the billboard hero (landing-home.css) exactly as it does live, and
+    `<body>` carries the `data-lobby` / `data-halo` scene URLs. Those stay on the
+    document the shell builds, so the restored page keeps its real behaviour.
+
+    Its scripts are dropped: the home bundle already contains them, bundled.
+    """
     html = read(SITE / "index.html")
-    m = re.search(r"<body[^>]*>(.*)</body>", html, re.S)
+    m = re.search(r"<body([^>]*)>(.*)</body>", html, re.S)
     if not m:
         raise SystemExit("no body in index.html")
-    body = m.group(1)
+    body_attrs, body = m.group(1), m.group(2)
     body = re.sub(r'<script[^>]*src="[^"]*"[^>]*>\s*</script>', "", body)
     body = re.sub(r"<script(?![^>]*nonce)[^>]*>.*?</script>", "", body, flags=re.S)
-    return body
+    html_tag = re.search(r"<html([^>]*)>", html)
+    attrs = html_tag.group(1) if html_tag else ""
+    # lang and translate are set on the wrapper already (translate="no" keeps the
+    # HUD's every-frame text rewrites from flipping the page through a translator).
+    attrs = re.sub(r'\s+(lang|translate)="[^"]*"', "", attrs)
+    return body, attrs, body_attrs
 
 
 def game_body() -> str:
@@ -593,10 +721,13 @@ def icon_map() -> dict[str, str]:
 
 def main() -> None:
     home_js = read(BUILD / "home.js")
+    landing_js = read(BUILD / "landing.js")
+    support_js = read(BUILD / "supportscene.js")
     css_home = rewrite_css_urls(home_css())
     css_game = rewrite_css_urls(read(SITE / "game.all.css"))
     js_game = game_js()
-    body_home = rewrite_markup_srcs(home_body())
+    raw_home, html_attrs, body_attrs = home_body()
+    body_home = rewrite_markup_srcs(raw_home)
     body_game = rewrite_markup_srcs(game_body())
 
     nonce = secrets.token_urlsafe(12)
@@ -608,12 +739,13 @@ def main() -> None:
   stickfrag.html - the whole game in one self-contained file.
   Generated by tools/build-single.py; rebuild with ./tools/build-all.sh.
 
-  The home screen and the game share this document but never at the same time:
-  the home markup is live, the game markup is inert inside a <template>, and the
-  game's module text is parked in a type="text/plain" script until PLAY is
-  pressed. See SHELL in the builder for why.
+  The home page is the real stickfrag.com landing page, whole: the header, the
+  hero, the news rows, the #play section and the footer are all here and the page
+  scrolls exactly as it does live. The game's markup is inert inside a <template>
+  and its module text is parked in a type="text/plain" script until PLAY, so the
+  menu costs no WebGL context. See SHELL in the builder for why.
 -->
-<html lang="en" translate="no">
+<html lang="en" translate="no"{html_attrs}>
   <head>
     <meta charset="utf-8" />
     <meta name="google" content="notranslate" />
@@ -654,18 +786,21 @@ def main() -> None:
   }});
 }})();</script>
     <style id="sf-home-css">{css_home}</style>
-    <style id="sf-home-lock">{HOME_LOCK_CSS}</style>
+    <style id="sf-home-lock">{SF_HOME_CSS}</style>
     <style id="sf-game-css">{css_game}</style>
+    <style id="sf-narrow-hud">{NARROW_HUD_CSS}</style>
     <style id="sf-pips">{PIP_CSS}</style>
     <style id="sf-p2p-css">{P2P_CSS}</style>
   </head>
-  <body>
+  <body{body_attrs} class="sf-home">
 <template id="sf-game-dom">{body_game}</template>
 <div id="sf-home-root">{body_home}</div>
 {P2P_MARKUP.replace("__NONCE__", nonce)}
 <script type="text/plain" id="sf-game-src">{js_game}</script>
 <script nonce="{nonce}">{NET_OFF}</script>
 <script nonce="{nonce}">{home_js}</script>
+<script nonce="{nonce}">{landing_js}</script>
+<script nonce="{nonce}">{support_js}</script>
 <script nonce="{nonce}">{shell}</script>
   </body>
 </html>

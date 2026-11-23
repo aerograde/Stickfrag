@@ -21,38 +21,69 @@ is *parked* as inert text, so sitting on the menu costs ~10 MB of JS heap instea
 ~120 MB and no WebGL context at all. Choosing a mode swaps the screens in place and
 boots the module from a blob URL.
 
+When the match boots, the game's markup is inserted **before** the home root in the
+document. The two screens share six element ids (`#gear`, `#feedback`, `#fb-close`,
+`#fb-send`, `#fb-status`, `#fb-text`) and the game resolves its HUD with
+`document.getElementById`, which returns the first match in document order, so the
+game's nodes have to come first. Hiding the home instead let the HUD empty the menu's
+`#gear`, which left a blank screen after HOME. HOME now calls a shell hook
+(`globalThis.__sfHome`) rather than navigating, so a match ends in place: the game's
+markup is removed, the menu comes back with its contents intact, and a second match
+can start.
+
 `stickfrag.svg` is the same file in an image wrapper, for anything that will only
 accept an SVG. An SVG opened directly is an XML document, so the game cannot run
 inside it: `document.body` is null and `createElement("canvas")` returns an
-`SVGElement` with no `getContext`. The wrapper carries the untouched payload and
-writes it into a fresh `about:blank` tab, which is a real HTML document. Browsers
-block `window.open` without a gesture, so it tries on load and the whole page is
-also a clickable retry. The query string survives into the tab, so `?peer=join`
-invite links work there too.
+`SVGElement` with no `getContext`. The wrapper carries the untouched payload and runs
+it in a nested frame:
+
+- **`file://` runs it in place**, in an `<iframe>` fed a blob URL. This is the
+  double-click case, and it is the one that can capture the mouse: Chromium refuses
+  pointer lock in an `about:srcdoc` frame (`WrongDocumentError`) but allows it in a
+  blob frame. No second tab.
+- **`http(s)` opens a new tab**, because Chromium refuses pointer lock inside a blob
+  document served over http. Browsers block `window.open` without a gesture, so it
+  tries on load and the whole page is also a clickable retry.
+
+A blob document from `file://` has a null origin, so `localStorage` throws there. The
+game only keeps a nickname and the settings in it, so the wrapper installs a
+memory-backed `Storage` before the payload's own scripts run. The query string cannot
+ride on a blob URL (appending one makes it invalid), so it is injected into the
+payload's `<head>` as `__SF_PARENT_QUERY`, which the shell merges into its boot
+parameters; `?peer=join&room=…` invite links work in both paths.
 
 ### The menu
 
-The home screen is the real landing page, so its own flow is intact: nickname, PLAY,
-then the mode list (TDM, free-for-all, gun game, capture the flag, pumpkin bomb),
-QUICK JOIN and CREATE A ROOM. Those steps and their stylesheets are the site's own;
-this build only removes the top bar, the server browser and the scrolling marketing
-sections below the hero.
+The home screen is the real landing page, **whole**: the top bar, the hero, the squad
+ribbon, the weekly row, the thank-you card, the updates, the `#play` section and the
+footer. Its own flow is intact: nickname, PLAY, then the mode list (TDM, free-for-all,
+gun game, capture the flag, pumpkin bomb), TRAINING, QUICK JOIN and CREATE A ROOM.
+Those steps and their stylesheets are the site's own.
 
-Two things are rewired because the server they used is gone:
+The page **scrolls**, exactly as it does live. An earlier build forced it to one
+viewport with `overflow: hidden`, which on a small screen clipped the menu — the mode
+list and QUICK JOIN were unreachable — and read as a completely broken page.
+
+Three things are rewired because the server they used is gone:
 
 - **Room-code JOIN.** The page asks matchmaking which room a code is; peers here find
   each other over the broker, so that submit is handled locally instead.
 - **Launch.** The menu ends by assigning to `location.href`. That URL carries mode,
   map and room and is exactly what the game reads from the query string, so it is
   handed to the shell and the match starts in place instead of re-parsing the file.
+- **The server browser.** The step and its row renderer are the site's own; only the
+  source of the rows changed. A hosted room is recorded locally and listed there, so
+  ALL SERVERS shows the rooms this build actually has rather than failing to reach a
+  matchmaker.
+
+Links to pages a single file cannot serve (leaderboard, maps, ideas, updates, privacy
+and the rest) are removed rather than left to fail; every removal is counted in
+`tools/patch_home.py`, so an upstream layout change fails the build instead of
+shipping a dead link.
 
 Choosing a mode hosts a local match, which is what gives it a real match object —
 mode name, scoreboard, and team scores for the team modes — rather than the bare
 offline sandbox. Reloading a match URL restores that same mode.
-
-The original landing page's top bar, server browser, footer and the long scrolling
-marketing sections below the hero are not part of this build: the home screen is
-exactly one viewport.
 
 `index.html` is the older standalone home page and is no longer required.
 
@@ -176,21 +207,38 @@ Patch layers are exact-match replacements, so a moved upstream fails the build i
 producing a half-patched client:
 
 ```
-tools/patch-build.py perf wheel net abilities abilities_bind   # client source
-tools/build-home-bundle.py                                     # home screen bundle
-tools/build-single.py                                          # stickfrag.html + .svg
+tools/patch-build.py perf wheel net abilities abilities_bind portable   # client source
+tools/build-home-bundle.py                                              # home + landing bundles
+tools/build-single.py                                                   # stickfrag.html
+tools/build-svg.py                                                      # stickfrag.svg
 ```
+
+`build-home-bundle.py` produces three bundles: the menu (`home.js`), the landing
+sections (`landing.js`) and the halo stickman (`supportscene.js`). They are separate
+on purpose. Adding `landing.js` to the menu entry renames every minified symbol in
+`home.js`, and the counted substitutions in `route_launch()` match on those names.
 
 ## Tests
 
 ```bash
-python3 tools/test_single.py   # home screen, no top bar / server list / scroll, PLAY in place
-python3 tools/test_svg.py      # the SVG build plays the same match, 60 fps, no network
-python3 tools/test_wheel.py    # scroll-wheel weapon switching
-python3 tools/test_pips.py     # sound pips: standing emits, crouching does not
-python3 tools/test_peers.py    # two-peer join, seating, movement, frame rate
-python3 tools/test_pickups.py  # F takes a wall weapon and an ability
-python3 tools/test_death.py    # death UI, respawn, no shooting while dead, health monotonic
+python3 tools/test_single.py     # whole site, scrolls, PLAY in place, HOME in place, HUD ids
+python3 tools/test_svg.py        # the SVG over http: launcher, tab, match, 60 fps
+python3 tools/test_svg_file.py   # the SVG from file://: inline frame, pointer lock, HOME
+python3 tools/test_wheel.py      # scroll-wheel weapon switching
+python3 tools/test_pips.py       # sound pips: standing emits, crouching does not
+python3 tools/test_peers.py      # two-peer join, seating, movement, frame rate
+python3 tools/test_pickups.py    # F takes a wall weapon and an ability
+python3 tools/test_death.py      # death UI, respawn, no shooting while dead, health monotonic
+```
+
+Diagnostics written while chasing the small-screen report, kept because they measure
+things the assertions do not:
+
+```bash
+python3 tools/diag_small.py            # every viewport: overflow, scrollability, errors
+python3 tools/diag_game.py 360 640 2   # a match: fps, draw calls, buffer size, quality
+python3 tools/shots_small.py 360 640 2 # menu / mode list / match screenshots
+python3 tools/shots_small.py 360 640 2 --live   # the same, from stickfrag.com
 ```
 
 `test_peers.py` runs two browser contexts on one machine, which share an mDNS host candidate;
@@ -198,6 +246,39 @@ it disables `WebRtcHideLocalIpsWithMdns` so same-machine ICE can complete. Real 
 different machines, where that is not a factor.
 
 ## Performance notes
+
+### Low-end and small-screen devices
+
+The client is WebGL2 throughout; there is no WebGPU path to add or lose
+(`navigator.gpu`, `GPUDevice` and `requestAdapter` appear nowhere in the bundle).
+The renderer already asks for a low-latency context (`desynchronized: true`,
+`powerPreference: "high-performance"`, no antialiasing). What a weak device actually
+needs is for the *quality and resolution policy* to notice it, and four changes do
+that without touching the art, the shaders, the ink pass or the paper pass:
+
+- **A weak desktop starts on LOW.** `qK()` already picked quality from the device on
+  touch and left desktop at HIGH. It now covers desktop too: a software rasteriser
+  (`SwiftShader`, `llvmpipe`, `Basic Render`), 4 GB of RAM or less, four cores or
+  fewer, or a small screen starts at the LOW preset that the Graphics setting already
+  offers — 0.75× pixels, 1024 shadow map. A machine that cannot hold HIGH no longer
+  spends its first minute finding out. Measured: an RTX-class GPU string stays at
+  HIGH (quality 2); the software renderer and a 4-core/4 GB profile both start at 0.
+- **The drawing buffer is capped on desktop as well.** `topPixelRatio()` capped the
+  long side for touch only. Desktop now gets `[1280, 1600, 1920]` per preset. A
+  1280×800 window at dpr 2 renders **1.02 MP instead of 4.10 MP** — a 75 % cut in
+  fragments, for pixels nobody can see, with no CSS size or FOV change. A 360×640
+  window at dpr 3 renders 720×1280 instead of 1080×1920.
+- **The haven's WebGL context is released when a match starts.** The lobby's 3D room
+  is its own renderer; holding it and the game's at once is the difference between a
+  playable match and a slideshow on a weak GPU. It loses the context on PLAY and gets
+  a fresh canvas on HOME, measured live during a match and again after returning.
+- **The HUD fits a narrow screen.** The panels are laid out for a desktop window
+  (`#health` 220 px, the ammo card 260 px) and, below 560 px of usable width,
+  `#xpbar`'s `calc(100vw - 560px)` went negative while its `min-width: 200px` kept it
+  200 px, so it overlapped both bottom corners. The widths are now capped to the
+  viewport (divided by `--hud-scale`, since these panels are zoomed), `#xpbar` sits
+  above the corners, and the toast keeps a margin for its rotation. At 360×640 every
+  panel is inside the viewport with no collisions.
 
 Two things were actually costing frames, and both are now fixed at the source:
 
@@ -393,7 +474,9 @@ For FPS, the original source would not change the GPU/quality ceiling.
 
 ```
 stickfrag.com/            site root (document root for tools/serve.py)
-  index.html              redirect into the standalone /play/
+  index.html              the real landing page, whole (built by patch_home.py)
+  stickfrag.html          one file: the site and the game, generated
+  stickfrag.svg           the same, wrapped for SVG-only targets, generated
   play/index.html         game page (CSP, standalone.js, one CSS link, modulepreload)
   play/standalone.js      forces offline mode + default nickname
   play/main.js            installed lean build (5,928,789 bytes)
@@ -430,11 +513,19 @@ static.cloudflareinsights.com/  captured analytics beacon (now unused)
 ## Known gaps
 
 The mirror was captured with a plain crawler, so it is missing the rest of the site (13 pages
-from `sitemap.xml`), the landing CSS/JS, `favicon.svg`, `apple-touch-icon.png`, `og.png`,
-`/map-*.webp` loading images and the lazy `/chunks/*.light` map data. The loading and icon
-requests for missing files were removed, so the installed page makes no 404s. The lean build
-has no online transport or Colyseus schema/transport cluster; replay/review URLs are stripped.
-Source maps are not published (`/play/main.js.map` returns 404).
+from `sitemap.xml`), `apple-touch-icon.png`, `og.png`, `/map-*.webp` loading images and the
+lazy `/chunks/*.light` map data. The loading and icon requests for missing files were removed,
+so the installed page makes no 404s. The lean build has no online transport or Colyseus
+schema/transport cluster; replay/review URLs are stripped. Source maps are not published
+(`/play/main.js.map` returns 404).
+
+`supportscene.js` and its chunk were fetched from the live site to restore the halo stickman on
+the thank-you card. `eventscene.js` was not: it is only used by the Friends Weekend section,
+which ships `hidden` on this build exactly as it does live, and two of its three chunks are not
+mirrored. Its loader is dropped rather than left to 404.
+
+The weekly leaderboard row and the daily card need a server, so they show their own empty
+states. That is the page's own markup and behaviour, not a stub of ours.
 
 ## Notice
 

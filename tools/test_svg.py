@@ -1,16 +1,19 @@
-"""Test the SVG build.
+"""Test the SVG build over http.
 
-`stickfrag.svg` is the same single file as `stickfrag.html`, wrapped so a browser
-opens it as an image document. An SVG document is XML, so the game cannot run
-inside it -- `document.body` is null and `createElement("canvas")` returns an
-`SVGElement` with no `getContext`. The wrapper therefore writes the untouched
-payload into a fresh `about:blank` tab, which is a real HTML document.
+`stickfrag.svg` carries the whole single file and runs it in a nested browsing
+context. Which one depends on where the file came from:
 
-What this asserts:
+* `file://` -- an inline `<iframe>` fed a blob URL, in place. Pointer lock works
+  there, which is what makes the game playable. `tools/test_svg_file.py` asserts
+  that path end to end.
+* `http(s)` -- a new tab. Chromium refuses pointer lock inside a blob document
+  served over http, so the popup is the only path that gives a playable match.
+
+What this asserts over http:
   * the SVG page renders its launcher and offers a clickable retry,
   * opening it produces a tab holding the game,
   * the query string survives into that tab, so invite links still resolve,
-  * the menu renders there with the mode tiles and no top bar,
+  * the menu is the whole site and renders the mode tiles,
   * the real flow (nickname, PLAY, mode) starts a match in place,
   * it holds 60 fps and stays free of errors and network requests.
 """
@@ -37,11 +40,6 @@ def main() -> int:
         page = context.new_page()
         context.on("page", lambda q: popups.append(q) if q is not page else None)
 
-        for target in (page, context):
-            target.on(
-                "pageerror",
-                lambda e: errors.append(str(e)[:200]) if hasattr(e, "strip") else None,
-            )
         page.on("pageerror", lambda e: errors.append(str(e)[:200]))
         page.on("console", lambda m: errors.append("console: " + m.text[:180]) if m.type == "error" else None)
         page.on(
@@ -69,7 +67,7 @@ def main() -> int:
             }"""
         )
 
-        # Browsers usually refuse window.open on load, so the retry is a click.
+        # Browsers refuse window.open on load, so the retry is a click.
         if not popups:
             page.mouse.click(640, 400)
             page.wait_for_timeout(1500)
@@ -93,15 +91,18 @@ def main() -> int:
         )
 
         game.wait_for_selector(".play-big", timeout=60_000)
-        game.wait_for_timeout(1200)
+        game.wait_for_timeout(1500)
 
         menu = game.evaluate(
             """() => {
               const root = document.getElementById('sf-home-root');
+              const doc = document.scrollingElement;
               return {
                 tiles: document.querySelectorAll('#start-modes .mode-tile').length,
-                scrolls: document.documentElement.scrollHeight > document.documentElement.clientHeight + 2,
+                scrolls: doc.scrollHeight > innerHeight + 4,
+                page: doc.scrollHeight,
                 bar: !!document.querySelector('header.bar'),
+                footer: !!document.querySelector('footer'),
                 gameRunning: !!window.__sfGame,
                 search: location.search,
                 params: window.__SF_BOOT_PARAMS || null,
@@ -120,7 +121,7 @@ def main() -> int:
               document.querySelector('.play-big').click();
             }"""
         )
-        game.wait_for_timeout(700)
+        game.wait_for_timeout(900)
         step = game.evaluate("() => document.getElementById('gear').dataset.step")
 
         game.evaluate("() => document.querySelector('#start-modes .mode-tile').click()")
@@ -159,9 +160,10 @@ def main() -> int:
         "launcher released the payload": launcher["payloadLeft"] == 0,
         "query string reaches the tab": "name=tester" in (menu["search"] or ""),
         "boot params carried over": (menu["params"] or {}).get("name") == "tester",
-        "menu renders": menu["tiles"] >= 5,
-        "menu does not scroll": menu["scrolls"] is False and menu["overflowX"] is False,
-        "no top bar": menu["bar"] is False,
+        "menu is the whole site": menu["bar"] and menu["footer"] and menu["page"] > 2000,
+        "menu scrolls like the site": menu["scrolls"],
+        "menu does not overflow sideways": menu["overflowX"] is False,
+        "mode tiles render": menu["tiles"] >= 5,
         "game parked until asked": menu["gameRunning"] is False,
         "PLAY opens the mode list": step == "start",
         "match starts in place": match["selfId"] == 1,

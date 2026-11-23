@@ -1,15 +1,24 @@
 #!/usr/bin/env python3
 """Prepare the vendored home screen for this build.
 
-The vendored page is the real stickfrag.com landing page. Three things change:
+The vendored page is the real stickfrag.com landing page, restored to its full
+length: the header bar, the hero, the squad ribbon, the news rows, the `#play`
+section, the advertisers plate and the footer are all present, and the page
+scrolls exactly as it does live.
 
-1. The top bar (`header.bar`) goes away: leaderboard, ideas, advertise, prices.
-2. The server browser goes away: "All servers", regions, the live list, no-bots.
-   The old multiplayer is gone, so a list of servers that no longer exist is a
-   lie on the page.
-3. Create and Join are rewired to this build's peer URLs
-   (`/stickfrag.html?peer=host` and `?peer=join&room=CODE`) instead of the
-   retired server flow.
+Two things change, both because the server the page drove is gone:
+
+1. The server browser. "All servers", regions and the live list came from a
+   matchmaking endpoint that does not exist in a standalone build, so the step is
+   removed and its entry point with it.
+2. Create and Join go to this build's peer URLs (`/stickfrag.html?peer=host`
+   and `?peer=join&room=CODE`) instead of the retired server flow.
+
+And one thing changes because of the single-file build itself:
+
+3. Links to pages this build does not ship are removed (owner's choice), rather
+   than left to fail when the file is opened from disk. Every removal is counted,
+   so a layout change upstream fails the build instead of half-stripping the page.
 """
 
 from __future__ import annotations
@@ -19,19 +28,6 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 HOME = ROOT / "stickfrag.com"
-
-
-def strip_top_bar(html: str) -> str:
-    """Remove the landing page's top navigation bar entirely."""
-    # The bar is a single <header class="bar"> ... </header> block.
-    out, n = re.subn(
-        r'\s*<header class="bar"[^>]*>.*?</header>',
-        "",
-        html,
-        flags=re.DOTALL,
-    )
-    # Already gone means an earlier step removed it, which is the goal.
-    return out
 
 
 def _remove_element(html: str, marker: str) -> tuple[str, int]:
@@ -63,73 +59,82 @@ def _remove_element(html: str, marker: str) -> tuple[str, int]:
         pos = m.end()
 
 
-def strip_server_list(html: str) -> str:
-    """Remove the old multiplayer server browser and its step."""
-    removed = 0
+# Pages a single file cannot serve. `/play/` is deliberately absent: the header's
+# PLAY button points there on the live site, and the shell rewires it to start the
+# match in place instead.
+DEAD_PREFIXES = (
+    "/leaderboard/", "/ideas/", "/maps/", "/weapons/", "/chromebook/",
+    "/how-to-play/", "/creators/", "/updates/", "/support/",
+    "imprint.html", "privacy.html", "terms.html", "ad-terms.html",
+)
 
-    # The whole `<div id="step-servers">` panel. It is a div, not a section, and
-    # it contains nested divs, so match to its matching close by counting tags.
-    html, n = _remove_element(html, 'id="step-servers"')
-    removed += n
+# Elements the page's scripts write into unconditionally. Removing the link itself
+# is right, but removing the node it lives in dereferences null and aborts the
+# whole script -- which on this page silently stopped the haven from booting at
+# all. These keep their element and lose only their target.
+NEUTRALISE = ('<a class="slot-news row-card" id="slot-news" href="/updates/">',)
 
-    # The "All servers" entry point on the start step.
-    html, n = re.subn(r'\s*<button[^>]*id="start-servers"[^>]*>.*?</button>', "", html, flags=re.DOTALL)
-    removed += n
-
-    return html
-
-
-# Everything after the hero screen. The home page is meant to be looked at, not
-# scrolled: these are the marketing rows below the play card.
-BELOW_THE_FOLD = [
-    'class="duo thanks-row"',
-    'class="duo updates-row"',
-    'id="event-row"',
-    'class="hero"',
-    'class="support soon-only"',
-    'class="plate live-only"',
-    'class="after live-only"',
-    'id="play"',
-    'class="squad"',
-    'id="event"',
-]
-
-
-def strip_news_rows(html: str) -> str:
-    """Remove the below-the-fold marketing: the hero screen is the page."""
-    for marker in BELOW_THE_FOLD:
-        html, _ = _remove_element(html, marker)
-    return html
-
-
-def strip_footer_nav(html: str) -> str:
-    """The footer's page nav links to pages this build does not ship."""
-    html, _ = _remove_element(html, 'aria-label="Footer"')
-    return html
-
-
-def strip_footer(html: str) -> str:
-    """No footer either: the hero screen is the whole page."""
-    html, _ = _remove_element(html, 'class="foot')
-    html, _ = _remove_element(html, "<footer")
-    return html
-
-
-def no_scroll(html: str) -> str:
-    """One screen: the having screen, nothing below it, no scrollbar."""
-    css = """
+# The card above is filled from local data, which is still worth showing, but its
+# "go" chevron points at the updates page, which this build does not ship.
+NEWS_CHEVRON_CSS = """
 <style>
-  /* One screen: the haven, and nothing to scroll to. */
-  html, body { height: 100%; overflow: hidden; background: #a8d8ea; }
-  body { overscroll-behavior: none; }
-  main { min-height: calc(100vh - 0px) !important; display: flex; }
-  main > section.gear { flex: 1; }
-  @media (max-height: 760px) {
-    section.gear { padding-top: 16px !important; padding-bottom: 20px !important; }
-  }
+.slot-news .news-go { display: none; }
 </style>
 """
-    return html.replace("</head>", css + "</head>", 1)
+
+ANCHOR = re.compile(r'<a\b[^>]*?href="([^"]*)"[^>]*>(.*?)</a>', re.S)
+RELEASE_TITLE = re.compile(r'<h3><a href="/updates/#[^"]*">(.*?)</a></h3>', re.S)
+RELEASE_MORE = re.compile(r'\s*<p class="more">.*?</p>', re.S)
+
+
+def strip_dead_links(html: str) -> str:
+    """Remove links to pages this build does not ship.
+
+    A single file cannot serve /leaderboard/, /maps/ or /updates/, and opening the
+    file from disk makes a root-absolute path resolve to the filesystem root, so
+    the click can only fail. The owner's choice is to drop them rather than leave
+    dead targets on the page.
+
+    The update release titles keep their text: it is content, not navigation, and
+    only its link goes. The "and N more" lines exist only to link there, so they
+    go whole.
+    """
+    html, more = RELEASE_MORE.subn("", html)
+    html, titles = RELEASE_TITLE.subn(r"<h3>\1</h3>", html)
+
+    # The event/news slot's news link: the element stays (its script fills it by
+    # id) and only the target goes, so the card renders and simply does nothing.
+    for old in NEUTRALISE:
+        if html.count(old) != 1:
+            raise SystemExit(f"neutralise site not found exactly once: {old[:60]}")
+        html = html.replace(old, old.replace(' href="/updates/"', ""), 1)
+
+    removed = 0
+
+    def drop(m: re.Match[str]) -> str:
+        nonlocal removed
+        if m.group(1).startswith(DEAD_PREFIXES):
+            removed += 1
+            return ""
+        return m.group(0)
+
+    html = ANCHOR.sub(drop, html)
+
+    left = [
+        a.group(1)
+        for a in ANCHOR.finditer(html)
+        if a.group(1).startswith(DEAD_PREFIXES)
+    ]
+    if left:
+        raise SystemExit(f"dead links survived the strip: {left}")
+    # 26 anchors: the page's own content links, in the header, the #play section
+    # and the footer, after the news slot's link was neutralised rather than cut.
+    if (more, titles, removed) != (2, 2, 26):
+        raise SystemExit(
+            f"dead-link strip found more={more} titles={titles} removed={removed}, "
+            f"expected 2/2/26"
+        )
+    return html
 
 
 # IDs that playmenu.js wires unconditionally. The server browser is gone from the
@@ -143,40 +148,20 @@ STUBS = [
     ("server-find", "input"),
     ("server-nobots-slot", "span"),
     ("server-quick", "button"),
-    ("start-servers", "button"),
     ("server-nobots", "button"),
-    # Sections this build removes but landing.js still queries.
-    ("thanks-row", "section"),
-    ("updates-row", "section"),
-    ("event-row", "section"),
 ]
 
 
 def add_stubs(html: str) -> str:
-    """Keep playmenu.js and landing.js from dereferencing nodes that are gone."""
+    """Keep playmenu.js from dereferencing nodes that are gone."""
     parts = []
     for node_id, tag in STUBS:
         if f'id="{node_id}"' in html:
             continue
         parts.append(f'<{tag} id="{node_id}" hidden></{tag}>')
-    # landing.js also queries these by class for the pricing/hero rows.
-    for cls in ("hero-card", "js-why-price"):
-        if f'class="{cls}"' not in html and f"{cls}" not in html.split("</body>")[0][-4000:]:
-            parts.append(f'<div class="{cls}" hidden></div>')
     if not parts:
         return html
     return html.replace("</body>", "".join(parts) + "</body>", 1)
-
-
-def drop_landing_script(html: str) -> str:
-    """Remove landing.js.
-
-    It renders the advertising calculator and the pricing rows, both of which are
-    deleted here, and it writes into those nodes unconditionally. The haven and
-    the play card come from haven-boot.js and playmenu.js, not this script.
-    """
-    html, _ = _remove_element(html, 'src="/landing.js')
-    return html
 
 
 def wire_peer_buttons(html: str) -> str:
@@ -221,20 +206,6 @@ def wire_peer_buttons(html: str) -> str:
     if (/^[A-Z0-9]{6}$/.test(value)) go('peer=join&room=' + value);
   }, true);
 
-  // Join uses the existing room-code field, which already validates the
-  // 6-character alphabet this build's rooms use.
-  const joinForm = byId('gear-join') || byId('gear');
-  if (joinForm) {
-    joinForm.addEventListener('submit', (e) => {
-      const field = joinForm.querySelector('input[name="room"], input#room, input[type="text"]');
-      const value = (field && field.value || '').replace(/[\\s-]/g, '').toUpperCase();
-      if (!/^[A-Z0-9]{6}$/.test(value)) return;
-      e.preventDefault();
-      e.stopImmediatePropagation();
-      go('peer=join&room=' + value);
-    }, true);
-  }
-
   // The old "invite link" copied a server URL. Point it at a room instead.
   const invite = byId('invite-link-copy');
   if (invite) {
@@ -261,15 +232,10 @@ def main() -> None:
     html = index.read_text(encoding="utf-8")
     before = len(html)
 
-    html = strip_top_bar(html)
-    html = strip_server_list(html)
-    html = strip_news_rows(html)
-    html = strip_footer_nav(html)
-    html = strip_footer(html)
-    html = no_scroll(html)
+    html = strip_dead_links(html)
     html = add_stubs(html)
-    html = drop_landing_script(html)
     html = wire_peer_buttons(html)
+    html = html.replace("</head>", NEWS_CHEVRON_CSS + "</head>", 1)
 
     index.write_text(html, encoding="utf-8")
     print(f"home page prepared ({before:,} -> {len(html):,} bytes)")

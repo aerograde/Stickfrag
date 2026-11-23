@@ -8,7 +8,7 @@
       name="description"
       content="Play StickFrag, the free multiplayer stickman shooter in your browser. Comic-style FPS for up to 14 players: SMG, shotgun, rifle and revolver. No download, no account, works on Chromebook."
     />
-    <link rel="canonical" href="https://stickfrag.html/" />
+    <link rel="canonical" href="https://stickfrag.com/" />
     <link rel="icon" href="/favicon.ico" sizes="48x48" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
@@ -17,8 +17,8 @@
     <meta property="og:site_name" content="StickFrag" />
     <meta property="og:title" content="StickFrag – the free stickman shooter in your browser" />
     <meta property="og:description" content="No download. No mercy. Just frags. Free stickman FPS for up to 14 players, drawn like a comic." />
-    <meta property="og:url" content="https://stickfrag.html/" />
-    <meta property="og:image" content="https://stickfrag.html/og.png?v=9abf0e8334" />
+    <meta property="og:url" content="https://stickfrag.com/" />
+    <meta property="og:image" content="https://stickfrag.com/og.png?v=9abf0e8334" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
     <meta name="twitter:card" content="summary_large_image" />
@@ -28,13 +28,13 @@
         "@graph": [
           {
             "@type": "Organization",
-            "@id": "https://stickfrag.html/#org",
+            "@id": "https://stickfrag.com/#org",
             "name": "StickFrag",
-            "url": "https://stickfrag.html/",
-            "logo": "https://stickfrag.html/icon-192.png",
-            "email": "hello@stickfrag.html",
+            "url": "https://stickfrag.com/",
+            "logo": "https://stickfrag.com/icon-192.png",
+            "email": "hello@stickfrag.com",
             "sameAs": [
-              "https://www.tiktok.com/@stickfrag.html",
+              "https://www.tiktok.com/@stickfrag.com",
               "https://www.instagram.com/stickfrag/",
               "https://www.youtube.com/@stickfrag",
               "https://discord.gg/mTYAtjNnyd"
@@ -42,20 +42,20 @@
           },
           {
             "@type": "WebSite",
-            "@id": "https://stickfrag.html/#website",
+            "@id": "https://stickfrag.com/#website",
             "name": "StickFrag",
-            "alternateName": ["Stick Frag", "StickFPS", "stickfrag.html"],
-            "url": "https://stickfrag.html/",
-            "publisher": { "@id": "https://stickfrag.html/#org" }
+            "alternateName": ["Stick Frag", "StickFPS", "stickfrag.com"],
+            "url": "https://stickfrag.com/",
+            "publisher": { "@id": "https://stickfrag.com/#org" }
           },
           {
             "@type": ["VideoGame", "WebApplication"],
-            "@id": "https://stickfrag.html/#game",
-            "publisher": { "@id": "https://stickfrag.html/#org" },
+            "@id": "https://stickfrag.com/#game",
+            "publisher": { "@id": "https://stickfrag.com/#org" },
             "name": "StickFrag",
             "alternateName": ["Stick Frag", "StickFPS", "StickFrag stickman shooter"],
-            "url": "https://stickfrag.html/play/",
-            "image": "https://stickfrag.html/og.png?v=9abf0e8334",
+            "url": "https://stickfrag.com/play/",
+            "image": "https://stickfrag.com/og.png?v=9abf0e8334",
             "description": "A free multiplayer stickman shooter (FPS) that runs in the browser. Team deathmatch and gun game for up to 14 players on comic-print maps.",
             "genre": ["Shooter", "First-person shooter", "Stickman game", "Multiplayer"],
             "playMode": "MultiPlayer",
@@ -86,14 +86,7 @@
     <link rel="stylesheet" href="/account.css?v=60bda81af3" />
   
 <style>
-  /* One screen: the haven, and nothing to scroll to. */
-  html, body { height: 100%; overflow: hidden; background: #a8d8ea; }
-  body { overscroll-behavior: none; }
-  main { min-height: calc(100vh - 0px) !important; display: flex; }
-  main > section.gear { flex: 1; }
-  @media (max-height: 760px) {
-    section.gear { padding-top: 16px !important; padding-bottom: 20px !important; }
-  }
+.slot-news .news-go { display: none; }
 </style>
 </head>
   <body data-lobby="/lobby.js?v=a6bd60bff1" data-event-scene="/eventscene.js?v=d12dddfe2f" data-halo="/supportscene.js?v=d157e2a4ac">
@@ -116,6 +109,25 @@
         <path fill="currentColor" fill-rule="evenodd" d="M5.5 4h13A4.5 4.5 0 0 1 23 8.5v7a4.5 4.5 0 0 1-4.5 4.5h-13A4.5 4.5 0 0 1 1 15.5v-7A4.5 4.5 0 0 1 5.5 4zM9.6 8.4v7.2l6.2-3.6z" />
       </symbol>
     </svg>
+    <header class="bar">
+      <div class="wrap">
+        <a class="logo" href="#top">STICKFRAG<span class="tld">.COM</span></a>
+        <nav aria-label="Main">
+          <a class="opt" href="#play">How to play</a>
+          
+          
+          <a class="discord-link" href="https://discord.gg/mTYAtjNnyd" target="_blank" rel="noopener" aria-label="Discord"><svg aria-hidden="true"><use href="#i-discord" /></svg><span>Discord</span></a>
+          <a class="live-only" href="#advertise">Advertise</a>
+          <a class="opt live-only" href="#prices">Prices</a>
+          <!--donate--><!--/donate-->
+        </nav>
+        <button class="btn paper fb-btn open-feedback" type="button" title="Tell us what you think" aria-label="Feedback">
+          <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linejoin="round"><path d="M4 5h16v11H11l-5 4v-4H4z" /></svg>
+          <span>Feedback</span>
+        </button>
+        <a class="btn js-play" href="/play/">PLAY</a>
+      </div>
+    </header>
 
     <main id="top">
       <!-- ================= PLAY MENU: your stickman in 3D (client/src/lobby.ts) and one question
@@ -179,7 +191,7 @@
               </div>
               <section class="locker-creator" id="locker-creator" aria-labelledby="cr-title" hidden>
                 <h3 id="cr-title">Creator rewards</h3>
-                <p>Post a StickFrag video with <b>#stickfrag</b>, paste its link, and put the code we give you in the caption. We check it and send packs. <a href="/creators/">Read the rules</a></p>
+                <p>Post a StickFrag video with <b>#stickfrag</b>, paste its link, and put the code we give you in the caption. We check it and send packs. </p>
                 <form id="cr-form" class="cr-form">
                   <input id="cr-link" type="url" inputmode="url" maxlength="300" placeholder="https://www.tiktok.com/@you/video/…" aria-label="Link of your video" autocomplete="off" />
                   <button class="btn" type="submit">GET MY CODE</button>
@@ -252,7 +264,7 @@
                 <!-- Overwatch: a small teaser card over the poster until players can review cases (item 443). -->
                 <div class="slot-ow row-card" id="slot-ow" hidden></div>
                 <a class="slot-poster row-card" id="slot-poster" href="#event" hidden></a>
-                <a class="slot-news row-card" id="slot-news" href="/updates/"></a>
+                <a class="slot-news row-card" id="slot-news"></a>
               </div>
             </div>
           </div>
@@ -337,10 +349,23 @@
                 </button>
                 <button class="back" type="button" data-back><span aria-hidden="true">‹</span> BACK</button>
                 <!-- Every server with its players, map, mode and ping (playMenuServers.ts, item 631). -->
+                <button class="btn paper" id="start-servers" type="button"><svg class="servers-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3.5" width="18" height="5" rx="1" /><rect x="3" y="9.5" width="18" height="5" rx="1" /><rect x="3" y="15.5" width="18" height="5" rx="1" /><circle cx="6.5" cy="6" r="1" /><circle cx="6.5" cy="12" r="1" /><circle cx="6.5" cy="18" r="1" /></svg>ALL SERVERS <span aria-hidden="true">›</span></button>
               </div>
 
               <!-- The server list, as before item 415: one row card per server, the mode chips filter it. -->
-              
+              <div class="step off" id="step-servers" inert>
+                <button class="back" type="button" data-back><span aria-hidden="true">‹</span> BACK</button>
+                <h2>Pick a server</h2>
+                <div class="server-head">
+                  <p class="server-title"><span id="server-title"></span> <select class="server-region" id="server-region" aria-label="Region" hidden></select></p>
+                  <span id="server-nobots-slot"></span>
+                  <button id="server-quick" class="btn" type="button">QUICK JOIN</button>
+                </div>
+                <div class="mode-chips" id="server-modes" role="group" aria-label="Game mode" hidden></div>
+                <input class="server-find" id="server-find" type="search" maxlength="24" placeholder="Find a friend by name" aria-label="Find a friend by name" autocomplete="off" spellcheck="false">
+                <div class="server-cols" aria-hidden="true"><span>Mode</span><span>Server</span><span>Match</span><span>Players</span><span>Ping</span></div>
+                <div class="servers" id="server-rows"></div>
+              </div>
 
               <div class="step off" id="step-game" inert>
                 <button class="back" type="button" data-back><span aria-hidden="true">‹</span> BACK</button>
@@ -409,11 +434,37 @@
 
       <!-- ================= SQUAD: a thin tilted ribbon with Discord and the clip channels
            (docs/design/discord.md). It overlaps the play menu's bottom edge on purpose. ================= -->
-      
+      <aside class="squad" aria-labelledby="squad-title">
+        <div class="wrap squad-row">
+          <p class="squad-text"><b id="squad-title">JOIN THE SQUAD!</b> <span>Find team mates on Discord.</span></p>
+          <div class="social-row">
+            <a class="btn discord" href="https://discord.gg/mTYAtjNnyd" target="_blank" rel="noopener"><svg aria-hidden="true"><use href="#i-discord" /></svg>DISCORD</a>
+            <a class="icon-link" href="https://www.tiktok.com/@stickfrag.com" target="_blank" rel="noopener" aria-label="TikTok @stickfrag.com" title="TikTok"><svg aria-hidden="true"><use href="#i-tiktok" /></svg></a>
+            <a class="icon-link" href="https://www.instagram.com/stickfrag/" target="_blank" rel="noopener" aria-label="Instagram @stickfrag" title="Instagram"><svg aria-hidden="true"><use href="#i-instagram" /></svg></a>
+            <a class="icon-link" href="https://www.youtube.com/@stickfrag" target="_blank" rel="noopener" aria-label="YouTube @stickfrag" title="YouTube"><svg aria-hidden="true"><use href="#i-youtube" /></svg></a>
+          </div>
+        </div>
+      </aside>
 
       <!-- ================= FRIENDS WEEKEND: the event (docs/design/friends-weekend.md). Hidden until the
            event is on; weekendHome.ts fills the numbers from the server's GET /event. ================= -->
-      
+      <section id="event" class="event" aria-labelledby="event-title" hidden>
+        <div class="wrap event-grid">
+          <div class="event-intro">
+            <p class="event-kicker">SPECIAL EVENT</p>
+            <h2 id="event-title">Friends Weekend</h2>
+            <p class="event-when"><span id="event-dates"></span></p>
+          </div>
+          <canvas class="event-canvas" id="event-canvas" role="img" aria-label="Three friends in a private lounge: one leans on the back wall, two sit on a velvet sofa and a pouf"></canvas>
+          <ul class="event-steps">
+            <li><b><span id="event-players"></span> or more players</b><span>Private room. No bots.</span></li>
+            <li><b>1 limited edition pack</b><span>Every player gets one after every private match. Up&nbsp;to&nbsp;<span id="event-per-day"></span>&nbsp;a&nbsp;day.</span></li>
+          </ul>
+          <a class="btn big event-make" id="event-make" href="/play/">MAKE A ROOM <span aria-hidden="true">›</span></a>
+          <p class="event-fine"><b>Playing solo?</b> If you played 3 matches before the weekend, 1 surprise pack waits for you in a public match. Active players only: no reward when idle or playing in more than one browser.</p>
+          <p class="event-rare"><b>Never again</b><span>These hats will never drop again.</span></p>
+        </div>
+      </section>
 
       <!-- ================= THREE ROWS under the event (item 212, docs/design/play-menu.md).
            Row 1: this week's top (leaderboard.ts, showWeeklyTop; the row stays hidden until the server
@@ -434,7 +485,7 @@
               <ol class="drop-rows"></ol>
             </div>
             <div class="week-links">
-              <a class="btn paper" href="/leaderboard/">FULL LEADERBOARD</a>
+              
               <span class="week-reset"></span>
             </div>
           </div>
@@ -445,37 +496,830 @@
            when the row comes near), beside every player quote (src/quotes.ts, written at build time).
            Without DONATE_URL build.mjs cuts the tip; the thank-you stays. No rewards for a tip: a
            reward makes it a sale (docs/business/donations-sweden.md). -->
-      
+      <section class="duo thanks-row" id="thanks-row" aria-label="Thank you">
+        <div class="wrap duo-grid">
+          <div class="thanks-col">
+            <div class="sits"><canvas id="halo-man" role="img" aria-label="A stickman with a halo lies on the edge of the card below"></canvas></div>
+            <div class="thanks">
+              <h2>Thank you for playing</h2>
+              <p>
+                StickFrag is free: no pop-ups, no video breaks, nothing to buy for power. Every match you play, every
+                idea you send and every friend you bring is the reason it keeps going.
+              </p>
+              <!--donate-->
+              <p>A small tip pays for the servers. You get nothing extra in the game for it, on purpose.</p>
+              <a class="btn big paper" href="https://ko-fi.com/stickfrag" target="_blank" rel="noopener">Buy me a coffee</a>
+              <p class="tip-note">Under 18? Ask a parent first. The tip page is run by another company and opens in a new tab.</p>
+              <!--/donate-->
+            </div>
+          </div>
+          <div class="quotes-col">
+            <h2>What players say</h2>
+            <div class="quotes">
+<figure class="quote"><blockquote>I like this game, thanks for making it &#60;3</blockquote><figcaption>a player</figcaption></figure><figure class="quote"><blockquote>I think the game is great and has a lot of potential, thanks for the experience!</blockquote><figcaption>a player</figcaption></figure><figure class="quote"><blockquote>Amazing game... hooked instantly.</blockquote><figcaption>a player</figcaption></figure><figure class="quote"><blockquote>Gotta say its a super nice game!</blockquote><figcaption>a player</figcaption></figure><figure class="quote"><blockquote>this is really neat reminds me of the old days.</blockquote><figcaption>a player</figcaption></figure><figure class="quote"><blockquote>nice game keep the good work</blockquote><figcaption>a player</figcaption></figure>
+            </div>
+          </div>
+        </div>
+      </section>
 
       <!-- Row 3 (owner, 2026-10-16): the latest updates (src/updates.ts, written at build time), a
            row of their own under the thank-you row, open to every player from the first visit. -->
-      
+      <section class="duo updates-row" aria-labelledby="updates-title">
+        <div class="wrap">
+          <div class="latest">
+            <h2 id="updates-title">Latest updates</h2>
+            <div class="releases">
+<article class="release">
+        <h3>Smoother aim, fixes from your feedback</h3>
+        <p class="when"><span class="name">Update 1.17</span> · <time datetime="2026-11-16">16 November 2026</time></p>
+        <ul><li>Recoil climbs as hard as ever, but each shot moves your camera smoothly instead of yanking it.</li><li>Your gun no longer shows through walls when you stand close to one, and you no longer slide sideways after you spawn.</li></ul>
+      </article><article class="release">
+        <h3>Pick your sight, a faster home page</h3>
+        <p class="when"><span class="name">Update 1.15</span> · <time datetime="2026-11-11">11 November 2026</time></p>
+        <ul><li>The loadout screen shows the sight on each gun. Click a gun and pick red dot, dot sight or iron sights in its SIGHT row.</li><li>The home page shows its 3D room much sooner on your first visit, and no longer freezes while it loads.</li></ul>
+      </article>
+            </div>
+            
+          </div>
+        </div>
+      </section>
 
       <!-- ================= HERO: the yard scene with its billboards, shown only with ads on sale
            ================= -->
-      
+      <div class="hero">
+        <svg
+          class="scene live-only"
+          viewBox="-170 140 1940 580"
+          preserveAspectRatio="xMidYMax slice"
+          role="img"
+          aria-labelledby="scene-title"
+        >
+          <title id="scene-title">
+            Two stickmen fight in a sunny military yard. A truck, a container, a blimp and a billboard carry
+            brand logos.
+          </title>
+          <defs>
+            <pattern id="dots" width="9" height="9" patternUnits="userSpaceOnUse">
+              <circle cx="4.5" cy="4.5" r="1.9" fill="#15111c" opacity="0.28" />
+            </pattern>
+            <pattern id="link" width="16" height="16" patternUnits="userSpaceOnUse">
+              <path d="M0 0L16 16M16 0L0 16" stroke="#15111c" stroke-width="1.4" opacity="0.35" />
+            </pattern>
+            <symbol id="cloud" viewBox="0 0 200 90" overflow="visible">
+              <path
+                d="M24 78a22 22 0 0 1 6-40a30 30 0 0 1 52-18a36 36 0 0 1 62 4a26 26 0 0 1 40 26a18 18 0 0 1-6 28z"
+                fill="#fff"
+                stroke="#15111c"
+                stroke-width="5"
+                stroke-linejoin="round"
+              />
+            </symbol>
+            <symbol id="pine" viewBox="-30 -90 60 90" overflow="visible">
+              <path d="M0-88L26-22H12L30 0H-30L-12-22H-26Z" fill="#2f7d6d" stroke="#15111c" stroke-width="4" stroke-linejoin="round" />
+            </symbol>
+            <g id="tagbox">
+              <rect x="6" y="6" width="330" height="58" fill="#15111c" />
+              <rect width="330" height="58" fill="#ffd23f" stroke="#15111c" stroke-width="4" />
+            </g>
+          </defs>
+
+          <!-- Sun with ink ring -->
+          <circle cx="1680" cy="220" r="62" fill="#ffd23f" stroke="#15111c" stroke-width="6" />
+          <circle cx="1680" cy="220" r="62" fill="url(#dots)" opacity="0.5" />
+
+          <!-- Sky life: the only idle motion (rule 2 of living-yard-and-ads.md) -->
+          <g class="cloud"><use href="#cloud" x="470" y="175" width="200" height="90" /></g>
+          <g class="cloud slow"><use href="#cloud" x="1530" y="300" width="150" height="68" /></g>
+          <g class="cloud slow"><use href="#cloud" x="560" y="290" width="130" height="58" /></g>
+
+          <a class="spot" href="#prices" data-slot="blimp" aria-label="Blimp ad slot. See prices.">
+            <!-- Slim hero: the blimp flies low and small, between the water tower and the billboard. -->
+            <g transform="translate(350 101) scale(0.7)"><g class="blimp">
+              <path d="M840 112l-40-34h34l30 26z" fill="#ef4d4d" stroke="#15111c" stroke-width="4" stroke-linejoin="round" />
+              <path d="M840 136l-40 34h34l30-26z" fill="#ef4d4d" stroke="#15111c" stroke-width="4" stroke-linejoin="round" />
+              <ellipse class="hit" cx="1000" cy="124" rx="170" ry="54" fill="#fff4dc" stroke="#15111c" stroke-width="5" />
+              <path d="M860 150a170 54 0 0 0 290 0z" fill="url(#dots)" />
+              <rect x="884" y="104" width="232" height="40" fill="#ef4d4d" stroke="#15111c" stroke-width="4" />
+              <text class="t" x="1000" y="132" text-anchor="middle" font-size="20" fill="#fff4dc">DOODLE DELIVERY</text>
+              <rect x="975" y="176" width="54" height="20" fill="#2f4a8a" stroke="#15111c" stroke-width="4" />
+              <path d="M985 176l-6-8M1020 176l6-8" stroke="#15111c" stroke-width="4" />
+              <g class="tag" transform="translate(835 206)">
+                <use href="#tagbox" />
+                <text class="t" x="165" y="37" text-anchor="middle" font-size="19" fill="#15111c" data-tag="blimp"></text>
+              </g>
+            </g></g>
+          </a>
+
+          <!-- Hills, billboard on poles, pines, fence -->
+          <path
+            d="M-200 452C-120 430 -60 440 0 470C160 404 300 404 460 448C620 384 820 392 980 446C1140 396 1320 384 1600 436C1680 418 1740 424 1800 440V520H-200Z"
+            fill="#9fd49a"
+            stroke="#15111c"
+            stroke-width="5"
+          />
+          <a class="spot" href="#prices" data-slot="billboard" aria-label="Highway billboard ad slot. See prices.">
+            <path d="M1250 330V470M1430 330V470" stroke="#15111c" stroke-width="12" />
+            <path d="M1250 330V470M1430 330V470" stroke="#8a8398" stroke-width="5" />
+            <rect class="hit" x="1170" y="214" width="340" height="120" fill="#fff4dc" stroke="#15111c" stroke-width="5" />
+            <rect x="1170" y="306" width="340" height="28" fill="#2fae72" stroke="#15111c" stroke-width="5" />
+            <text class="t" x="1340" y="280" text-anchor="middle" font-size="40" fill="#15111c" letter-spacing="-1">GRAPHITE GYM</text>
+            <path d="M1430 214h80v92h-80z" fill="url(#dots)" />
+            <g class="tag" transform="translate(1175 140)">
+              <use href="#tagbox" />
+              <text class="t" x="165" y="37" text-anchor="middle" font-size="19" fill="#15111c" data-tag="billboard"></text>
+            </g>
+          </a>
+          <g>
+            <use href="#pine" x="-30" y="-90" width="60" height="90" transform="translate(-120 476) scale(1.1)" />
+            <use href="#pine" x="-30" y="-90" width="60" height="90" transform="translate(40 478)" />
+            <use href="#pine" x="-30" y="-90" width="60" height="90" transform="translate(150 470) scale(1.2)" />
+            <use href="#pine" x="-30" y="-90" width="60" height="90" transform="translate(470 474) scale(.9)" />
+            <use href="#pine" x="-30" y="-90" width="60" height="90" transform="translate(600 476) scale(1.15)" />
+            <use href="#pine" x="-30" y="-90" width="60" height="90" transform="translate(1040 476) scale(1.05)" />
+            <use href="#pine" x="-30" y="-90" width="60" height="90" transform="translate(1150 478) scale(.85)" />
+            <use href="#pine" x="-30" y="-90" width="60" height="90" transform="translate(1540 474) scale(1.2)" />
+            <use href="#pine" x="-30" y="-90" width="60" height="90" transform="translate(1720 472) scale(.95)" />
+          </g>
+          <rect x="-200" y="446" width="2000" height="54" fill="url(#link)" />
+          <path d="M-200 446H1800" stroke="#15111c" stroke-width="5" />
+          <path
+            d="M-160 440V500M-64 440V500M32 440V500M128 440V500M224 440V500M320 440V500M416 440V500M512 440V500M608 440V500M704 440V500M800 440V500M896 440V500M992 440V500M1088 440V500M1184 440V500M1280 440V500M1376 440V500M1472 440V500M1568 440V500M1664 440V500M1760 440V500"
+            stroke="#15111c"
+            stroke-width="6"
+          />
+
+          <!-- Ground -->
+          <rect x="-200" y="496" width="2000" height="264" fill="#f0d9a8" />
+          <path d="M-200 496H1800" stroke="#15111c" stroke-width="4" />
+
+          <!-- Long diagonal sun shadows, printed as violet shade plus dots -->
+          <g fill="#cdb59f">
+            <path d="M60 620H400L520 700H180Z" />
+            <path d="M430 652H712L820 720H540Z" />
+            <path d="M960 670H1200L1300 735H1060Z" />
+            <path d="M1220 620H1580L1600 640V700H1340Z" />
+            <path d="M700 612H940L1010 650H770Z" />
+          </g>
+          <g fill="url(#dots)">
+            <path d="M60 620H400L520 700H180Z" />
+            <path d="M430 652H712L820 720H540Z" />
+            <path d="M960 670H1200L1300 735H1060Z" />
+            <path d="M1220 620H1580L1600 640V700H1340Z" />
+          </g>
+
+          <!-- Water tower: the band keeps the game name (open decision 1) -->
+          <g stroke="#15111c" stroke-width="7" stroke-linecap="round">
+            <path d="M760 408L736 600M880 408L904 600M800 408L794 600M840 408L846 600" />
+            <path d="M752 470L888 530M888 470L752 530" stroke-width="4" />
+          </g>
+          <rect x="700" y="596" width="240" height="20" fill="#e2dccb" stroke="#15111c" stroke-width="5" />
+          <rect x="740" y="290" width="160" height="122" fill="#e9e1cf" stroke="#15111c" stroke-width="5" />
+          <rect x="864" y="290" width="36" height="122" fill="#c7bfd6" />
+          <rect x="864" y="290" width="36" height="122" fill="url(#dots)" />
+          <rect x="740" y="290" width="160" height="122" fill="none" stroke="#15111c" stroke-width="5" />
+          <path d="M728 292L820 246L912 292Z" fill="#2f4a8a" stroke="#15111c" stroke-width="5" stroke-linejoin="round" />
+          <rect x="740" y="328" width="160" height="40" fill="#fff" stroke="#15111c" stroke-width="4" />
+          <text class="t" x="820" y="358" text-anchor="middle" font-size="24" fill="#ef4d4d" stroke="#15111c" stroke-width="1.5" letter-spacing="-1">STICKFRAG</text>
+
+          <!-- Barracks A (cyan) and B (coral) -->
+          <g stroke="#15111c" stroke-width="5" stroke-linejoin="round">
+            <rect x="60" y="470" width="330" height="150" fill="#4fb3d9" />
+            <rect x="330" y="470" width="60" height="150" fill="#3c87a6" />
+            <rect x="330" y="470" width="60" height="150" fill="url(#dots)" stroke="none" />
+            <path d="M40 472L215 392L410 472Z" fill="#2f4a8a" />
+            <rect x="96" y="512" width="56" height="40" fill="#2a3550" />
+            <rect x="248" y="512" width="56" height="40" fill="#2a3550" />
+            <rect x="172" y="540" width="56" height="80" fill="#2a3550" />
+            <rect x="1236" y="470" width="340" height="150" fill="#ef6f6c" />
+            <rect x="1236" y="470" width="60" height="150" fill="#b4505a" />
+            <rect x="1236" y="470" width="60" height="150" fill="url(#dots)" stroke="none" />
+            <path d="M1216 472L1406 392L1596 472Z" fill="#7a2f4f" />
+            <rect x="1330" y="512" width="56" height="40" fill="#2a3550" />
+            <rect x="1470" y="512" width="56" height="40" fill="#2a3550" />
+          </g>
+
+          <!-- Container (pink) -->
+          <a class="spot" href="#prices" data-slot="containers" aria-label="Container ad slot. See prices.">
+            <rect class="hit" x="960" y="560" width="240" height="112" fill="#f28fb1" stroke="#15111c" stroke-width="5" />
+            <path
+              d="M980 566V666M1000 566V666M1020 566V666M1140 566V666M1160 566V666M1180 566V666"
+              stroke="#15111c"
+              stroke-width="2.5"
+              opacity="0.45"
+            />
+            <rect x="1030" y="582" width="100" height="70" fill="#fff4dc" stroke="#15111c" stroke-width="4" />
+            <text class="t" x="1080" y="612" text-anchor="middle" font-size="25" fill="#15111c">STIK</text>
+            <text class="t" x="1080" y="640" text-anchor="middle" font-size="25" fill="#ef4d4d">CHIPS</text>
+            <path d="M960 640H1200V672H960Z" fill="url(#dots)" />
+            <!-- Ink splat from a missed shot -->
+            <path
+              d="M1172 598c6-10 18-4 14 4c10-2 12 10 2 12c6 8-4 16-10 8c-4 10-16 6-12-2c-10 2-12-10-2-12c-6-6 2-14 8-10z"
+              fill="#15111c"
+            />
+            <g class="tag" transform="translate(915 494)">
+              <use href="#tagbox" />
+              <text class="t" x="165" y="37" text-anchor="middle" font-size="19" fill="#15111c" data-tag="containers"></text>
+            </g>
+          </a>
+
+          <!-- Box truck -->
+          <a class="spot" href="#prices" data-slot="trucks" aria-label="Truck ad slot. See prices.">
+            <g stroke="#15111c" stroke-width="5" stroke-linejoin="round">
+              <rect class="hit" x="430" y="532" width="206" height="120" fill="#4c6ef5" />
+              <rect x="448" y="548" width="170" height="86" fill="#fff4dc" stroke-width="4" />
+              <rect x="448" y="620" width="170" height="14" fill="#ef4d4d" stroke-width="4" />
+              <path d="M636 576H690L716 610V652H636Z" fill="#fff4dc" />
+              <path d="M652 588H684L702 610H652Z" fill="#86c8ec" stroke-width="4" />
+              <path d="M430 632H716V652H430Z" fill="url(#dots)" stroke="none" />
+              <circle cx="480" cy="656" r="21" fill="#15111c" />
+              <circle cx="590" cy="656" r="21" fill="#15111c" />
+              <circle cx="682" cy="656" r="21" fill="#15111c" />
+            </g>
+            <g fill="#e9e1cf">
+              <circle cx="480" cy="656" r="7" />
+              <circle cx="590" cy="656" r="7" />
+              <circle cx="682" cy="656" r="7" />
+            </g>
+            <text class="t" x="533" y="602" text-anchor="middle" font-size="32" fill="#15111c" letter-spacing="-1">INK COLA</text>
+            <g class="tag" transform="translate(368 466)">
+              <use href="#tagbox" />
+              <text class="t" x="165" y="37" text-anchor="middle" font-size="19" fill="#15111c" data-tag="trucks"></text>
+            </g>
+          </a>
+
+          <!-- Stickman A: running, red headband, firing -->
+          <g transform="translate(270 742) scale(1.15)" stroke="#15111c" stroke-width="10" stroke-linecap="round" stroke-linejoin="round" fill="none">
+            <path d="M-34 0L0-70L30-2" />
+            <path d="M0-70L6-126" />
+            <path d="M4-118L44-110L78-114M4-116L34-98L66-104" />
+            <rect x="58" y="-122" width="56" height="14" fill="#15111c" stroke-width="3" />
+            <rect x="74" y="-110" width="10" height="20" fill="#15111c" stroke-width="3" />
+            <circle cx="10" cy="-150" r="22" fill="#15111c" stroke="none" />
+            <path d="M-11-156H31" stroke="#ef4d4d" stroke-width="8" />
+            <path d="M-11-156L-30-146L-42-158" stroke="#ef4d4d" stroke-width="6" />
+            <path d="M120-130L130-114L146-118L132-108L140-92L124-102L114-90L116-108Z" fill="#ffd23f" stroke-width="3" />
+          </g>
+          <!-- Stickman B: crouched behind the container, blue headband -->
+          <g transform="translate(1290 744) scale(-1.1 1.1)" stroke="#15111c" stroke-width="10" stroke-linecap="round" stroke-linejoin="round" fill="none">
+            <path d="M-26 0L-6-42L22-46L26 0" />
+            <path d="M-6-42L4-98" />
+            <path d="M2-90L40-84L70-88M2-88L30-72L60-78" />
+            <rect x="52" y="-96" width="56" height="14" fill="#15111c" stroke-width="3" />
+            <circle cx="10" cy="-122" r="22" fill="#15111c" stroke="none" />
+            <path d="M-11-128H31" stroke="#3d7cf2" stroke-width="8" />
+            <path d="M-11-128L-30-118L-40-130" stroke="#3d7cf2" stroke-width="6" />
+          </g>
+        </svg>
+
+        <p class="sale-hint">
+          <span class="live-only">Every logo in this picture is for sale. <a href="#advertise">Advertise in the yard</a></span>
+        </p>
+      </div>
 
       <!-- ================= PLAYERS: what the game is. Also the page's keyword text for search
            (docs/business/seo-plan.md): keep "free stickman shooter", "stickman FPS", "multiplayer",
            "Chromebook", the guns, the maps and the links to the four guides. ================= -->
-      
+      <section id="play">
+        <div class="wrap">
+          <div class="sec-head">
+            <!-- The page's h1 (the hero card's until 2026-10-06): search reads it first. -->
+            <h1 class="page-title">
+              No download. No mercy. Just frags.
+              <small>StickFrag: the free stickman shooter in your browser</small>
+            </h1>
+            <h2>A stickman FPS you can play anywhere</h2>
+            <p>
+              StickFrag is a free online multiplayer stickman shooter. You see the fight through your stickman's
+              eyes, but the whole world is drawn like a printed comic: fat ink lines, flat colours and halftone
+              shadows. You join a match that is already running, and bots fill it when few people are online.
+            </p>
+            <p>
+              Team deathmatch and gun game for up to 14 players. No download, no account, and it works on a school
+              Chromebook.
+            </p>
+          </div>
+
+          <div class="modes">
+            <div class="panel" style="--c: var(--blue)">
+              <h3>Team deathmatch</h3>
+              <p>
+                Blue against red, eight against eight. Pick a main gun, a sidearm and a grenade for every life:
+                any of the twelve guns, from the SMG to the RPG. The sniper, the machine gun and the hand cannon
+                wait between the two halves of the map.
+              </p>
+            </div>
+            <div class="panel" style="--c: var(--yellow)">
+              <h3>Gun game</h3>
+              <p>
+                Every two kills give you the next gun: M4, AK, machine gun, SMG, shotgun, sniper, hand cannon,
+                revolver, pistol and the silenced pistol. Then the knife: one knife kill wins.
+              </p>
+            </div>
+            <div class="panel" style="--c: var(--green)">
+              <h3>Five maps</h3>
+              <p>
+                A fenced yard, a main street, a farm, a huge rail depot and a sea port. Up to 14 players fight in
+                each match, 20 on the depot. 
+              </p>
+            </div>
+          </div>
+
+          <div class="controls panel">
+            <h3>Controls</h3>
+            <ul class="keys">
+              <li><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> Move</li>
+              <li><kbd>Mouse</kbd> Aim</li>
+              <li><kbd>Click</kbd> Fire</li>
+              <li><kbd>Right-click</kbd> Aim down sights</li>
+              <li><kbd>R</kbd> Reload</li>
+              <li><kbd>T</kbd> Change sight (red dot)</li>
+              <li><kbd>Space</kbd> Jump</li>
+              <li><kbd>C</kbd> Crouch</li>
+              <li><kbd>Shift</kbd> Sprint</li>
+              <li><kbd>1</kbd><kbd>2</kbd> Gun or knife (<kbd>Q</kbd> swaps)</li>
+              <li><kbd>Tab</kbd> Scores</li>
+            </ul>
+          </div>
+
+          <div class="facts">
+            <div>
+              <h3>Free, and fair</h3>
+              <p>Money never buys power. Every gun is open to every player from the first match, and the server decides every hit.</p>
+            </div>
+            <div>
+              <h3>No account, no tracking</h3>
+              <p>You only pick a nickname. We set no cookies and build no profiles.</p>
+            </div>
+            <div>
+              <h3>Any computer, no download</h3>
+              <p>
+                <a href="#works-on">Works on</a> Windows, Mac, Linux and , in
+                Chrome, Edge, Firefox or Safari. You need a keyboard and a mouse; phones come later.
+              </p>
+            </div>
+          </div>
+
+          <div class="works-on panel" id="works-on">
+            <h3>Works on</h3>
+            <div class="works-cols">
+              <div>
+                <p class="works-label">System</p>
+                <ul class="works-list">
+              <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 4h8v7H3zM13 4h8v7h-8zM3 13h8v7H3zM13 13h8v7h-8z"/></svg><span>Windows</span></li>
+              <li><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="12" rx="1.5"/><path d="M8 20h8M12 16v4"/></svg><span>macOS</span></li>
+              <li><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 9l4 3-4 3M13 15h4"/></svg><span>Linux</span></li>
+              <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5h14v10H5zM2 19h20"/></svg><span>ChromeOS</span></li>
+                </ul>
+              </div>
+              <div>
+                <p class="works-label">Browser</p>
+                <ul class="works-list">
+              <li><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3.5"/><path d="M12 8.5h8M8.9 14l-4-7M15.1 14l-4 7"/></svg><span>Chrome</span></li>
+              <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 13a8 8 0 1 0-3 6.2M8 13h12a4 4 0 0 0-4-5"/></svg><span>Edge</span></li>
+              <li><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M6 14c0-4 3-7 7-7 0 3 3 3 3 6a4 4 0 0 1-8 1"/></svg><span>Firefox</span></li>
+              <li><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M15.5 8.5l-2 5-5 2 2-5z"/></svg><span>Safari</span></li>
+                </ul>
+              </div>
+            </div>
+            <p class="works-note">Keyboard and mouse. Phones: coming later.</p>
+            <p class="works-note">Safari: mouse aim feels best in Chrome.</p>
+          </div>
+
+          <div class="more">
+            <p>
+              New here? Read , see , or
+              compare .
+            </p>
+            <p class="creators">Make videos of StickFrag? .</p>
+            <p class="tiktok">
+              <strong>Saw StickFrag on TikTok?</strong> This is the game. Press PLAY and you are in the same
+              yard in ten seconds.
+            </p>
+          </div>
+        </div>
+      </section>
 
       <!-- ================= One line for brands (while ads are off). The tip card moved up to the
            thank-you row (item 212). ================= -->
-      
+      <section id="support" class="support soon-only">
+        <div class="wrap">
+          <p class="brands-line">
+            <b>For brands:</b> the billboards, trucks and blimp in our maps carry made-up brands today. We open
+            them to real brands once StickFrag has a real player base. Write to
+            <!-- email_off: Cloudflare's email obfuscation added a script that threw on this page (2026-10-07). -->
+            <a href="mailto:hello@stickfrag.com?subject=Ad%20space%20in%20StickFrag">hello@stickfrag.com</a>.
+          </p>
+        </div>
+      </section>
 
       <!-- ================= ADVERTISERS (CONFIG.adsLive) ================= -->
-      
+      <section id="advertise" class="plate live-only">
+        <div class="burst" aria-hidden="true">
+          <svg viewBox="0 0 100 100">
+            <path
+              d="M50 2l8 16 17-8-2 18 18 1-12 13 14 11-17 6 7 17-18-3-2 18-13-12-13 12-2-18-18 3 7-17-17-6 14-11-12-13 18-1-2-18 17 8z"
+              fill="#ffd23f"
+              stroke="#15111c"
+              stroke-width="3"
+              stroke-linejoin="round"
+            />
+          </svg>
+          <span class="js-burst">Founding sponsors pay half</span>
+        </div>
+        <div class="wrap">
+          <div class="sec-head">
+            <h2>Put your brand on the truck everyone hides behind</h2>
+            <p>
+              StickFrag has no pop-ups and no video breaks. Brands are part of the yard: on the trucks, the
+              containers, the blimp and the big screen. Players see them in every fight and call positions by
+              them: “behind the cola truck!”
+            </p>
+          </div>
+
+          <div class="why">
+            <div class="panel">
+              <h3>Part of the world, not in the way</h3>
+              <p>
+                Your logo gets the same ink lines, sun shadows and halftone dots as everything else in the game.
+                Send us your logo and we redraw it in the comic style, free.
+              </p>
+            </div>
+            <div class="panel">
+              <h3>No tracking</h3>
+              <p>No cookies, no profiles, no targeting. Every player in a match sees the same brand.</p>
+            </div>
+            <div class="panel">
+              <h3 class="live-only">A flat weekly price</h3>
+              <p class="js-why-price live-only">
+                Prices start at a few euros a day. If fewer players come than we forecast, we add free days.
+              </p>
+              <h3 class="soon-only">Founding sponsors first</h3>
+              <p class="soon-only">
+                The first brands in the yard get a founding price. Join the list and we write to you before
+                anyone else.
+              </p>
+            </div>
+          </div>
+
+          <!-- Calculator -->
+          <div class="calc live-only" id="prices">
+            <div class="calc-left">
+              <div class="picker panel">
+                <h3>1. Pick your slots</h3>
+                <p class="hint">Each slot is yours alone for the weeks you book.</p>
+                <fieldset class="slots" id="slots">
+                  <legend class="sr-only">Ad slots</legend>
+                </fieldset>
+                <p class="tower-note">
+                  The water tower band is the top slot on the map. It carries the game name for now.
+                  <a href="#book">Ask us</a> if you want it.
+                </p>
+              </div>
+
+              <div class="mapbox panel">
+                <h3>Where your brand goes</h3>
+                <p class="hint">The yard from above, north at the top. Picked slots turn yellow.</p>
+                <svg class="yardmap" id="yardmap" viewBox="-44 -48 88 92" role="img" aria-label="Top-down map of the yard with the ad slots">
+                  <rect x="-35" y="-35" width="70" height="70" fill="#f0d9a8" stroke="#15111c" stroke-width="0.9" />
+                  <g stroke="#15111c" stroke-width="0.45">
+                    <rect x="-27" y="-8" width="8" height="16" fill="#4fb3d9" />
+                    <rect x="19" y="-8" width="8" height="16" fill="#ef6f6c" />
+                    <rect x="-14" y="24" width="28" height="7" fill="#ffcf5a" />
+                    <rect x="-3.5" y="-3.5" width="7" height="7" fill="#e2dccb" />
+                    <circle r="2.6" fill="#e9e1cf" />
+                    <rect x="25" y="-29" width="4" height="4" fill="#e8833a" />
+                    <circle cx="22" cy="21" r="2.2" fill="#ef4d4d" />
+                    <circle cx="27" cy="25" r="2.2" fill="#ef4d4d" />
+                    <rect x="-28" y="18" width="2.4" height="2.4" fill="#e8833a" />
+                    <rect x="-23" y="22" width="2.4" height="2.4" fill="#e8833a" />
+                    <rect x="-27" y="27" width="2.4" height="2.4" fill="#e8833a" />
+                    <rect x="-20" y="17" width="2.4" height="2.4" fill="#e8833a" />
+                  </g>
+                  <text class="t" x="-23" y="11" text-anchor="middle">Barracks A</text>
+                  <text class="t" x="23" y="11" text-anchor="middle">Barracks B</text>
+                  <text class="t" x="0" y="34.5" text-anchor="middle">Canteen</text>
+                  <text class="t" x="0" y="6.8" text-anchor="middle">Tower</text>
+                  <text class="t" x="27" y="-30.5" text-anchor="middle">Guard</text>
+                  <text class="t" x="24.5" y="30.5" text-anchor="middle">Fuel</text>
+                  <text class="t" x="-24" y="33" text-anchor="middle">Crates</text>
+
+                  <g data-map="trucks">
+                    <rect class="m" x="-13" y="-24.2" width="6" height="2.4" />
+                    <rect class="m" x="3" y="-28.2" width="6" height="2.4" />
+                    <text class="t" x="-2" y="-18.5" text-anchor="middle">Trucks</text>
+                  </g>
+                  <g data-map="containers">
+                    <rect class="m" x="-32" y="-32" width="6" height="2.4" />
+                    <rect class="m" x="-32" y="-28.5" width="6" height="2.4" />
+                    <rect class="m" x="-24.4" y="-32" width="2.4" height="6" />
+                    <text class="t" x="-27" y="-22.5" text-anchor="middle">Containers</text>
+                  </g>
+                  <g data-map="jumbotron">
+                    <rect class="m" x="-3.4" y="21.6" width="6.8" height="1.8" />
+                    <text class="t" x="0" y="20.4" text-anchor="middle">Big screen</text>
+                  </g>
+                  <g data-map="canteen">
+                    <rect class="m" x="-12.8" y="27" width="1.6" height="1.6" />
+                    <rect class="m" x="11.2" y="27" width="1.6" height="1.6" />
+                    <rect class="m" x="-6" y="28.6" width="1.4" height="1.4" />
+                    <rect class="m" x="4.6" y="28.6" width="1.4" height="1.4" />
+                    <rect class="m" x="-24" y="-10.4" width="1.6" height="1.6" />
+                    <rect class="m" x="22.4" y="-10.4" width="1.6" height="1.6" />
+                  </g>
+                  <g data-map="pitchside">
+                    <rect class="m" x="-30" y="-35.8" width="12" height="1.6" />
+                    <rect class="m" x="18" y="34.2" width="12" height="1.6" />
+                    <rect class="m" x="-35.8" y="-6" width="1.6" height="12" />
+                    <rect class="m" x="34.2" y="-6" width="1.6" height="12" />
+                    <circle class="m" cx="-11" cy="-14" r="0.9" />
+                    <circle class="m" cx="11" cy="14" r="0.9" />
+                    <circle class="m" cx="11" cy="-14" r="0.9" />
+                    <circle class="m" cx="-11" cy="16" r="0.9" />
+                  </g>
+                  <g data-map="billboard">
+                    <rect class="m" x="6" y="-42.5" width="14" height="3.4" />
+                    <text class="t" x="13" y="-44" text-anchor="middle">Billboard, outside the fence</text>
+                  </g>
+                  <g data-map="blimp">
+                    <ellipse class="m" cx="-28" cy="-41" rx="6" ry="2.4" />
+                    <text class="t" x="-28" y="-44.6" text-anchor="middle">Blimp, in the sky</text>
+                  </g>
+                </svg>
+              </div>
+            </div>
+
+            <div class="result panel" aria-live="polite">
+              <h3>2. Pick how long</h3>
+              <div class="ctl">
+                <div class="ctl-label"><span>Weeks</span><span class="num" id="weeks-out">2 weeks</span></div>
+                <div class="stepper">
+                  <button type="button" id="weeks-dec" aria-label="One week less">–</button>
+                  <input type="range" id="weeks" min="1" max="12" value="2" aria-label="Weeks" />
+                  <button type="button" id="weeks-inc" aria-label="One week more">+</button>
+                </div>
+              </div>
+              <div class="ctl">
+                <div class="ctl-label"><span>How busy the game is</span></div>
+                <div class="seg" id="scenario"></div>
+                <p class="scenario-note" id="scenario-note"></p>
+              </div>
+
+              <div id="outputs">
+                <div class="big-out">
+                  <div class="n" id="o-reach">0</div>
+                  <div class="l">players see your brand</div>
+                </div>
+                <dl class="outs">
+                  <div>
+                    <dt>Views in total</dt>
+                    <dd id="o-views">0</dd>
+                  </div>
+                  <div>
+                    <dt>Views per player</dt>
+                    <dd id="o-freq">0</dd>
+                  </div>
+                  <div>
+                    <dt>You pay per 1,000 views</dt>
+                    <dd id="o-cpm">€0</dd>
+                  </div>
+                  <div>
+                    <dt>You pay per day</dt>
+                    <dd id="o-day">€0</dd>
+                  </div>
+                </dl>
+                <div class="chart">
+                  <h4 id="chart-title">Players reached, day by day</h4>
+                  <svg id="chart" viewBox="0 0 560 170" aria-labelledby="chart-title chart-desc"><desc id="chart-desc"></desc></svg>
+                  <div class="tip" id="tip"></div>
+                </div>
+                <div class="bill" id="bill"></div>
+                <p class="compare" id="compare"></p>
+                <a class="btn big book" id="book-btn" href="#book">Book this campaign</a>
+                <p class="book-note">Opens an email with your campaign filled in. Nothing is charged yet.</p>
+              </div>
+              <div class="empty" id="empty" hidden>Pick at least one slot on the left to see your numbers.</div>
+            </div>
+          </div>
+
+          <!-- Logo preview -->
+          <div class="preview">
+            <div class="panel">
+              <h3><span class="live-only">3. </span>See your brand in the yard</h3>
+              <p class="hint">A rough preview. We redraw the final art in the game's style, free.</p>
+              <label class="field">
+                Brand name
+                <input type="text" id="pv-name" maxlength="22" value="YOUR BRAND" spellcheck="false" />
+              </label>
+              <div class="field">
+                Or your logo
+                <span class="file">
+                  <span class="btn paper">Choose an image</span>
+                  <input type="file" id="pv-file" accept="image/png,image/jpeg,image/svg+xml,image/webp" aria-label="Choose a logo image" />
+                </span>
+              </div>
+              <div class="field">
+                <span id="pv-paint-label">Stripe colour</span>
+                <div class="swatches" role="radiogroup" aria-labelledby="pv-paint-label" id="pv-paint"></div>
+              </div>
+              <p class="privacy-line">Your image stays on your computer. This page uploads nothing.</p>
+            </div>
+            <div class="preview-stage">
+              <svg viewBox="0 0 720 400" role="img" aria-label="Preview of your brand on a box truck in the yard">
+                <defs>
+                  <pattern id="pdots" width="9" height="9" patternUnits="userSpaceOnUse">
+                    <circle cx="4.5" cy="4.5" r="1.9" fill="#15111c" opacity="0.3" />
+                  </pattern>
+                  <!-- Step 1 of the creative pipeline: flatten to a few paints -->
+                  <filter id="flat" color-interpolation-filters="sRGB">
+                    <feComponentTransfer>
+                      <feFuncR type="discrete" tableValues="0.08 0.55 0.94 1" />
+                      <feFuncG type="discrete" tableValues="0.07 0.45 0.82 0.96" />
+                      <feFuncB type="discrete" tableValues="0.11 0.42 0.66 0.86" />
+                    </feComponentTransfer>
+                  </filter>
+                  <clipPath id="pv-clip"><rect x="98" y="116" width="344" height="150" /></clipPath>
+                </defs>
+                <circle cx="640" cy="64" r="40" fill="#ffd23f" stroke="#15111c" stroke-width="5" />
+                <use href="#cloud" x="60" y="20" width="150" height="68" />
+                <path d="M0 300H720" stroke="#15111c" stroke-width="4" />
+                <rect x="0" y="300" width="720" height="100" fill="#f0d9a8" />
+                <path d="M70 336H560L660 400H160Z" fill="#cdb59f" />
+                <path d="M70 336H560L660 400H160Z" fill="url(#pdots)" />
+                <g stroke="#15111c" stroke-width="6" stroke-linejoin="round">
+                  <rect x="70" y="90" width="400" height="230" fill="#4c6ef5" />
+                  <rect x="86" y="104" width="368" height="198" fill="#fff4dc" stroke-width="5" />
+                  <rect id="pv-stripe" x="86" y="276" width="368" height="26" fill="#ef4d4d" stroke-width="5" />
+                  <path d="M470 172H580L630 238V320H470Z" fill="#fff4dc" />
+                  <path d="M496 192H568L604 238H496Z" fill="#86c8ec" stroke-width="5" />
+                  <circle cx="160" cy="326" r="34" fill="#15111c" />
+                  <circle cx="380" cy="326" r="34" fill="#15111c" />
+                  <circle cx="560" cy="326" r="34" fill="#15111c" />
+                </g>
+                <g fill="#e9e1cf">
+                  <circle cx="160" cy="326" r="11" />
+                  <circle cx="380" cy="326" r="11" />
+                  <circle cx="560" cy="326" r="11" />
+                </g>
+                <g clip-path="url(#pv-clip)">
+                  <text id="pv-text" class="t" x="270" y="210" text-anchor="middle" dominant-baseline="middle" fill="#15111c" stroke="#15111c" stroke-width="1.5">YOUR BRAND</text>
+                  <image id="pv-img" x="108" y="122" width="324" height="140" preserveAspectRatio="xMidYMid meet" filter="url(#flat)" hidden />
+                </g>
+                <!-- Sun shadow across the panel: the halftone falls on your art too -->
+                <path d="M300 104H454V302H220Z" fill="#6d5f99" opacity="0.18" />
+                <path d="M300 104H454V302H220Z" fill="url(#pdots)" />
+                <rect x="86" y="104" width="368" height="198" fill="none" stroke="#15111c" stroke-width="5" />
+                <rect x="408" y="112" width="38" height="20" fill="#fff" stroke="#15111c" stroke-width="2.5" />
+                <text x="427" y="127" text-anchor="middle" font-size="12" font-weight="900" font-family="system-ui, sans-serif" fill="#15111c">AD</text>
+              </svg>
+            </div>
+          </div>
+
+          <ol class="steps live-only" id="book">
+            <li><strong>Pick</strong>Choose slots and weeks with the calculator, then press “Book this campaign”.</li>
+            <li><strong>Send your logo</strong>A PNG or SVG is enough. We turn it into comic art.</li>
+            <li><strong>Check the preview</strong>Within 2 working days you get screenshots from the game.</li>
+            <li><strong>Pay the invoice</strong>By bank transfer or card. Your campaign starts on your date.</li>
+            <li><strong>Get a weekly report</strong>Every Monday: players, views and fresh screenshots.</li>
+          </ol>
+        </div>
+      </section>
 
       <!-- ================= RULES + FAQ ================= -->
-      
+      <section class="after live-only">
+        <div class="wrap">
+          <div class="sec-head">
+            <h2>What we accept</h2>
+            <p>Many of our players are teenagers. These rules protect them, and they keep your brand next to a game parents are happy with.</p>
+          </div>
+          <div class="rules">
+            <div class="panel">
+              <h3><i style="background: var(--green)"></i>Good fit</h3>
+              <ul>
+                <li>Games and gaming gear</li>
+                <li>Headphones and tech</li>
+                <li>Clothing and shoes</li>
+                <li>Streaming and apps</li>
+                <li>Water and sugar-free drinks</li>
+              </ul>
+            </div>
+            <div class="panel">
+              <h3><i style="background: var(--yellow)"></i>Ask us first</h3>
+              <ul>
+                <li>Sugary drinks and snacks: the rules differ by country</li>
+                <li>Energy drinks</li>
+              </ul>
+            </div>
+            <div class="panel">
+              <h3><i style="background: var(--red)"></i>Never</h3>
+              <ul>
+                <li>Alcohol, tobacco, vapes, nicotine</li>
+                <li>Gambling, betting, loot boxes, crypto, trading</li>
+                <li>Weapons and firearm shops</li>
+                <li>Political or religious campaigns</li>
+              </ul>
+            </div>
+          </div>
+          <div class="art-rules">
+            <p>
+              <strong>Art rules, so the game stays fair:</strong> no people or stickmen at life size, no shapes
+              like a crosshair or a hit marker, no flashing, and no red splashes that look like a hit.
+            </p>
+          </div>
+
+          <div class="faq">
+            <h2>Questions from brands</h2>
+            <details>
+              <summary>How do you count a view?</summary>
+              <p>
+                A view is one sighting: your art is on screen, big enough to read, not behind a wall, for at
+                least one second. The game counts views and our server checks and caps the numbers. Views come
+                from players' browsers, so our reports call them estimates. Player numbers come from our servers.
+              </p>
+            </details>
+            <details>
+              <summary>Where do the forecast numbers come from?</summary>
+              <p class="js-forecast-faq">
+                From our daily players, the average play time and how many players come back. You can see the
+                exact numbers we use below the calculator.
+              </p>
+            </details>
+            <details>
+              <summary>What if fewer players come than you forecast?</summary>
+              <p>
+                We add free days to your campaign until it reaches the views we forecast when you booked. You
+                never pay more than the price you agreed.
+              </p>
+            </details>
+            <details>
+              <summary>Do you track players or use cookies?</summary>
+              <p>
+                No. We set no ad cookies and build no profiles, and we do not target anybody. Every player in a
+                match sees the same brand. That also keeps your campaign clear of the EU ban on profiling-based
+                ads to minors.
+              </p>
+            </details>
+            <details>
+              <summary>Who plays StickFrag?</summary>
+              <p>
+                Players on desktop browsers, mostly in Europe and North America. Many are teenagers and young
+                adults. They play in short sessions, often with friends.
+              </p>
+            </details>
+            <details>
+              <summary>Can I change my art during a campaign?</summary>
+              <p>Yes, once a week, free. Send the new art by Thursday and it goes live the next Monday.</p>
+            </details>
+            <details>
+              <summary>Is there a minimum?</summary>
+              <p>One slot for one week. No contract after that, and no automatic renewal.</p>
+            </details>
+            <details>
+              <summary>Will players see an “AD” mark?</summary>
+              <p>
+                Yes. Paid art carries a small “AD” mark, and the game menu lists our sponsors. The law requires
+                that players can tell an ad from the game.
+              </p>
+            </details>
+          </div>
+
+          <div class="final">
+            <div>
+              <h2>Want a slot? Send us your pick</h2>
+              <p>We answer within one working day. You only pay after you approve the preview.</p>
+            </div>
+            <a class="btn big" id="final-btn" href="#prices">Email us</a>
+          </div>
+        </div>
+      </section>
     </main>
 
     <footer>
       <div class="wrap">
         <a class="logo" href="#top">STICKFRAG</a>
-        
-        
+        <div class="footer-social">
+          <a href="https://discord.gg/mTYAtjNnyd" target="_blank" rel="noopener" aria-label="Discord" title="Discord"><svg aria-hidden="true"><use href="#i-discord" /></svg></a>
+          <a href="https://www.tiktok.com/@stickfrag.com" target="_blank" rel="noopener" aria-label="TikTok @stickfrag.com" title="TikTok"><svg aria-hidden="true"><use href="#i-tiktok" /></svg></a>
+          <a href="https://www.instagram.com/stickfrag/" target="_blank" rel="noopener" aria-label="Instagram @stickfrag" title="Instagram"><svg aria-hidden="true"><use href="#i-instagram" /></svg></a>
+          <a href="https://www.youtube.com/@stickfrag" target="_blank" rel="noopener" aria-label="YouTube @stickfrag" title="YouTube"><svg aria-hidden="true"><use href="#i-youtube" /></svg></a>
+        </div>
+        <nav aria-label="Footer">
+          <a class="js-play" href="/play/">Play</a>
+          
+          
+          
+          
+          
+          
+          
+          
+          <!--donate--><!--/donate-->
+          <a class="live-only" href="#advertise">Advertise</a>
+          <a class="soon-only" href="#support">For brands</a>
+          
+          
+          
+          
+        </nav>
         <small>© 2026 StickFrag. All rights reserved. The game, its characters, maps, art and code are ours. Do not copy them.<span class="live-only"> Prices exclude VAT.</span></small>
       </div>
     </footer>
@@ -494,76 +1338,15 @@
         <button id="fb-close" type="button" class="btn paper">CLOSE</button>
         <button id="fb-send" type="button" class="btn">SEND</button>
       </div>
-      <p class="fb-note">Good ideas go on the public <a href="/ideas/">ideas board</a>, where players like them. If we build your idea, we may thank you by your nickname. Do not write personal details.</p>
+      <p class="fb-note">Good ideas go on the public , where players like them. If we build your idea, we may thank you by your nickname. Do not write personal details.</p>
     </div>
 
     <script src="/retry.js?v=06dd2ace69"></script>
     <script type="module" src="/playmenu.js?v=15f5cce3d0"></script>
     <script type="module" src="/signup.js?v=37b18f08b7"></script>
-    
+    <script type="module" src="/landing.js?v=be3fd702f2"></script>
   <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"8789da46cdde4a3f84336b6bda790796","r":1,"spa":2}' crossorigin="anonymous"></script>
-
-<script>
-// Standalone shim: the home page's own PLAY path continues into a mode/server
-// picker backed by matchmaking endpoints that a standalone build does not have.
-// Send the player straight into the game instead, carrying the nickname and map
-// they already chose. Everything visual on this page is the real thing.
-(() => {
-  const GAME = "/play/";
-  const params = () => new URLSearchParams(location.search);
-
-  function nickname() {
-    const el = document.getElementById("gear-name");
-    const typed = el && !el.hidden ? el.value.trim() : "";
-    if (/^[A-Za-z0-9_]{3,16}$/.test(typed)) return typed;
-    try {
-      const saved = (localStorage.getItem("name") || "").trim();
-      if (/^[A-Za-z0-9_]{3,16}$/.test(saved)) return saved;
-    } catch {}
-    return "player";
-  }
-
-  function enter(extra) {
-    const q = new URLSearchParams();
-    q.set("name", nickname());
-    q.set("offline", "");
-    q.set("map", params().get("map") || "yard");
-    for (const [k, v] of Object.entries(extra || {})) q.set(k, v);
-    location.href = GAME + "?" + q.toString();
-  }
-
-  // PLAY, then whichever way the player wanted to get in.
-  document.addEventListener(
-    "click",
-    (e) => {
-      const el = e.target.closest && e.target.closest(
-        "#start-quick, #start-create, #start-servers, .play-big, .js-play, #gear-join button, #code-create, #invite-go"
-      );
-      if (!el) return;
-      e.preventDefault();
-      e.stopPropagation();
-      const room = (document.getElementById("invite-code")?.textContent || "").trim();
-      if (el.id === "start-create" && room) enter({ room });
-      else enter();
-    },
-    true
-  );
-
-  // The form's own submit must not run the dead name-check path.
-  document.addEventListener(
-    "submit",
-    (e) => {
-      if (e.target && e.target.id === "gear-join") {
-        e.preventDefault();
-        e.stopPropagation();
-        enter();
-      }
-    },
-    true
-  );
-})();
-</script>
-<div id="server-rows" hidden></div><span id="server-title" hidden></span><select id="server-region" hidden></select><div id="server-modes" hidden></div><input id="server-find" hidden></input><span id="server-nobots-slot" hidden></span><button id="server-quick" hidden></button><button id="start-servers" hidden></button><button id="server-nobots" hidden></button><section id="thanks-row" hidden></section><section id="updates-row" hidden></section><section id="event-row" hidden></section><div class="hero-card" hidden></div><div class="js-why-price" hidden></div>
+<button id="server-nobots" hidden></button>
 <script>
 // Peer multiplayer for this build. The real landing page drove a server list
 // that no longer exists; these two controls now start a host match or join one
@@ -602,20 +1385,6 @@
     e.stopImmediatePropagation();
     if (/^[A-Z0-9]{6}$/.test(value)) go('peer=join&room=' + value);
   }, true);
-
-  // Join uses the existing room-code field, which already validates the
-  // 6-character alphabet this build's rooms use.
-  const joinForm = byId('gear-join') || byId('gear');
-  if (joinForm) {
-    joinForm.addEventListener('submit', (e) => {
-      const field = joinForm.querySelector('input[name="room"], input#room, input[type="text"]');
-      const value = (field && field.value || '').replace(/[\s-]/g, '').toUpperCase();
-      if (!/^[A-Z0-9]{6}$/.test(value)) return;
-      e.preventDefault();
-      e.stopImmediatePropagation();
-      go('peer=join&room=' + value);
-    }, true);
-  }
 
   // The old "invite link" copied a server URL. Point it at a room instead.
   const invite = byId('invite-link-copy');

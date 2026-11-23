@@ -111065,7 +111065,7 @@ var Rde = { desktop: {}, touch: { quality: 0, hudScale: 0.6 } },
   JK = { desktop: { fpsCap: 0, adaptive: !__sfNoAutoRes() }, touch: { fpsCap: 60, adaptive: !0 } },
   WK = { desktop: { zoom: 1, sight: 1 }, touch: { zoom: 1.3, sight: 1.4 } },
   VK = { desktop: 1, touch: 0.7 },
-  XK = { desktop: null, touch: [1280, 1920, 1920] },
+  XK = { desktop: [1280, 1600, 1920], touch: [1280, 1920, 1920] },
   Nde = 4,
   Gde = 4,
   Ode = 35e5;
@@ -111102,8 +111102,21 @@ function Kde(r) {
 function _de(r) {
   return /Intel/i.test(r) && !/Arc/i.test(r);
 }
+function __sfLooksSoftware(g) {
+  return /SwiftShader|llvmpipe|Basic Render|Software|Mesa OffScreen/i.test(g || "");
+}
 function qK(r, e) {
-  r === "touch" ? Ku({ quality: Yde(Kde(e)) }) : _de(e) && Ku({ quality: 1 });
+  if (r === "touch") { Ku({ quality: Yde(Kde(e)) }); return; }
+  // A machine that cannot hold HIGH should not spend its first minute discovering
+  // that: a software rasteriser, very little RAM, very few cores, or a small
+  // screen all mean the same thing here.
+  const __sfWeak =
+    __sfLooksSoftware(e) ||
+    (navigator.deviceMemory > 0 && navigator.deviceMemory <= 4) ||
+    (navigator.hardwareConcurrency > 0 && navigator.hardwareConcurrency <= 4) ||
+    screen.width * screen.height * (devicePixelRatio ** 2) < 1_200_000;
+  if (__sfWeak) { Ku({ quality: 0 }); return; }
+  _de(e) && Ku({ quality: 1 });
 }
 function Jde(r, e) {
   let o = (A, a) => ({
@@ -119662,7 +119675,7 @@ function IX({ params: r, game: e, hud: o, renderer: t, input: n, sound: i, mode:
   fX(),
   vX();
   function d() {
-    removeEventListener("beforeunload", ul), location.replace("/#gear");
+    removeEventListener("beforeunload", ul), (globalThis.__sfHome ? globalThis.__sfHome() : location.replace("/#gear"));
   }
   document.getElementById("go-home").addEventListener("click", d),
   document.getElementById("left-home").addEventListener("click", d),
@@ -119791,7 +119804,7 @@ function Dhe() {
       tP(lB(r)),
       iP(
         r,
-        () => location.replace("/#gear"),
+        () => (globalThis.__sfHome ? globalThis.__sfHome() : location.replace("/#gear")),
         () => location.reload()
       ),
       r);
@@ -121368,7 +121381,7 @@ await(
   await Promise.resolve().then(() => (zX(), kX))
 ).openReplayPage(Co, { game: Wo, renderer: a1, sound: GA, canvas: u8, world: fl, mapId: j1 })) :
 !Rs && !SY(Co, cm).invite ?
-location.replace(`/${location.search}#gear`) : (
+(globalThis.__sfHome ? globalThis.__sfHome() : location.replace(`/${location.search}#gear`)) : (
 Rs || (Rs = await KK()),
 await R0("Mixing the ink", 1),
 dX(),
