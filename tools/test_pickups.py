@@ -11,6 +11,8 @@ import json
 
 from playwright.sync_api import sync_playwright
 
+from test_entry import game_frame
+
 URL = "http://127.0.0.1:8123/stickfrag.html?play&name=tester&map=yard"
 
 
@@ -21,16 +23,17 @@ def main() -> int:
         page = browser.new_page(viewport={"width": 1100, "height": 700})
         page.on("pageerror", lambda e: errors.append(str(e)))
         page.goto(URL, wait_until="load", timeout=90000)
-        page.wait_for_function(
+        game = game_frame(page)
+        game.wait_for_function(
             "() => !!globalThis.__sfGame && globalThis.__sfGame.ready === true", timeout=90000
         )
         page.wait_for_timeout(1500)
         # Pointer lock is gated on a trusted gesture an automated browser cannot
         # hold; the input code reads this flag, so set what the lock would set.
-        page.evaluate("() => { globalThis.__sfGame.input.locked = true; }")
+        game.evaluate("() => { globalThis.__sfGame.input.locked = true; }")
 
         # --- weapon on a pedestal -------------------------------------------
-        weapon = page.evaluate(
+        weapon = game.evaluate(
             """() => {
               const g = globalThis.__sfGame;
               const s = g.predictor.state;
@@ -46,17 +49,17 @@ def main() -> int:
 
         # Let one frame run so the HUD writes the prompt.
         page.wait_for_timeout(900)
-        weapon["promptText"] = page.evaluate(
+        weapon["promptText"] = game.evaluate(
             "() => (document.getElementById('prompt')?.textContent || '').trim()"
         )
 
-        page.click("canvas", position={"x": 500, "y": 300})
+        page.mouse.click(550, 380)
         page.keyboard.down("f")
         page.wait_for_timeout(400)
         page.keyboard.up("f")
         page.wait_for_timeout(1200)
 
-        weapon_after = page.evaluate(
+        weapon_after = game.evaluate(
             """() => {
               const s = globalThis.__sfGame.predictor.state;
               return { weapon: s.weapon, ammo: s.ammo, mag: globalThis.__sfWeapons?.[s.weapon]?.mag };
@@ -69,23 +72,25 @@ def main() -> int:
         hosted = browser.new_page(viewport={"width": 1100, "height": 700})
         hosted.on("pageerror", lambda e: errors.append(str(e)))
         hosted.goto(
-            "http://127.0.0.1:8123/stickfrag.html?peer=host&name=picker&room=AB2CD3",
+            "http://127.0.0.1:8123/stickfrag.html?peer=host&name=picker&map=yard",
             wait_until="load",
             timeout=90000,
         )
-        hosted.wait_for_function(
+        hgame = game_frame(hosted)
+        hgame.wait_for_function(
             "() => !!globalThis.__sfGame && globalThis.__sfGame.ready === true", timeout=90000
         )
         hosted.wait_for_timeout(2500)
-        hosted.evaluate("() => { globalThis.__sfGame.input.locked = true; }")
+        hgame.evaluate("() => { globalThis.__sfGame.input.locked = true; }")
         # The pool is filled by the host authority a beat after the match is up.
         # Waiting for an actual drop keeps this from racing the spawn.
-        hosted.wait_for_function(
+        hgame.wait_for_function(
             "() => (globalThis.__sfGame.abilityDrop || []).length > 0", timeout=20000
         )
+        game = hgame
         page = hosted
 
-        ability = page.evaluate(
+        ability = game.evaluate(
             """() => {
               const g = globalThis.__sfGame;
               const d0 = (g.abilityDrop || [])[0];
@@ -132,7 +137,7 @@ def main() -> int:
         page.keyboard.up("f")
         page.wait_for_timeout(1200)
 
-        ability_after = page.evaluate(
+        ability_after = game.evaluate(
             """() => {
               const g = globalThis.__sfGame;
               return {

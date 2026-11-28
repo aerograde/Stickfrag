@@ -14,8 +14,9 @@ from __future__ import annotations
 
 import re
 import shutil
-import subprocess
 from pathlib import Path
+
+from esbuild_runner import run as esbuild
 
 ROOT = Path(__file__).resolve().parent.parent
 SITE = ROOT / "stickfrag.com"
@@ -78,16 +79,14 @@ def bundle() -> int:
         encoding="utf-8",
     )
     OUT.parent.mkdir(parents=True, exist_ok=True)
-    subprocess.run(
+    esbuild(
         [
-            "npx", "--yes", "esbuild@0.25", str(entry),
+            str(entry),
             "--bundle", "--minify", "--format=iife", "--target=esnext",
             f"--outfile={OUT}",
         ],
-        check=True,
         cwd=str(WORK),
-        stdout=subprocess.DEVNULL,
-        stderr=subprocess.STDOUT,
+        quiet=True,
     )
     bundle_landing()
     bundle_support()
@@ -103,16 +102,14 @@ def bundle_landing() -> int:
     """
     entry = WORK / "__landing.js"
     entry.write_text('import "./landing.js";\n', encoding="utf-8")
-    subprocess.run(
+    esbuild(
         [
-            "npx", "--yes", "esbuild@0.25", str(entry),
+            str(entry),
             "--bundle", "--minify", "--format=iife", "--target=esnext",
             f"--outfile={LANDING_OUT}",
         ],
-        check=True,
         cwd=str(WORK),
-        stdout=subprocess.DEVNULL,
-        stderr=subprocess.STDOUT,
+        quiet=True,
     )
     # The scene URLs in body.dataset cannot be imported from a single file. The
     # halo stickman is bundled here instead and self-starts from #halo-man; the
@@ -131,16 +128,14 @@ def bundle_support() -> int:
     """Bundle the halo stickman, which landing.js loaded by URL."""
     entry = WORK / "__support.js"
     entry.write_text('import "./supportscene.js";\n', encoding="utf-8")
-    subprocess.run(
+    esbuild(
         [
-            "npx", "--yes", "esbuild@0.25", str(entry),
+            str(entry),
             "--bundle", "--minify", "--format=iife", "--target=esnext",
             f"--outfile={SUPPORT_OUT}",
         ],
-        check=True,
         cwd=str(WORK),
-        stdout=subprocess.DEVNULL,
-        stderr=subprocess.STDOUT,
+        quiet=True,
     )
     return SUPPORT_OUT.stat().st_size
 
@@ -239,8 +234,11 @@ if(!live)return;
 live=false;
 var c=canvas();
 if(!(c instanceof HTMLCanvasElement))return;
-var g=c.getContext("webgl2")||c.getContext("webgl");
-try{g&&g.getExtension("WEBGL_lose_context")?.loseContext()}catch(e){}
+// The builder exposes its own teardown: cancel its frame loop, disconnect
+// both observers, abort its document listeners and drop the GL context. Only
+// losing the context left the scene, the observers and the loop alive, so
+// every PLAY/HOME cycle cost another copy of the room.
+try{c.__sfDispose&&c.__sfDispose()}catch(e){}
 var fresh=c.cloneNode(false);
 fresh.removeAttribute("class");
 fresh.width=300;fresh.height=150;
@@ -254,6 +252,65 @@ globalThis.__sfLobbyRestore=function(){
 requestAnimationFrame(function(){requestAnimationFrame(globalThis.__sfLobbyBoot.start)});
 };
 __sfLobbyBoot.start();"""
+
+
+def wrap_lobby_dispose(js: str) -> str:
+    """Give the lobby builder a real teardown.
+
+    `release()` used to only lose the WebGL context and swap the canvas. The
+    scene, the IntersectionObserver, the ResizeObserver, the two document
+    listeners and the self-scheduling frame loop all stayed alive, so each
+    visit to a match left another copy of the room in the menu's heap. This
+    records them on a canvas property the wrapper can call.
+    """
+    resize = "new ResizeObserver(C).observe(e),C();"
+    new_resize = "let __sfRO=new ResizeObserver(C);__sfRO.observe(e),C();"
+    js = replace_once(js, resize, new_resize, "lobby: resize observer")
+
+    inter = (
+        "if(new IntersectionObserver(([N])=>{P=N?.isIntersecting??!1,"
+        "P&&D&&!L&&(L=requestAnimationFrame(I))}).observe(e),!D)"
+    )
+    new_inter = (
+        "let __sfIO=new IntersectionObserver(([N])=>{P=N?.isIntersecting??!1,"
+        "P&&D&&!L&&(L=requestAnimationFrame(I))});__sfIO.observe(e);if(!D)"
+    )
+    js = replace_once(js, inter, new_inter, "lobby: intersection observer")
+
+    # The two document listeners must be abortable, or they keep the whole
+    # scene reachable after the canvas is gone.
+    listeners = (
+        "document.addEventListener(_n,()=>{T(),x=performance.now()}),"
+        "document.addEventListener(uc,N=>{_=N.detail,T()});"
+    )
+    new_listeners = (
+        "let __sfAbort=new AbortController();"
+        "document.addEventListener(_n,()=>{T(),x=performance.now()},{signal:__sfAbort.signal}),"
+        "document.addEventListener(uc,N=>{_=N.detail,T()},{signal:__sfAbort.signal});"
+    )
+    js = replace_once(js, listeners, new_listeners, "lobby: document listeners")
+
+    # The renderer variable is `t` in this builder, and the loop handle is `L`.
+    js = replace_once(
+        js,
+        new_resize,
+        new_resize +
+        "e.__sfDispose=function(){P=!1,cancelAnimationFrame(L);"
+        "try{__sfIO.disconnect()}catch(_){}"
+        "try{__sfRO.disconnect()}catch(_){}"
+        "try{__sfAbort.abort()}catch(_){}"
+        "try{t.dispose()}catch(_){}"
+        "try{t.forceContextLoss()}catch(_){}};",
+        "lobby: dispose hook",
+    )
+    return js
+
+
+def replace_once(js: str, old: str, new: str, label: str) -> str:
+    found = js.count(old)
+    if found != 1:
+        raise SystemExit(f"{label} matched {found} times, expected 1")
+    return js.replace(old, new, 1)
 
 
 def wrap_lobby(js: str) -> str:
@@ -274,6 +331,7 @@ def route_launch() -> int:
             raise SystemExit(f"home bundle site not found exactly once ({found}): {old[:70]}")
         js = js.replace(old, new, 1)
     js = wrap_lobby(js)
+    js = wrap_lobby_dispose(js)
     OUT.write_text(js, encoding="utf-8")
     return OUT.stat().st_size
 

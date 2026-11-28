@@ -16,6 +16,8 @@ import sys
 
 from playwright.sync_api import sync_playwright
 
+from test_entry import game_frame
+
 BENCH = """() => new Promise(res => {
   const rec = [];
   let last = performance.now();
@@ -42,14 +44,15 @@ BENCH = """() => new Promise(res => {
 def measure(page, bots: int, warm: float) -> dict:
     url = (
         "http://127.0.0.1:8123/stickfrag.html"
-        f"?peer=host&name=tester&room=PERF23&mode=ffa&bots={bots}&map=yard"
+        f"?peer=host&name=tester&mode=ffa&bots={bots}&map=yard"
     )
     page.goto(url, wait_until="load", timeout=90000)
-    page.wait_for_function(
+    game = game_frame(page)
+    game.wait_for_function(
         "() => !!globalThis.__sfGame && globalThis.__sfGame.ready === true", timeout=90000
     )
-    page.wait_for_timeout(int(warm * 1000))
-    return page.evaluate(BENCH)
+    game.wait_for_timeout(int(warm * 1000))
+    return game.evaluate(BENCH)
 
 
 def main() -> int:

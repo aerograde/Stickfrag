@@ -6,51 +6,73 @@ design docs and server code were never published; `play/main.js` is a recovered,
 client. The production bundle is preserved at `build/main.original.js`.
 
 A match chosen from the menu runs locally under the host authority: the chosen mode, its
-scoreboard and team scores, ability pickups, and any peers who join. There is no bot AI — the
-original client had none either, it lived on the server — so a local match has no opponents
-until someone joins your room. FPS and draw calls are visible by default.
+scoreboard and team scores, ability pickups, a small bot AI and any peers who join. The
+original client had no AI of its own — on the live site every bot ran on the server — so
+the host simulation here supplies it. FPS and draw calls are visible by default.
 
 ## One file
 
 `stickfrag.html` is the whole thing: the home screen and the match in a single
 self-contained file. Drop it anywhere — including `file://` — and it runs, with no
-server and no external requests.
+server. A solo match makes no external requests; a room or invite uses the signalling
+code pairing described under Multiplayer.
 
-The two screens never coexist. The home markup is live on load and the game's module
-is *parked* as inert text, so sitting on the menu costs ~10 MB of JS heap instead of
-~120 MB and no WebGL context at all. Choosing a mode swaps the screens in place and
-boots the module from a blob URL.
+The menu runs in the top document. Every match gets a **disposable iframe** of its own:
+over http(s) the frame loads this same file with `?embed=1` (a real document, which is
+what Chromium grants pointer lock to); from disk, or when the document has no
+addressable URL, a game-only document is built from the parked CSS, HUD markup and
+module and loaded from a blob URL. An embedded match skips the menu bundles entirely and
+the game does not rewrite the wrapper URL, so it is a game frame from first paint to
+HOME. HOME removes the frame, and with it the module, the WebGL context, listeners,
+sockets and timers. That matters: an ES module cannot be unloaded, so a match imported
+into the menu document used to leave roughly 80 MB and a GL context behind on every
+PLAY/HOME cycle.
 
-When the match boots, the game's markup is inserted **before** the home root in the
-document. The two screens share six element ids (`#gear`, `#feedback`, `#fb-close`,
-`#fb-send`, `#fb-status`, `#fb-text`) and the game resolves its HUD with
-`document.getElementById`, which returns the first match in document order, so the
-game's nodes have to come first. Hiding the home instead let the HUD empty the menu's
-`#gear`, which left a blank screen after HOME. HOME now calls a shell hook
-(`globalThis.__sfHome`) rather than navigating, so a match ends in place: the game's
-markup is removed, the menu comes back with its contents intact, and a second match
-can start.
+The game's markup and module are parked as inert text, so the menu pays for no game
+context. The HUD and the menu never share a document, so their overlapping ids and
+class names cannot collide. The landing page itself is the real site, whole and live.
 
-`stickfrag.svg` is the same file in an image wrapper, for anything that will only
-accept an SVG. An SVG opened directly is an XML document, so the game cannot run
-inside it: `document.body` is null and `createElement("canvas")` returns an
-`SVGElement` with no `getContext`. The wrapper carries the untouched payload and runs
-it in a nested frame:
+`stickfrag.svg` is the same file in an image wrapper. An SVG opened directly is an XML
+document, so the game cannot run inside it: `document.body` is null and
+`createElement("canvas")` returns an `SVGElement` with no `getContext`. The wrapper
+carries the untouched payload and launches it:
 
-- **`file://` runs it in place**, in an `<iframe>` fed a blob URL. This is the
-  double-click case, and it is the one that can capture the mouse: Chromium refuses
-  pointer lock in an `about:srcdoc` frame (`WrongDocumentError`) but allows it in a
-  blob frame. No second tab.
-- **`http(s)` opens a new tab**, because Chromium refuses pointer lock inside a blob
-  document served over http. Browsers block `window.open` without a gesture, so it
-  tries on load and the whole page is also a clickable retry.
+- On load, the payload is written to **IndexedDB** (`stickfrag` / `files` /
+  `stickfrag.html`) together with a boot script. The launcher waits for that write
+  before offering the game.
+- A click opens an `about:blank` tab. A tiny bootstrap reads the stored file from
+  IndexedDB and becomes it. If the tab cannot use storage (private mode, some `file://`
+  origins), it asks the launcher for the file and the launcher writes it directly.
+- From `file://`, a double-click starts an inline blob frame instead of a tab. This is
+  the pointer-lock path: Chromium refuses pointer lock in `about:srcdoc` but allows it
+  in a blob frame from disk. If the inline frame fails, a click falls back to the tab.
+  Linux Chromium is one host that refuses this blob-in-SVG frame; the tab fallback is
+  the path measured there.
+- A query on the SVG that names a match (`?peer=join&room=…`, `?mode=…`, `?play`) is
+  passed through and autostarts the match, so an invite link can point at either file.
+- HOME from a match refills that frame (or rewrites the tab) with a fresh payload
+  document and a **menu-only query** — the room, mode and map belong to the match that
+  just ended, not to the next menu. A second match therefore gets a new module and a new
+  GL context.
 
 A blob document from `file://` has a null origin, so `localStorage` throws there. The
-game only keeps a nickname and the settings in it, so the wrapper installs a
-memory-backed `Storage` before the payload's own scripts run. The query string cannot
-ride on a blob URL (appending one makes it invalid), so it is injected into the
-payload's `<head>` as `__SF_PARENT_QUERY`, which the shell merges into its boot
-parameters; `?peer=join&room=…` invite links work in both paths.
+wrapper installs a memory-backed `Storage` before the payload's scripts run; the probe
+covers writes as well as reads. The query string cannot ride on a blob URL (appending
+one makes it invalid), so it is injected into the payload's `<head>` as
+`__SF_PARENT_QUERY`; the shell merges it into the boot parameters and uses it to start
+the requested match. `?peer=join&room=…` invite links work in both paths. The launcher
+keeps the payload so HOME can rewrite the document. An `<img>` or CSS background never
+runs SVG scripts, so open the file directly (or through `<object>`/`<iframe>`).
+
+### Pointer lock and the fallback
+
+A match normally captures the pointer. Some contexts cannot grant it: an
+`about:blank` tab, a sandboxed or blob frame over http, a browser or embedding that
+denies the request. In those cases the game switches to a playable fallback: movement
+keys, mouse-move look without capture, click to fire and the wheel to switch weapons.
+A short banner says `MOUSE CAPTURE UNAVAILABLE`; if a lock is granted later, it takes
+over and the banner goes away. The resume panel no longer traps the player.
+
 
 ### The menu
 
@@ -66,11 +88,12 @@ list and QUICK JOIN were unreachable — and read as a completely broken page.
 
 Three things are rewired because the server they used is gone:
 
-- **Room-code JOIN.** The page asks matchmaking which room a code is; peers here find
-  each other over the broker, so that submit is handled locally instead.
+- **Room-code JOIN.** The old matchmaker is gone. A short code now starts a join
+  match locally; the actual pairing uses the long JOIN/ANSWER codes from the in-game
+  panel (details under Multiplayer).
 - **Launch.** The menu ends by assigning to `location.href`. That URL carries mode,
   map and room and is exactly what the game reads from the query string, so it is
-  handed to the shell and the match starts in place instead of re-parsing the file.
+  handed to the shell, which opens a match frame with the same parameters.
 - **The server browser.** The step and its row renderer are the site's own; only the
   source of the rows changed. A hosted room is recorded locally and listed there, so
   ALL SERVERS shows the rooms this build actually has rather than failing to reach a
@@ -83,25 +106,64 @@ shipping a dead link.
 
 Choosing a mode hosts a local match, which is what gives it a real match object —
 mode name, scoreboard, and team scores for the team modes — rather than the bare
-offline sandbox. Reloading a match URL restores that same mode.
+offline sandbox. Reloading a match URL restores that same mode. Nothing contacts a
+broker or matchmaker: a host is authoritative locally, and a joining player starts a
+join match and pairs with its long code. Room/invite links are shortcuts into that
+join flow, not automatic connection.
 
 `index.html` is the older standalone home page and is no longer required.
 
 ## Multiplayer
 
-Peer-to-peer with no game server. A **WebRTC mesh** carries the connections and one player is
-the **host**, who runs the authoritative 60 Hz simulation; everyone else sends inputs and
+Peer-to-peer with no game server and **no signalling broker**. One player is the
+**host**, who runs the authoritative 60 Hz simulation; everyone else sends inputs and
 receives snapshots. The client's own prediction and reconciliation are untouched.
 
-Two ways to connect:
+### Pairing one player
 
-1. **MQTT signalling (default).** Free anonymous brokers, tried in parallel:
-   `broker.emqx.io`, `broker.hivemq.com`, `test.mosquitto.org`. A room is
-   `sf1/<CODE>/…`; a room-scoped nonce keeps two rooms with the same code apart.
-2. **Offer/answer codes (fallback, always works).** In game, the host copies an offer code
-   (`SF1:…`), the joiner pastes it and returns an answer code (`SF1:…`). No broker, no
-   server, and it works on a LAN. Same ICE path, including STUN for the public address and
-   host candidates for the local network.
+1. The host starts a match (a mode tile, QUICK JOIN or a room invite still gets them
+   into a host or join match). The host can pair players at any time: press **Esc**
+   (to leave mouse capture), then **C**, or use the notice.
+2. The joining player starts a **join** match. The pairing panel opens automatically.
+3. The joining player presses **COPY JOIN CODE**. That long `SF1:…` code is a complete
+   SDP offer including ICE candidates.
+4. Send the JOIN code to the host out-of-band. The host pastes it into the panel and
+   presses **PASTE CODE**. The panel produces the long **ANSWER** code.
+5. Send the ANSWER code back. The joining player pastes it and presses **PASTE CODE**.
+   The WebRTC connection opens and the host seats them.
+
+`tools/test_peers.py` drives exactly those panel buttons, not a hidden API.
+
+### Three or more players: the mesh
+
+Every additional player repeats the JOIN/ANSWER exchange with the host. After the host
+seats a new player, it sends that player the ids of the existing joiners **over the
+already-open host data channel**. The new player creates one offer per existing joiner;
+the host relays the offers, answers and ICE candidates between the two joiners until
+their **direct** link opens. No further codes are needed.
+
+The result is a full graph: each player has a direct link to the host and to every other
+joiner. Game traffic stays host-authoritative (inputs only to the host, snapshots and
+events from the host); the direct joiner links are the mesh the host builds. A roster
+message keeps every scoreboard in step as players join.
+
+`tools/test_mesh.py` exercises the relay routing deterministically with fake peers, so
+it runs even on a machine whose loopback ICE cannot connect. `tools/test_peers.py`
+runs the real two- and three-player path when ICE is available.
+
+### Transport limits
+
+Signalling is **STUN only**: host candidates on a LAN and STUN for the public address.
+There is no TURN relay. Networks that require TURN (symmetric NAT, some corporate
+networks) will not connect; STUN is the explicit trade-off.
+
+The JOIN/ANSWER codes are compressed (`CompressionStream`/`DecompressionStream`) SDPs;
+they are roughly 700 characters in practice. Gathering waits up to ten seconds for ICE
+so the code carries the candidates; the panel shows when it is working.
+
+Same-machine loopback WebRTC is not available in every OS/browser/network configuration;
+`tools/test_peers.py` checks the codes and reports SKIP when ICE cannot connect, rather
+than blaming the game. Real players are on different machines.
 
 ## Picking things up
 
@@ -200,18 +262,29 @@ the room's Bots box is unticked — turns them off.
 ## Build
 
 ```bash
-./tools/build-all.sh     # patch -> bundle -> home bundle -> single file
+./tools/build-all.sh          # wrapper for the cross-platform build
+python3 tools/build-all.py    # the same build, directly (Windows included)
 ```
 
 Patch layers are exact-match replacements, so a moved upstream fails the build instead of
 producing a half-patched client:
 
 ```
-tools/patch-build.py perf wheel net abilities abilities_bind portable   # client source
+tools/patch-build.py perf wheel net abilities abilities_bind portable fallback  # client source
 tools/build-home-bundle.py                                              # home + landing bundles
 tools/build-single.py                                                   # stickfrag.html
 tools/build-svg.py                                                      # stickfrag.svg
 ```
+
+`tools/esbuild_runner.py` pins esbuild **0.25.12** and invokes it through `npx.cmd` on
+Windows. The home bundle is patched by exact-match substitutions against minified
+names, so a floating bundler version is a build input, not an incidental download.
+The client is ESM with top-level await and no `package.json`, so the syntax check
+copies it to `build/check.mjs` before `node --check`; a bare `.js` is treated as
+CommonJS by older Node releases.
+
+The shell lives in `tools/single-shell.js` so it can be read and syntax-checked as
+JavaScript; `build-single.py` only assembles the document and inlines the assets.
 
 `build-home-bundle.py` produces three bundles: the menu (`home.js`), the landing
 sections (`landing.js`) and the halo stickman (`supportscene.js`). They are separate
@@ -221,15 +294,61 @@ on purpose. Adding `landing.js` to the menu entry renames every minified symbol 
 ## Tests
 
 ```bash
-python3 tools/test_single.py     # whole site, scrolls, PLAY in place, HOME in place, HUD ids
-python3 tools/test_svg.py        # the SVG over http: launcher, tab, match, 60 fps
-python3 tools/test_svg_file.py   # the SVG from file://: inline frame, pointer lock, HOME
-python3 tools/test_wheel.py      # scroll-wheel weapon switching
-python3 tools/test_pips.py       # sound pips: standing emits, crouching does not
-python3 tools/test_peers.py      # two-peer join, seating, movement, frame rate
-python3 tools/test_pickups.py    # F takes a wall weapon and an ability
-python3 tools/test_death.py      # death UI, respawn, no shooting while dead, health monotonic
+python3 tools/test_browsers.py chromium   # all flows, one browser (firefox/webkit too)
+python3 tools/test_single.py              # site, PLAY, match frame, HOME, second match
+python3 tools/test_svg.py                 # SVG over http: IDB, about:blank, match, fps
+python3 tools/test_svg_file.py            # SVG from file://: inline frame, lock, HOME
+python3 tools/test_home.py                # single-file home: gate, mode list, branding
+python3 tools/test_fallback.py            # playable when pointer lock is refused
+python3 tools/test_resilience.py          # storage/IDB/popups/WebGL/blob/HOME failures
+python3 tools/test_menu_matrix.py         # headless menu/SVG matrix, no game (Linux/CI)
+python3 tools/test_cycles.py              # five PLAY/HOME cycles: no frame left behind
+python3 tools/test_wheel.py               # scroll-wheel weapon switching
+python3 tools/test_pips.py                # sound pips: standing emits, crouching does not
+python3 tools/test_peers.py               # panel JOIN/ANSWER, 2 & 3-peer mesh, seating
+python3 tools/test_mesh.py                # deterministic host-relay/mesh routing
+python3 tools/test_pickups.py             # F takes a wall weapon and an ability
+python3 tools/test_death.py               # death UI, respawn, no shooting while dead
+python3 tools/test_perf_match.py          # p50/p90 frame time in a four-bot match
 ```
+
+`test_browsers.py` is the cross-machine check: the same four flows (http single file,
+file:// single file, file:// SVG, http SVG) in Chromium, Firefox and WebKit, with
+pointer lock or the fallback, HOME, a second match and a no-external-requests check.
+Install the engines once with `python3 -m playwright install chromium firefox webkit`.
+
+### Cross-machine verification
+
+Executed from this workspace:
+
+- **macOS (this host), Chromium + Firefox + WebKit:** the full 38-check matrix passes in
+  all three engines; the resilience suite passes 56 checks, including direct
+  `?peer=&mode=` SVG matches over HTTP and `file://` followed by HOME; the five-cycle
+  leak test returns 1 frame / 0 iframes / 3 canvases every time; in a run where the
+  host's loopback ICE completed, the code-paired three-player graph opened (host 2
+  peers, each joiner host + the other joiner) at 60 FPS; on runs where it does not, the
+  peers test validates the JOIN/ANSWER codes and reports the mesh half as SKIP rather
+  than failing the code path. The deterministic relay test passes; the four-bot match
+  holds p90 18.2 ms with zero dropped frames.
+- **Linux x86_64, Colima + Playwright 1.60.0 images:** `tools/build-all.py` produces
+  byte-identical `main.js`, `home.js`, `landing.js` and `supportscene.js` (same SHA-256)
+  and single files of the same size as macOS; the headless menu/SVG matrix passes 41/41
+  checks in Chromium, Firefox and WebKit. Two environment-specific paths were exercised
+  there: Chromium's Linux build refuses the blob iframe inside an SVG (the launcher's
+  click-to-tab fallback takes over), and WebKit's headless build has no IndexedDB (the
+  about:blank tab uses the direct-write fallback). Both are designed paths, not failures.
+
+Prepared, but not executed from this host:
+
+- **Windows/Linux/macOS CI:** `.github/workflows/ci.yml` builds from source on each OS
+  and runs the headless menu/SVG matrix. It is in the tree; running it needs a push or a
+  workflow dispatch in the GitHub repository.
+- **GPU-bound gameplay** needs a GPU. The Linux VM available here has none; Chromium's
+  SwiftShader did not finish compiling the match shaders within ten minutes, so Linux
+  gameplay is not claimed as measured. The game bundle is byte-identical to the macOS
+  one, and the menu/SVG/build are measured on Linux. Windows gameplay likewise needs a
+  Windows GPU runner. These are the only two combinations this host cannot execute; the
+  CI/tooling is ready for them.
 
 Diagnostics written while chasing the small-screen report, kept because they measure
 things the assertions do not:
@@ -241,9 +360,13 @@ python3 tools/shots_small.py 360 640 2 # menu / mode list / match screenshots
 python3 tools/shots_small.py 360 640 2 --live   # the same, from stickfrag.com
 ```
 
-`test_peers.py` runs two browser contexts on one machine, which share an mDNS host candidate;
-it disables `WebRtcHideLocalIpsWithMdns` so same-machine ICE can complete. Real players are on
-different machines, where that is not a factor.
+`test_peers.py` opens two browser contexts on one machine and then a third, which share an mDNS host candidate;
+it drives the actual JOIN/ANSWER panel and disables `WebRtcHideLocalIpsWithMdns` so
+same-machine ICE can complete. It then joins a third player and checks the host's relayed
+direct mesh. Some machines still refuse loopback WebRTC; the test validates the codes and
+reports SKIP for the datachannel half rather than blaming the game. `test_mesh.py` checks
+the relay routing deterministically, so the three-player signalling path is covered even
+then. Real players are on different machines.
 
 ## Performance notes
 
@@ -268,10 +391,11 @@ that without touching the art, the shaders, the ink pass or the paper pass:
   1280×800 window at dpr 2 renders **1.02 MP instead of 4.10 MP** — a 75 % cut in
   fragments, for pixels nobody can see, with no CSS size or FOV change. A 360×640
   window at dpr 3 renders 720×1280 instead of 1080×1920.
-- **The haven's WebGL context is released when a match starts.** The lobby's 3D room
-  is its own renderer; holding it and the game's at once is the difference between a
-  playable match and a slideshow on a weak GPU. It loses the context on PLAY and gets
-  a fresh canvas on HOME, measured live during a match and again after returning.
+- **Each match has its own context, and the menu's room pauses.** A match runs in a
+  disposable frame, so the lobby and the game never share a document. The lobby's
+  `IntersectionObserver` stops its render loop while the menu is hidden; its renderer
+  is kept, because releasing and rebuilding it churned (and the old scene leaked).
+  Removing the match frame on HOME releases its GL context with the rest of the realm.
 - **The HUD fits a narrow screen.** The panels are laid out for a desktop window
   (`#health` 220 px, the ammo card 260 px) and, below 560 px of usable width,
   `#xpbar`'s `calc(100vw - 560px)` went negative while its `min-width: 200px` kept it
@@ -315,6 +439,17 @@ so the extra resolution was buying nothing measurable:
 
 Together that is **~64 MB less GPU memory**. Pixel ratio was measured too and left alone: at
 1.5 vs 1.0 the GPU time was 21.4 ms vs 21.2 ms, so lowering it would only cost sharpness.
+
+### Match lifetime and the menu
+
+Every PLAY creates a match frame and every HOME removes it. `tools/test_cycles.py` runs
+five cycles and asserts that the frame count returns to one, the canvas count stays at
+three and no page errors appear; the frame's module, listeners, sockets and GL context
+go with it. The old shared-document shell could not unload an ES module, so it left
+roughly **80 MB and a GL context** behind on every cycle. The menu's own heap is about
+**41 MB** on this Mac, including the paused lobby. With broker signalling removed, the
+menu and solo matches make no external requests; the long JOIN/ANSWER codes are the
+only signalling path.
 
 ### Matches with other players
 
@@ -447,7 +582,7 @@ What exists is a recovered source tree that has been verified end-to-end:
   `tools/strip-net.js`.
 - `readable/main.lean.js` — `main.offline.js` with the Colyseus schema/encoder/transport cluster
   cut by `tools/cut-sdk.py` (119,059 lines). This is the installed source.
-  `tools/build-source.sh` builds it to `build/main.js` (5.7 MiB / 5,928,789 bytes).
+  `tools/build-source.sh` builds it to `build/main.js` (~5.7 MiB).
 - `build/main.original.js` — the untouched production bundle, kept for comparison and revert.
 - `docs/SYMBOLS.md` — class map and method anchors for the HUD, predictor, game loop, input,
   network client, renderer and clock.
@@ -475,11 +610,11 @@ For FPS, the original source would not change the GPU/quality ceiling.
 ```
 stickfrag.com/            site root (document root for tools/serve.py)
   index.html              the real landing page, whole (built by patch_home.py)
-  stickfrag.html          one file: the site and the game, generated
-  stickfrag.svg           the same, wrapped for SVG-only targets, generated
-  play/index.html         game page (CSP, standalone.js, one CSS link, modulepreload)
+  stickfrag.html          one file: the site and the game, generated (~10.4 MB)
+  stickfrag.svg           the same payload, IndexedDB/about:blank launcher, generated
+  play/index.html         standalone game page (CSP, standalone.js, CSS, modulepreload)
   play/standalone.js      forces offline mode + default nickname
-  play/main.js            installed lean build (5,928,789 bytes)
+  play/main.js            installed lean build (~5.7 MiB)
   *.css                   readable source stylesheets
   game.all.css            generated bundle used by the page
   play-redirect.js        name gate / menu redirect
@@ -498,12 +633,26 @@ docs/SYMBOLS.md           recovered class map and method anchors
 docs/RECOVERY.md          source search and fidelity report
 tools/build.py            CSS bundle + brotli/gzip build
 tools/serve.py            static server with compression and caching
+tools/build-all.py        cross-platform build (patch -> bundle -> single -> svg)
+tools/build-all.sh        wrapper for build-all.py
+tools/esbuild_runner.py   pinned esbuild 0.25.12, Windows-safe
+tools/single-shell.js     the single file's menu/frame shell
 tools/beautify.sh         regenerate readable/main.js
 tools/rename.js           restore subsystem class names -> readable/main.named.js
 tools/optimize.py         standalone/performance patches -> readable/main.fast.js
 tools/strip-net.js        remove dormant network classes -> readable/main.offline.js
 tools/cut-sdk.py          cut schema/encoder/transport -> readable/main.lean.js
 tools/build-source.sh     lean -> build/main.js
+tools/test_browsers.py    Chromium/Firefox/WebKit flow matrix
+tools/test_single.py      single file: menu, frame, HOME, second match
+tools/test_svg.py         SVG over http: IndexedDB, about:blank, match
+tools/test_svg_file.py    SVG from disk: inline frame, pointer lock, HOME
+tools/test_fallback.py    playable without pointer lock
+tools/test_resilience.py  storage/IDB/popups/WebGL/blob/direct-SVG failure paths
+tools/test_menu_matrix.py headless menu/SVG matrix, no game (Linux/CI)
+tools/ci_menu.py          starts the server and runs the headless matrix on CI
+tools/test_cycles.py      five PLAY/HOME cycles, no frame left behind
+.github/workflows/ci.yml  build + menu/SVG matrix on ubuntu/macos/windows
 server.stickfrag.com/     captured JSON endpoints (auth, rewards)
 us.stickfrag.com/         captured matchmaking/server-list JSON
 wss---us1.stickfrag.com/  placeholder for the captured WebSocket URL
@@ -518,6 +667,19 @@ lazy `/chunks/*.light` map data. The loading and icon requests for missing files
 so the installed page makes no 404s. The lean build has no online transport or Colyseus
 schema/transport cluster; replay/review URLs are stripped. Source maps are not published
 (`/play/main.js.map` returns 404).
+
+The SVG is a launcher, not a picture: `<img>` and CSS backgrounds never execute SVG scripts.
+Open it directly, or through `<object>`/`<iframe>`. Over http(s) it launches an `about:blank`
+tab, where Chromium refuses pointer lock; the game's mouse-move fallback takes over. For
+pointer lock, open `stickfrag.html` directly (the file:// inline path keeps it).
+
+Two Linux engine quirks are handled and tested: Chromium's Linux build refuses a blob iframe
+inside an SVG (the launcher's click-to-tab fallback is used), and headless WebKit on Linux may
+have no IndexedDB (the direct-write fallback is used). The game itself needs WebGL 2; without
+it the shell shows a specific message and returns to the menu instead of a black match.
+Windows runtime and GPU-bound Linux/Windows gameplay are not measured from this macOS host;
+the CI workflow builds and runs the headless menu/SVG matrix on all three OSes, and the full
+gameplay matrix needs a GPU runner.
 
 `supportscene.js` and its chunk were fetched from the live site to restore the halo stickman on
 the thank-you card. `eventscene.js` was not: it is only used by the Friends Weekend section,

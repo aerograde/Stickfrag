@@ -16,9 +16,11 @@ from pathlib import Path
 
 from playwright.sync_api import sync_playwright
 
+from test_entry import game_frame
+
 URL = (
     "http://127.0.0.1:8123/stickfrag.html"
-    "?peer=host&name=tester&room=DTH234&mode=ffa&bots=3&map=yard"
+    "?peer=host&name=tester&mode=ffa&bots=3&map=yard"
 )
 
 
@@ -31,13 +33,14 @@ def main() -> int:
         page.on("console", lambda m: errors.append("c:" + m.text[:160]) if m.type == "error" else None)
 
         page.goto(URL, wait_until="load", timeout=90000)
-        page.wait_for_function(
+        game = game_frame(page)
+        game.wait_for_function(
             "() => !!globalThis.__sfGame && globalThis.__sfGame.ready === true", timeout=90000
         )
         page.wait_for_timeout(2500)
 
         # Record the health curve and whether the death UI is up.
-        page.evaluate(
+        game.evaluate(
             """() => {
               const g = globalThis.__sfGame;
               window.__hp = [];
@@ -58,10 +61,10 @@ def main() -> int:
         )
 
         # Stand still and let the bots land a kill.
-        page.wait_for_function("() => !!globalThis.__sfGame.death", timeout=90000)
+        game.wait_for_function("() => !!globalThis.__sfGame.death", timeout=90000)
         page.wait_for_timeout(500)
 
-        dead_state = page.evaluate(
+        dead_state = game.evaluate(
             """() => {
               const g = globalThis.__sfGame;
               const el = document.querySelector('#loadout') || document.querySelector('#death');
@@ -75,30 +78,30 @@ def main() -> int:
         )
 
         # Firing while dead must not consume ammo.
-        before = page.evaluate("() => globalThis.__sfGame.predictor.state.ammo")
+        before = game.evaluate("() => globalThis.__sfGame.predictor.state.ammo")
         page.mouse.down()
         page.wait_for_timeout(700)
         page.mouse.up()
-        after = page.evaluate("() => globalThis.__sfGame.predictor.state.ammo")
+        after = game.evaluate("() => globalThis.__sfGame.predictor.state.ammo")
 
         # The death screen must still be up a moment later: a bot respawning must
         # not clear it.
         page.wait_for_timeout(1500)
-        still_dead = page.evaluate("() => !!globalThis.__sfGame.death")
+        still_dead = game.evaluate("() => !!globalThis.__sfGame.death")
 
-        page.wait_for_function(
+        game.wait_for_function(
             "() => !globalThis.__sfGame.death && globalThis.__sfGame.health > 0", timeout=40000
         )
-        respawned = page.evaluate(
+        respawned = game.evaluate(
             "() => ({ hp: globalThis.__sfGame.health, death: !!globalThis.__sfGame.death })"
         )
 
-        curve = page.evaluate(
+        curve = game.evaluate(
             """() => { const a = window.__hp, out = [];
               for (let i = 0; i < a.length; i++) if (i === 0 || a[i] !== a[i - 1]) out.push(a[i]);
               return out; }"""
         )
-        death_samples = page.evaluate("() => window.__deaths.length")
+        death_samples = game.evaluate("() => window.__deaths.length")
         browser.close()
 
     print("death UI   :", dead_state)

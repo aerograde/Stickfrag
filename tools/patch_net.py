@@ -24,10 +24,15 @@ HOST_FACTORY = r"""
 // Peer transport. Runs inside module scope so it can use the client's own
 // simulation functions rather than a re-implementation of them.
 //
-//   ?peer=host&room=CODE          host a match
-//   ?peer=join&room=CODE          join over MQTT signalling
-//   ?peer=offer                   show an offer code for manual exchange
-//   ?peer=answer&code=...         paste an offer, get a return code
+//   ?peer=host                    start the authority (bots, local play)
+//   ?peer=join                    start a joining client
+//
+// Pairing is manual and broker-free:
+//   * the joining player creates a JOIN code (SDP offer, STUN gathered);
+//   * the host pastes it and sends back an ANSWER code;
+//   * the joining player pastes the answer.
+// A third player repeats this with the host; the host relays the WebRTC
+// signalling between joiners so all peers end up in a direct mesh.
 // ---------------------------------------------------------------------------
 var __sfPeer = (() => {
   // The runtime IIFE above puts everything on globalThis.__SF. Read it from there
@@ -508,11 +513,10 @@ var __sfPeer = (() => {
         if (host) {
           mesh?.broadcast({ k: "in", d: batch });
         } else {
-          // The host's peer id is its own random nickname, not the literal
-          // "host", so address whichever peer is actually connected.
-          for (let peer of mesh?.peers?.values() || []) {
-            peer.open && mesh.send(peer.id, { k: "in", d: batch });
-          }
+          // Inputs go to the authority only. A joiner may also have direct
+          // mesh links for signalling/state, but the host owns the simulation.
+          let h = mesh && mesh.hostPeer ? mesh.peers.get(mesh.hostPeer) : null;
+          if (h && h.open) h.send({ k: "in", d: batch });
         }
       },
       chat() {}, report() {}, voteKick() {}, switchTeam() {},
@@ -524,43 +528,88 @@ var __sfPeer = (() => {
     };
   }
 
-  // --- broker-free code exchange -------------------------------------------
-  // The fallback path: a host publishes an offer code, the joiner returns an
-  // answer code. No broker, no signalling server, works on a LAN.
-  let codePeer = null;
+  // --- long-code pairing ----------------------------------------------------
+  // The joining player creates the JOIN offer; the host answers it. These long
+  // codes are the only out-of-band signalling channel. A joiner's pending offer
+  // is keyed by its link id so the host's answer finds it.
+  let pendingJoin = new Map();
 
-  async function offerCode() {
-    return (async () => {
-      if (!mesh) return null;
-      let id = "code";
-      let old = mesh.peers.get(id);
-      old && (old.close(), mesh.peers.delete(id));
-      codePeer = mesh.add(id, !0);
-      let desc = await codePeer.offerComplete();
-      let body = await SF.pack({ k: "offer", d: { type: desc.type, sdp: desc.sdp } });
-      return "SF1:" + body;
-    })();
+  function dropPending() {
+    for (let [link, p] of pendingJoin) {
+      mesh && mesh.peers.delete(p.temp);
+      try { p.peer.close(); } catch {}
+      pendingJoin.delete(link);
+    }
   }
 
-  async function acceptCode(text) {
-    if (!mesh) return null;
-    let raw = String(text || "").trim().replace(/^SF1:/i, "");
-    if (!raw) return null;
-    let msg;
-    try {
-      msg = await SF.unpack(raw);
-    } catch {
-      return null;
-    }
-    if (!msg || msg.k !== "offer") return null;
-    let id = "code";
-    let old = mesh.peers.get(id);
-    old && (old.close(), mesh.peers.delete(id));
-    codePeer = mesh.add(id, !1);
-    await codePeer.setRemote(msg.d);
-    let desc = await codePeer.answerComplete();
-    let out = await SF.pack({ k: "answer", d: { type: desc.type, sdp: desc.sdp } });
+  async function offerCode() {
+    if (!mesh || role !== "join") return null;
+    dropPending();
+    let link = SF.code(10);
+    let temp = "offer:" + link;
+    let peer = mesh.add(temp, !0);
+    let desc = await peer.offerComplete(10000);
+    pendingJoin.set(link, { peer, temp });
+    let body = await SF.pack({
+      k: "offer", from: selfPeer, link,
+      d: { type: desc.type, sdp: desc.sdp },
+    });
+    return "SF1:" + body;
+  }
+
+  async function acceptAnswerMessage(msg) {
+    if (!mesh || msg.k !== "answer" || !msg.link) return false;
+    let pending = pendingJoin.get(msg.link);
+    if (!pending) return false;
+    if (msg.to && msg.to !== selfPeer) return false;
+    await pending.peer.setRemote(msg.d);
+    mesh.rename(pending.temp, String(msg.from));
+    mesh.hostPeer = String(msg.from);
+    pendingJoin.delete(msg.link);
+    return true;
+  }
+
+  async function acceptOffer(msg) {
+    if (!mesh || role !== "host") return false;
+    if (!msg.from || !msg.link || !msg.d) return false;
+    let peer = mesh.add(String(msg.from), !1);
+    await peer.setRemote(msg.d);
+    let desc = await peer.answerComplete(10000);
+    let out = await SF.pack({
+      k: "answer", from: selfPeer, to: String(msg.from), link: msg.link,
+      d: { type: desc.type, sdp: desc.sdp },
+    });
     return "SF1:" + out;
+  }
+
+  // One paste box handles both directions: an offer produces the host's ANSWER
+  // code (a string); an answer completes the joining player's pending offer
+  // (true). The UI copies whichever comes back.
+  async function acceptCode(text) {
+    if (!mesh) return false;
+    let raw = String(text || "").trim().replace(/^SF1:/i, "");
+    if (!raw) return false;
+    let msg;
+    try { msg = await SF.unpack(raw); } catch { return false; }
+    if (!msg) return false;
+    if (msg.k === "offer") return acceptOffer(msg);
+    if (msg.k === "answer") return acceptAnswerMessage(msg);
+    return false;
+  }
+
+  async function acceptAnswer(text) {
+    return (await acceptCode(text)) === true;
+  }
+
+  // A third player's host list arrives over the host link. The new player
+  // initiates to every existing joiner; the offers and ICE travel through the
+  // host until the direct link is open. This creates the full mesh.
+  function connectMesh(pid) {
+    if (!mesh || !pid || pid === selfPeer || mesh.peers.has(pid)) return;
+    let peer = mesh.add(pid, !0);
+    peer.offer().then((d) => {
+      mesh.signal(pid, { k: "offer", d });
+    }).catch((err) => console.warn("[sf] mesh offer", pid, err && err.message));
   }
 
   // --- boot ----------------------------------------------------------------
@@ -570,77 +619,78 @@ var __sfPeer = (() => {
     selfPeer = SF.peerId();
     let code = (opts.code || SF.code()).toUpperCase();
 
-    let retries = {};
     let abilityAuth = null;
     mesh = new SF.Mesh({
       code,
-      onPeer: async (id, msg) => {
-        // "open" must be handled before the duplicate-peer guard: the peer
-        // already exists by then, and this is the only notification a peer that
-        // connected over a pasted code will ever get.
-        if (role === "host" && msg && msg.k === "open") {
-          let seatId = hostSim?.seat(id, "player");
+      host: role === "host",
+      onPeer: (id, msg) => {
+        if (role === "host") {
+          if (!msg || msg.k !== "open" || !hostSim) return;
+          let seatId = hostSim.seat(id, "player");
           mesh.send(id, {
             k: "welcome",
-            d: { id: seatId, roster: hostSim.roster(), code },
+            d: { id: seatId, roster: hostSim.roster(), code, host: selfPeer },
           });
+          // The mesh list arrives after the welcome. Every existing joiner is
+          // direct to the host already; the new one links to them over the host.
+          let others = [...mesh.peers.entries()]
+            .filter(([pid, p]) => pid !== id && p.open)
+            .map(([pid]) => pid);
+          mesh.send(id, { k: "mesh", d: { peers: others } });
+          // Existing peers need the new player's name/team for the scoreboard
+          // and for the remote names that come with later snapshots.
+          let roster = hostSim.roster();
+          for (const [pid, p] of mesh.peers.entries()) {
+            if (p.open) mesh.send(pid, { k: "roster", d: roster });
+          }
           return;
         }
-        if (mesh.peers.has(id)) return;
-        if (role === "host") {
-          // A joiner announced itself: offer it a datachannel and seat it.
-          if (msg && msg.k !== "hello") return;
-          let peer = mesh.add(id, !0);
-          hostSim.seat(id, "player");
-          let offer = await peer.offer();
-          mesh.signal(id, { k: "offer", d: offer });
-        } else {
-          // The joiner is the answerer: only an offer creates a peer. Everything
-          // else is a notification about one that already exists, and must not
-          // replace it.
-          if (msg && msg.k !== "offer") return;
-          mesh.add(id, !1);
-        }
+        // A joining client answers direct mesh offers from other joiners. Its
+        // link to the host is completed by the pasted answer, not an offer here.
+        if (msg && msg.k !== "offer") return;
+        mesh.add(id, !1);
       },
       onMessage: (id, msg) => {
         if (!msg) return;
         if (role === "host") {
-          if (msg.k === "in") for (let i of msg.d) hostSim.input(id, i);
-          if (msg.k === "hello") {
-            let seatId = hostSim.seat(id, "player");
-            mesh.send(id, { k: "welcome", d: { id: seatId, roster: hostSim.roster(), code } });
-          }
-        } else {
-          if (msg.k === "snap") {
-            globalThis.__snapCount = (globalThis.__snapCount || 0) + 1;
-            globalThis.__lastSnap = msg.d;
-            G.onSnapshot(msg.d);
-          }
-          if (msg.k === "event") G.onEvent(msg.d);
-          if (msg.k === "welcome") {
-            // The host's id for us is authoritative: the HUD, the roster and the
-            // predictor all key off selfId.
-            let seat = msg.d.id;
-            if (typeof seat === "number" && seat > 0) G.selfId = seat;
-            G.onWelcome({ id: seat ?? 1, roster: msg.d.roster, code, xp: 0, owner: !1 });
-          }
+          if (msg.k === "in" && hostSim) for (let i of msg.d) hostSim.input(id, i);
+          return;
+        }
+        if (msg.k === "snap") {
+          globalThis.__snapCount = (globalThis.__snapCount || 0) + 1;
+          globalThis.__lastSnap = msg.d;
+          G.onSnapshot(msg.d);
+        }
+        if (msg.k === "event") G.onEvent(msg.d);
+        if (msg.k === "welcome") {
+          // The host's id for us is authoritative: the HUD, the roster and the
+          // predictor all key off selfId. hostPeer is the authority link.
+          if (msg.d.host) mesh.hostPeer = String(msg.d.host);
+          let seat = msg.d.id;
+          if (typeof seat === "number" && seat > 0) G.selfId = seat;
+          G.onWelcome({ id: seat ?? 1, roster: msg.d.roster, code, xp: 0, owner: !1 });
+        }
+        if (msg.k === "mesh") {
+          for (let pid of msg.d?.peers || []) connectMesh(pid);
+        }
+        if (msg.k === "roster") {
+          // The host added or lost a player. Keep the scoreboard/remote names in
+          // step without replaying onWelcome (which would reset local state).
+          try { G.roster = new Map((msg.d || []).map((p) => [p.id, p])); } catch {}
         }
       },
       onLost: (id) => {
-        if (role === "host") hostSim.remove(id);
-        // A failed check is usually one dead candidate path, not a dead room.
-        // Rebuild the link once before telling the player they were disconnected.
-        if (role === "join") {
-          retries[id] = (retries[id] || 0) + 1;
-          if (retries[id] <= 2) setTimeout(() => { mesh.add(id, !1); mesh.hello(); }, 600 * retries[id]);
+        if (role !== "host" || !hostSim) return;
+        hostSim.remove(id);
+        // A leave must disappear from every remaining scoreboard. The direct
+        // links are independent of the mesh, so the survivor still has a path
+        // to the host for this roster update.
+        let roster = hostSim.roster();
+        for (const [pid, p] of mesh.peers.entries()) {
+          if (p.open) mesh.send(pid, { k: "roster", d: roster });
         }
       },
     });
-
-    // Local play must not wait for a broker. Try signalling in the background;
-    // a host without a broker is still a playable match, and joining peers that
-    // cannot find us over MQTT can still use the offer/answer codes.
-    let brokerDone = mesh.openBroker();
 
     if (role === "host") {
       hostSim = makeHost(opts.world, opts.selfId, opts.name, opts.mode || chosenMode());
@@ -703,13 +753,9 @@ var __sfPeer = (() => {
           selfSnap.ack = G.seq - 1;
           G.onSnapshot(selfSnap);
         }
-        // The broker-free code is a fallback. Offer it, but do not cover the
-        // game with it: the panel opens from the in-game button (or when no
-        // broker is reachable at all).
-      // The offer code is generated on demand from the panel button, never
-      // automatically: gathering takes seconds and must not touch the frame loop.
-      // Announce the match once. Re-sending it every frame rebuilt the HUD
-        // banner path and threw on the map id.
+        // Announce the match once. Re-sending it every frame rebuilt the HUD
+        // banner path and threw on the map id. Join codes are generated on
+        // demand from the panel; gathering must never touch this loop.
         if (!hostSim.announced) {
           hostSim.announced = !0;
           // The match object is consumed by the HUD, the podium and the pickup
@@ -742,28 +788,14 @@ var __sfPeer = (() => {
       });
       G.ready = !0;
       G.frozen = !1;
-      // The joiner cannot announce itself until signalling is actually open.
-      brokerDone.then((ok) => {
-        if (!ok) {
-          G.setNotice("No signalling broker reachable.");
-          // The broker is the fast path; this is the one that always works.
-          globalThis.__sfCodeUI?.show(
-            "No broker reachable. Ask the host for their offer code, paste it here, and send the return code back.",
-            "join"
-          );
-          return;
-        }
-        // The host may have subscribed after our first announcement, and a
-        // pub/sub broker keeps no history for us. Repeat for a few seconds until
-        // a datachannel opens.
-        let tries = 0;
-        mesh.hello();
-        let beat = setInterval(() => {
-          tries++;
-          if ([...mesh.peers.values()].some((p) => p.open) || tries > 12) return clearInterval(beat);
-          mesh.hello();
-        }, 700);
-      });
+      // No automatic signalling. The joining player creates a JOIN code from
+      // the panel (C), sends it to the host, and pastes the host's ANSWER code
+      // back. The local scene stays responsive while that happens.
+      G.setNotice("Press C to pair with the host.");
+      globalThis.__sfCodeUI?.show(
+        "Copy your JOIN code and send it to the host, then paste their ANSWER code here.",
+        "join"
+      );
     }
 
     let net = transport({ host: role === "host", selfId: 1, code });
@@ -774,32 +806,21 @@ var __sfPeer = (() => {
     return net;
   }
 
-  // The host applies the joiner's return code, completing the handshake with no
-  // signalling channel involved at all.
-  async function acceptAnswer(text) {
-    let raw = String(text || "").trim().replace(/^SF1:/i, "");
-    if (!raw || !codePeer) return false;
-    let msg;
-    try {
-      msg = await SF.unpack(raw);
-    } catch {
-      return false;
-    }
-    if (!msg || msg.k !== "answer") return false;
-    await codePeer.setRemote(msg.d);
-    return true;
-  }
-
-  globalThis.__sfCodeApi = { offer: offerCode, accept: acceptCode, acceptAnswer };
+  globalThis.__sfCodeApi = {
+    offer: offerCode,
+    accept: acceptCode,
+    acceptAnswer,
+    role: () => role,
+    hostPeer: () => (mesh ? mesh.hostPeer : null),
+  };
 
   return {
-    boot, wanted, mode: chosenMode, botCount, role: () => role, debug,
+    boot, wanted, mode: chosenMode, botCount, role: () => role,
     debug: () => ({
       role,
       peers: mesh ? [...mesh.peers.keys()] : [],
       open: mesh ? [...mesh.peers.values()].filter((p) => p.open).length : 0,
-      broker: !!(mesh && mesh.broker),
-      brokerUrl: mesh ? mesh.brokerUrl || null : null,
+      hostPeer: mesh ? mesh.hostPeer : null,
       code: mesh ? mesh.code : null,
       sent: hostSim ? hostSim.sentAt : null,
       bots: hostSim ? hostSim.botCount() : 0,
@@ -843,9 +864,9 @@ def switch_boot(text: str) -> str:
         selfId: 1,
       });
       globalThis.__sfPeerDbg = __sfPeer.debug;
-      // A host with no peers yet is already playing, so the boot notice must not
-      // sit on the screen; it is only honest while actually joining someone.
-      if (__sfPeer.wanted() === "host") Wo.setNotice("");
+      // A host with no peers yet is already playing; tell it how to invite
+      // instead of leaving the boot notice on screen.
+      if (__sfPeer.wanted() === "host") Wo.setNotice("Press Esc, then C, to pair players");
       Wo.sendLoadout(), N0();
     } catch (err) {
       console.error("sf-peer boot failed", err);

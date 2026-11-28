@@ -11,6 +11,8 @@ import json
 
 from playwright.sync_api import sync_playwright
 
+from test_entry import game_frame
+
 URL = "http://127.0.0.1:8123/stickfrag.html?play&name=tester&map=yard&soundviz=1"
 
 # The client's own flags value for "crouched" is Ar.Crouched = 1, and
@@ -41,24 +43,21 @@ def main() -> int:
         page.on("pageerror", lambda e: errors.append(str(e)))
         page.on("console", lambda m: errors.append(m.text) if m.type == "error" else None)
         page.goto(URL, wait_until="load", timeout=90000)
-        page.wait_for_function(
-            "() => !!globalThis.__sfGame && globalThis.__sfGame.ready === true",
-            timeout=90000,
-        )
-        page.wait_for_function(
+        game = game_frame(page)
+        game.wait_for_function(
             "() => !!globalThis.__sfGame && globalThis.__sfGame.ready === true",
             timeout=90000,
         )
         page.wait_for_timeout(1500)
 
         # Expose the game and the step function for this assertion only.
-        ready = page.evaluate(
+        ready = game.evaluate(
             """() => ({ game: !!globalThis.__sfGame, sv: !!globalThis.__sfSV, wr: !!globalThis.__sfWR })"""
         )
 
-        stand = page.evaluate(WALK, 2) if ready["wr"] else None
+        stand = game.evaluate(WALK, 2) if ready["wr"] else None
         page.wait_for_timeout(120)
-        crouch = page.evaluate(WALK, 3) if ready["wr"] else None
+        crouch = game.evaluate(WALK, 3) if ready["wr"] else None
 
         browser.close()
 

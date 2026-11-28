@@ -10,7 +10,7 @@ source="${1:-$root/readable/main.lean.js}"
 [ -f "$source" ] || source="$root/readable/main.named.js"
 [ -f "$source" ] || source="$root/readable/main.js"
 mkdir -p "$root/build"
-npx --yes esbuild@0.25 "$source" \
+python3 "$root/tools/esbuild_runner.py" "$source" \
   --bundle --minify --format=esm --target=esnext --legal-comments=inline \
   --outfile="$root/build/main.js"
 ls -lh "$root/build/main.js"

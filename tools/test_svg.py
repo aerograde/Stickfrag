@@ -52,7 +52,12 @@ def main() -> int:
         # A query string must survive into the tab, because that is how an invite
         # link names its room.
         page.goto(f"{BASE}/stickfrag.svg?name=tester&map=yard", wait_until="load", timeout=90_000)
-        page.wait_for_timeout(2000)
+        # The payload is stored first; the launcher then waits for a gesture.
+        page.wait_for_function(
+            "() => /CLICK TO START|READY/.test(document.getElementById('sf-hint')?.textContent || '')",
+            timeout=120_000,
+        )
+        page.wait_for_timeout(200)
 
         launcher = page.evaluate(
             """() => {
@@ -92,6 +97,29 @@ def main() -> int:
 
         game.wait_for_selector(".play-big", timeout=60_000)
         game.wait_for_timeout(1500)
+        # The launcher keeps the source so HOME in the tab can rewrite the menu.
+        page.wait_for_timeout(4000)
+        launcher["payloadLeft"] = page.evaluate(
+            "() => (document.getElementById('sf-source') || {}).textContent"
+            " ? document.getElementById('sf-source').textContent.length : 0"
+        )
+
+        stored = page.evaluate(
+            """() => new Promise((res) => {
+              const req = indexedDB.open('stickfrag', 1);
+              req.onerror = () => res(null);
+              req.onsuccess = () => {
+                const tx = req.result.transaction('files', 'readonly');
+                const get = tx.objectStore('files').get('stickfrag.html');
+                get.onerror = () => res(null);
+                get.onsuccess = () => {
+                  const v = get.result;
+                  res(v ? { html: v.html && v.html.size, boot: typeof v.boot } : null);
+                };
+              };
+            })"""
+        )
+        load_source = game.evaluate("() => window.__SF_LOAD_SOURCE || null")
 
         menu = game.evaluate(
             """() => {
@@ -157,7 +185,10 @@ def main() -> int:
 
     checks = {
         "launcher renders": launcher["hasButton"] and launcher["hint"] is not None,
-        "launcher released the payload": launcher["payloadLeft"] == 0,
+        "launcher keeps the file for HOME": launcher["payloadLeft"] > 0,
+        "payload stored in IndexedDB": bool(stored) and stored["html"] > 1_000_000
+        and stored["boot"] == "string",
+        "tab loaded from IndexedDB": load_source == "idb",
         "query string reaches the tab": "name=tester" in (menu["search"] or ""),
         "boot params carried over": (menu["params"] or {}).get("name") == "tester",
         "menu is the whole site": menu["bar"] and menu["footer"] and menu["page"] > 2000,
@@ -174,7 +205,8 @@ def main() -> int:
         "no external requests": not external,
     }
 
-    print(json.dumps({"launcher": launcher, "menu": menu, "match": match, "fps": fps}, indent=2))
+    print(json.dumps({"launcher": launcher, "stored": stored, "loadSource": load_source,
+                      "menu": menu, "match": match, "fps": fps}, indent=2))
     if errors:
         print("errors:", errors[:5])
     if external:

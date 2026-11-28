@@ -110601,6 +110601,7 @@ var Ide = (r) => r?.name ?? String(r),
     onCtrl = null;
     stats = new Diagnostics();
     rawWanted = !0;
+    sfFallback = !1;
     keys = new Set();
     lastDown = new Map();
     mouseButtons = 0;
@@ -110628,7 +110629,7 @@ var Ide = (r) => r?.name ?? String(r),
       addEventListener(
         "wheel",
         (t) => {
-          this.locked && (
+          (this.locked || this.sfFallback) && (
           t.preventDefault(),
           !this.menu &&
           !this.numbersTaken &&
@@ -110644,7 +110645,7 @@ var Ide = (r) => r?.name ?? String(r),
         this.keys.clear(), this.lastDown.clear();
       }),
       e.addEventListener("mousedown", (t) => {
-        !this.locked ||
+        (!this.locked && !this.sfFallback) ||
         this.menu ||
         this.mouseTaken || (
         t.button >= 3 && t.preventDefault?.(),
@@ -110656,7 +110657,7 @@ var Ide = (r) => r?.name ?? String(r),
         this.mouseButtons &= ~(1 << t.button), this.keys.delete(`Mouse${t.button}`);
       });
       let o = (t, n, i) => {
-        if (!this.locked || this.menu) return;
+        if ((!this.locked && !this.sfFallback) || this.menu) return;
         this.stats.move(i);
         let A = pde * this.sensitivity;
         this.turn(-t * A, -(this.invertY ? -n : n) * A);
@@ -110666,8 +110667,10 @@ var Ide = (r) => r?.name ?? String(r),
       addEventListener("mousemove", (t) => o(t.movementX, t.movementY, t.timeStamp)),
       document.addEventListener("pointerlockchange", () => {
         this.locked ?
-        this.menuFree = !1 :
-        this.menuFree || (this.keys.clear(), this.mouseButtons = 0, this.aimOn = !1);
+        (this.menuFree = !1, this.sfFallback = !1,
+          globalThis.__sfNoLock = !1, clearTimeout(this.sfHintT),
+          document.getElementById("sf-nolock")?.remove()) :
+        this.menuFree || this.sfFallback || (this.keys.clear(), this.mouseButtons = 0, this.aimOn = !1);
       }),
       e.addEventListener("contextmenu", (t) => t.preventDefault());
     }
@@ -110685,7 +110688,7 @@ var Ide = (r) => r?.name ?? String(r),
       this.devices.push(e);
     }
     get active() {
-      return this.locked || this.menuFree || this.devices.some((e) => e.active);
+      return this.locked || this.menuFree || this.sfFallback || this.devices.some((e) => e.active);
     }
     get pointerless() {
       return this.devices.some((e) => e.pointerless);
@@ -110764,6 +110767,30 @@ var Ide = (r) => r?.name ?? String(r),
       return this.menu;
     }
     lockAsk = 0;
+    sfHintT = 0;
+    sfFallbackMode() {
+      if (this.locked || this.sfFallback) return;
+      this.sfFallback = !0, this.menuFree = !0,
+      this.stats.lock("fallback: move the mouse to look, no capture");
+      try {
+        globalThis.__sfNoLock = !0,
+        globalThis.dispatchEvent(new CustomEvent("sf:nolock"));
+      } catch {}
+      this.sfHint();
+    }
+    sfHint() {
+      try {
+        let e = document.getElementById("sf-nolock");
+        e || (e = document.createElement("div"), e.id = "sf-nolock",
+          (document.body || document.documentElement).appendChild(e));
+        e.textContent = "MOUSE CAPTURE UNAVAILABLE \u2014 MOVE THE MOUSE TO LOOK, CLICK TO FIRE";
+        e.style.cssText = "position:fixed;left:50%;bottom:22px;transform:translateX(-50%);" +
+          "z-index:9999;background:#15111c;color:#fff4dc;border:2px solid #fff4dc;" +
+          "padding:10px 16px;font:800 12px/1.5 ui-sans-serif,system-ui,sans-serif;" +
+          "letter-spacing:.06em;text-align:center;pointer-events:none";
+        clearTimeout(this.sfHintT), this.sfHintT = setTimeout(() => e.remove(), 20000);
+      } catch {}
+    }
     lock() {
       for (let i of this.devices) i.play();
       if (this.pointerless) return;
@@ -110774,8 +110801,13 @@ var Ide = (r) => r?.name ?? String(r),
       let e = ++this.lockAsk,
         o = performance.now(),
         t = (i) => {
-          let A = i ? "raw" : "plain",
+          let A = i ? "raw" : "plain", a;
+          try {
             a = i ? this.canvas.requestPointerLock({ unadjustedMovement: !0 }) : this.canvas.requestPointerLock();
+          } catch (err) {
+            this.sfFallbackMode();
+            return;
+          }
           if (!a) {
             let l = new AbortController(),
               s = { once: !0, signal: l.signal },
@@ -110786,7 +110818,7 @@ var Ide = (r) => r?.name ?? String(r),
             document.addEventListener(
               "pointerlockerror",
               () => {
-                d(`${By} refused`), e === this.lockAsk && (this.menuFree = !1);
+                d(`${By} refused`), e === this.lockAsk && this.sfFallbackMode();
               },
               s
             );
@@ -110796,14 +110828,18 @@ var Ide = (r) => r?.name ?? String(r),
             () => this.stats.lock(A),
             (l) => {
               let s = Ide(l);
-              this.stats.lock(`${A} refused: ${s}`), Lde.has(s) || !i ? n(i) : t(!1);
+              if (this.stats.lock(`${A} refused: ${s}`), !i) {
+                this.sfFallbackMode();
+                return;
+              }
+              t(!1);
             }
           );
         },
         n = (i) => {
           if (!(e !== this.lockAsk || this.locked)) {
             if (performance.now() - o > wde) {
-              this.menuFree = !1;
+              this.sfFallbackMode();
               return;
             }
             setTimeout(() => {
@@ -119847,7 +119883,7 @@ var c8 = !1;
 function zhe(r) {
   c8 = !0, removeEventListener("beforeunload", ul);
   let e = new URLSearchParams(location.search);
-  e.set("map", r), gm(iw(r), r), wf(), R0("Loading the map", 0), location.replace(`${location.pathname}?${e}`);
+  e.set("map", r), gm(iw(r), r), wf(), R0("Loading the map", 0), (globalThis.__SF_EMBED || globalThis.__SF_NO_URL_WRITE || location.replace(`${location.pathname}?${e}`));
 }
 function m8(r, e, o = !1, t = null) {
   return c8 ?
@@ -119858,7 +119894,7 @@ function m8(r, e, o = !1, t = null) {
   e && gm(iw(e), e),
   wf(),
   R0(r, 0),
-  location.replace(`${location.pathname}${AX(location.search, e, o, t)}`),
+  (globalThis.__SF_EMBED || globalThis.__SF_NO_URL_WRITE || location.replace(`${location.pathname}${AX(location.search, e, o, t)}`)),
   !0) :
   !1;
 }
@@ -119920,10 +119956,14 @@ function RX(r, e, o = "FRIENDS ROOM") {
 // offline client runs and sends snapshots down. That keeps the client's existing
 // prediction/reconciliation untouched: it only needed a snapshot producer.
 //
-// Signaling, in order of preference:
-//   1. MQTT over WebSocket on a free anonymous broker ("sf(code)")
-//   2. an offer/answer code pair pasted by hand ("code")
-//   3. the same code pair on a LAN, where mDNS host candidates resolve
+// Signalling is code-only. No broker, no signalling server:
+//   * the joining player creates a JOIN code: an SDP offer gathered to
+//     completion over STUN;
+//   * the host pastes it and sends back an ANSWER code: the answering SDP;
+//   * the joining player pastes the answer and the datachannel opens.
+// For a third and later player, the host relays the offer/answer/ICE messages
+// between the joiners over the host datachannels, so every pair gets a direct
+// link (a full mesh) without any further codes.
 //
 // Nothing here imports anything; it is prepended to the bundle as one IIFE.
 // ---------------------------------------------------------------------------
@@ -119947,160 +119987,6 @@ function RX(r, e, o = "FRIENDS ROOM") {
     return SF._pid;
   }
   put("peerId", peerId);
-
-  // ---------------------------------------------------------------- MQTT ----
-  // A deliberately small MQTT 3.1.1 client: CONNECT, SUBSCRIBE, PUBLISH (QoS 0),
-  // PINGREQ. That is the whole protocol surface signaling needs.
-  const BROKERS = [
-    "wss://broker.emqx.io:8084/mqtt",
-    "wss://broker.hivemq.com:8884/mqtt",
-    "wss://test.mosquitto.org:8081/mqtt",
-  ];
-
-  class Topic {
-    constructor(url) {
-      this.url = url;
-      this.ws = null;
-      this.buffer = new Uint8Array(0);
-      this.waiters = new Map();
-      this.seq = 1;
-      this.handlers = new Set();
-      this.ready = false;
-    }
-    static encodeString(s) {
-      const b = new TextEncoder().encode(s);
-      const out = new Uint8Array(b.length + 2);
-      new DataView(out.buffer).setUint16(0, b.length);
-      out.set(b, 2);
-      return out;
-    }
-    static remainingLength(n) {
-      const out = [];
-      do {
-        let d = n % 128;
-        n = Math.floor(n / 128);
-        if (n > 0) d |= 0x80;
-        out.push(d);
-      } while (n > 0);
-      return Uint8Array.from(out);
-    }
-    static packet(type, flags, body) {
-      const head = Uint8Array.from([(type << 4) | flags]);
-      const len = Topic.remainingLength(body.length);
-      const out = new Uint8Array(head.length + len.length + body.length);
-      out.set(head, 0);
-      out.set(len, head.length);
-      out.set(body, head.length + len.length);
-      return out;
-    }
-    send(pkt) {
-      if (this.ws && this.ws.readyState === WebSocket.OPEN) this.ws.send(pkt);
-    }
-    connect(clientId) {
-      return new Promise((resolve, reject) => {
-        let settled = false;
-        let timer = null;
-        const ws = new WebSocket(this.url, "mqtt");
-        ws.binaryType = "arraybuffer";
-        this.ws = ws;
-
-        const fail = (e) => {
-          if (settled) return;
-          settled = true;
-          if (timer) clearTimeout(timer);
-          try { ws.close(); } catch {}
-          reject(e instanceof Error ? e : new Error(String(e)));
-        };
-        // Arm the timeout only after `fail` exists: referring to it in the
-        // setTimeout call site would hit its temporal dead zone.
-        timer = setTimeout(() => fail(new Error("timeout")), 6000);
-
-        ws.onopen = () => {
-          // Variable header: protocol name (encodeString already writes its 2-byte
-          // length), protocol level 4, connect flags 0x02 (clean session), keepalive.
-          const parts = [];
-          parts.push(Topic.encodeString("MQTT"), Uint8Array.from([4, 0x02]));
-          parts.push(Uint8Array.from([0, 30])); // keepalive 30s
-          parts.push(Topic.encodeString(clientId));
-          const body = new Uint8Array(parts.reduce((n, p) => n + p.length, 0));
-          let o = 0;
-          for (const p of parts) (body.set(p, o), (o += p.length));
-          this.send(Topic.packet(1, 0, body));
-        };
-
-        ws.onmessage = (ev) => {
-          this._onData(new Uint8Array(ev.data));
-          if (!settled && this.ready) (settled = true, clearTimeout(timer), (this._err = null), resolve(this));
-        };
-        ws.onerror = () => fail(new Error("broker unreachable"));
-        ws.onclose = () => fail(new Error("broker closed"));
-
-        this._err = fail;
-        this._ping = setInterval(() => this.send(Uint8Array.from([0xc0, 0])), 25000);
-      });
-    }
-    _onData(chunk) {
-      const merged = new Uint8Array(this.buffer.length + chunk.length);
-      merged.set(this.buffer, 0);
-      merged.set(chunk, this.buffer.length);
-      this.buffer = merged;
-      for (;;) {
-        if (this.buffer.length < 2) return;
-        const type = this.buffer[0] >> 4;
-        let mult = 1,
-          len = 0,
-          i = 1;
-        for (;;) {
-          if (i >= this.buffer.length) return;
-          const d = this.buffer[i++];
-          len += (d & 0x7f) * mult;
-          mult *= 128;
-          if (!(d & 0x80)) break;
-        }
-        if (this.buffer.length < i + len) return;
-        const body = this.buffer.slice(i, i + len);
-        this.buffer = this.buffer.slice(i + len);
-        if (type === 2) {
-          this.ready = true;
-          this._err && (this._err = null);
-        } else if (type === 3) {
-          const idLen = (body[0] << 8) | body[1];
-          const topic = new TextDecoder().decode(body.slice(2, 2 + idLen));
-          const payload = body.slice(2 + idLen);
-          for (const h of this.handlers) h(topic, payload);
-        }
-      }
-    }
-    subscribe(topic) {
-      const body = new Uint8Array(2 + 2 + topic.length + 1);
-      body[0] = 0;
-      body[1] = 1;
-      body[2] = (topic.length >> 8) & 0xff;
-      body[3] = topic.length & 0xff;
-      body.set(new TextEncoder().encode(topic), 4);
-      body[body.length - 1] = 0;
-      this.send(Topic.packet(8, 2, body));
-    }
-    publish(topic, obj) {
-      const payload = new TextEncoder().encode(JSON.stringify(obj));
-      const t = new TextEncoder().encode(topic);
-      const body = new Uint8Array(2 + t.length + payload.length);
-      body[0] = (t.length >> 8) & 0xff;
-      body[1] = t.length & 0xff;
-      body.set(t, 2);
-      body.set(payload, 2 + t.length);
-      this.send(Topic.packet(3, 0, body));
-    }
-    close() {
-      clearInterval(this._ping);
-      try {
-        this.ws?.close();
-      } catch {}
-    }
-  }
-
-  put("Topic", Topic);
-  put("BROKERS", BROKERS);
 
   // ------------------------------------------------------- code encoding ----
   // An offer or answer plus its ICE candidates, as one pasteable string.
@@ -120185,6 +120071,7 @@ function RX(r, e, o = "FRIENDS ROOM") {
     _wire() {
       this.data.onopen = () => {
         this.open = true;
+        globalThis.__openAt = performance.now();
         this.host.onOpen(this);
       };
       this.data.onmessage = (e) => {
@@ -120214,16 +120101,16 @@ function RX(r, e, o = "FRIENDS ROOM") {
     }
     // Full gathering, for a description that will be copied and pasted by hand
     // and therefore cannot be followed by trickled candidates.
-    async offerComplete() {
+    async offerComplete(budget = 10000) {
       const o = await this.pc.createOffer();
       await this.pc.setLocalDescription(o);
-      await this.host.iceDone(this, 4000);
+      await this.host.iceDone(this, budget);
       return this.pc.localDescription;
     }
-    async answerComplete() {
+    async answerComplete(budget = 10000) {
       const a = await this.pc.createAnswer();
       await this.pc.setLocalDescription(a);
-      await this.host.iceDone(this, 4000);
+      await this.host.iceDone(this, budget);
       return this.pc.localDescription;
     }
     send(obj) {
@@ -120243,103 +120130,44 @@ function RX(r, e, o = "FRIENDS ROOM") {
   }
 
   // -------------------------------------------------------------- mesh -----
-  // Owns a set of peers plus whatever signaling channel was chosen. Payloads are
-  // plain objects; the host decides what to do with them.
+  // Owns a set of peers. The host is the authority; joiners are all directly
+  // linked to the host and, through host relayed signalling, to each other.
   class Mesh {
-    // A stable per-room tag that keeps two rooms sharing one code apart.
-    static roomNonce(code) {
-      let h = 0x811c9dc5;
-      for (let i = 0; i < code.length; i++) h = Math.imul(h ^ code.charCodeAt(i), 0x01000193) >>> 0;
-      return h.toString(36);
-    }
-    constructor({ code, onMessage, onPeer, onLost }) {
+    constructor({ code, onMessage, onPeer, onLost, host = false }) {
       this.code = code;
       this.peers = new Map();
       this.onMessageCb = onMessage;
       this.onPeerCb = onPeer;
       this.onLostCb = onLost;
-      this.pendingIce = new Map();
-      this.broker = null;
-      // Room scope, not peer scope: every peer derives the same value from the
-      // code. A per-peer random value made each side reject the other's messages.
-      this.nonce = Mesh.roomNonce(code);
+      this.isHost = !!host;
+      this.hostPeer = null;
     }
-    async openBroker() {
-      // Try every broker at once: public brokers are individually flaky, and a
-      // serial loop costs up to 6 s per dead host before reaching a working one.
-      const attempts = BROKERS.map((url) => new Topic(url).connect(`sf-${SF.peerId()}-${Date.now() % 100000}`).then(
-        (t) => ({ url, t }),
-        () => null
-      ));
-      const winner = await Promise.race([
-        Promise.all(attempts).then((all) => all.find(Boolean) || null),
-      ]);
-      for (const a of attempts) a.then((r) => r && r !== winner && r.t.close(), () => {});
-      if (winner) {
-        try {
-          const t = winner.t;
-          const inbox = `sf1/${this.code}/${SF.peerId()}`;
-          t.subscribe(inbox);
-          t.subscribe(`sf1/${this.code}/hello`);
-          t.handlers.add((topic, payload) => {
-            let msg;
-            try {
-              msg = JSON.parse(new TextDecoder().decode(payload));
-            } catch {
-              return;
-            }
-            if (!msg || msg.from === SF.peerId()) return;
-            this.onSignal(msg);
-          });
-          this.broker = t;
-          this.inbox = inbox;
-          this.brokerUrl = winner.url;
-          console.info("[sf] signalling on", winner.url);
-          this.hello();
-          return true;
-        } catch (err) {
-          console.info("[sf] subscribe failed", err && err.message);
-        }
+
+    // Send a signalling message. Direct when the pair already has an open
+    // datachannel; otherwise a joiner asks the host to relay it to the target.
+    // The initial host<->joiner offer/answer travels in the pasteable codes.
+    signal(to, msg) {
+      const p = this.peers.get(to);
+      if (p && p.open) { p.send({ k: "sig", d: msg }); return true; }
+      if (!this.isHost && this.hostPeer && to !== this.hostPeer) {
+        const via = this.peers.get(this.hostPeer);
+        if (via && via.open) { via.send({ k: "relay", to, d: msg }); return true; }
       }
       return false;
     }
-    hello() {
-      this.broker?.publish(`sf1/${this.code}/hello`, {
-        k: "hello",
-        from: SF.peerId(),
-        nonce: this.nonce,
-        at: Date.now(),
-      });
-    }
-    signal(to, msg) {
-      const out = { ...msg, from: SF.peerId(), nonce: this.nonce };
-      if (this.broker) {
-        this.broker.publish(`sf1/${this.code}/${to}`, out);
-      } else {
-        // No broker: the offer/answer codes carry this message instead.
-        (this.pending || (this.pending = [])).push(out);
-      }
-    }
+
     onSignal(msg) {
-      if (msg.nonce && msg.nonce !== this.nonce) return; // two rooms, same code
       if (msg.k === "ice" && !this.peers.has(msg.from)) {
         // Hold it and stop: the peer does not exist yet, so there is nothing to
         // apply it to. It is replayed when the offer/answer creates the peer.
         (this.earlyIce || (this.earlyIce = [])).push(msg);
         return;
       }
-      if (msg.k === "hello") {
-        // A new arrival announces itself; the host answers with an offer.
-        this.onPeerCb?.(msg.from, msg);
-        return;
-      }
       let peer = this.peers.get(msg.from);
       if (!peer) {
-        // Let the application create the peer, then apply this message to it.
         this.onPeerCb?.(msg.from, msg);
         peer = this.peers.get(msg.from);
         if (!peer) return;
-        // Replay anything that arrived before this peer existed.
         if (this.earlyIce) {
           for (const m of this.earlyIce) if (m.from === msg.from) peer.queueIce(m.d);
           this.earlyIce = this.earlyIce.filter((m) => m.from !== msg.from);
@@ -120353,10 +120181,8 @@ function RX(r, e, o = "FRIENDS ROOM") {
       }
       if (msg.k === "ice") peer.queueIce(msg.d);
     }
+
     async iceDone(peer, budget = 900) {
-      // A short settle only. Host (LAN) candidates land in the first few hundred
-      // milliseconds; the rest trickle over the signalling channel. Waiting for
-      // full gathering here delayed the datachannel by seconds on every join.
       await new Promise((resolve) => {
         if (peer.pc.iceGatheringState === "complete") return resolve();
         let done = false;
@@ -120372,9 +120198,11 @@ function RX(r, e, o = "FRIENDS ROOM") {
         peer.pc.addEventListener("icegatheringstatechange", onChange);
       });
     }
+
     onIce(peer, cand) {
       this.signal(peer.id, { k: "ice", d: cand.toJSON ? cand.toJSON() : cand });
     }
+
     add(id, initiator) {
       const old = this.peers.get(id);
       if (old) {
@@ -120385,15 +120213,28 @@ function RX(r, e, o = "FRIENDS ROOM") {
       this.peers.set(id, p);
       return p;
     }
+
+    // A joining player's offer starts under a temporary id; once the host's
+    // answer arrives we key it by the host's peer id.
+    rename(oldId, newId) {
+      const p = this.peers.get(oldId);
+      if (!p) return null;
+      this.peers.delete(oldId);
+      p.id = newId;
+      this.peers.set(newId, p);
+      return p;
+    }
+
     onOpen(peer) {
       this.onPeerCb?.(peer.id, { k: "open" });
     }
+
     onLost(peer) {
-      // Close before forgetting: a lost peer still holds a connection.
       try { peer.pc.close(); } catch {}
       if (this.peers.get(peer.id) === peer) this.peers.delete(peer.id);
       this.onLostCb?.(peer.id);
     }
+
     onMessage(peer, raw) {
       let msg;
       try {
@@ -120401,8 +120242,23 @@ function RX(r, e, o = "FRIENDS ROOM") {
       } catch {
         return;
       }
+      if (msg.k === "sig") {
+        this.onSignal({ ...msg.d, from: peer.id });
+        return;
+      }
+      if (msg.k === "relay") {
+        if (this.isHost) {
+          const target = this.peers.get(msg.to);
+          if (target && target.open) target.send({ k: "relay", from: peer.id, d: msg.d });
+        } else {
+          // A joiner receives the host's relay of another joiner's signal.
+          this.onSignal({ ...msg.d, from: msg.from || peer.id });
+        }
+        return;
+      }
       this.onMessageCb?.(peer.id, msg);
     }
+
     broadcast(obj) {
       for (const p of this.peers.values()) p.send(obj);
     }
@@ -120411,7 +120267,6 @@ function RX(r, e, o = "FRIENDS ROOM") {
     }
     close() {
       for (const p of this.peers.values()) p.close();
-      this.broker?.close();
     }
   }
 
@@ -120440,10 +120295,15 @@ function RX(r, e, o = "FRIENDS ROOM") {
 // Peer transport. Runs inside module scope so it can use the client's own
 // simulation functions rather than a re-implementation of them.
 //
-//   ?peer=host&room=CODE          host a match
-//   ?peer=join&room=CODE          join over MQTT signalling
-//   ?peer=offer                   show an offer code for manual exchange
-//   ?peer=answer&code=...         paste an offer, get a return code
+//   ?peer=host                    start the authority (bots, local play)
+//   ?peer=join                    start a joining client
+//
+// Pairing is manual and broker-free:
+//   * the joining player creates a JOIN code (SDP offer, STUN gathered);
+//   * the host pastes it and sends back an ANSWER code;
+//   * the joining player pastes the answer.
+// A third player repeats this with the host; the host relays the WebRTC
+// signalling between joiners so all peers end up in a direct mesh.
 // ---------------------------------------------------------------------------
 var __sfPeer = (() => {
   // The runtime IIFE above puts everything on globalThis.__SF. Read it from there
@@ -120924,11 +120784,10 @@ var __sfPeer = (() => {
         if (host) {
           mesh?.broadcast({ k: "in", d: batch });
         } else {
-          // The host's peer id is its own random nickname, not the literal
-          // "host", so address whichever peer is actually connected.
-          for (let peer of mesh?.peers?.values() || []) {
-            peer.open && mesh.send(peer.id, { k: "in", d: batch });
-          }
+          // Inputs go to the authority only. A joiner may also have direct
+          // mesh links for signalling/state, but the host owns the simulation.
+          let h = mesh && mesh.hostPeer ? mesh.peers.get(mesh.hostPeer) : null;
+          if (h && h.open) h.send({ k: "in", d: batch });
         }
       },
       chat() {}, report() {}, voteKick() {}, switchTeam() {},
@@ -120940,43 +120799,88 @@ var __sfPeer = (() => {
     };
   }
 
-  // --- broker-free code exchange -------------------------------------------
-  // The fallback path: a host publishes an offer code, the joiner returns an
-  // answer code. No broker, no signalling server, works on a LAN.
-  let codePeer = null;
+  // --- long-code pairing ----------------------------------------------------
+  // The joining player creates the JOIN offer; the host answers it. These long
+  // codes are the only out-of-band signalling channel. A joiner's pending offer
+  // is keyed by its link id so the host's answer finds it.
+  let pendingJoin = new Map();
 
-  async function offerCode() {
-    return (async () => {
-      if (!mesh) return null;
-      let id = "code";
-      let old = mesh.peers.get(id);
-      old && (old.close(), mesh.peers.delete(id));
-      codePeer = mesh.add(id, !0);
-      let desc = await codePeer.offerComplete();
-      let body = await SF.pack({ k: "offer", d: { type: desc.type, sdp: desc.sdp } });
-      return "SF1:" + body;
-    })();
+  function dropPending() {
+    for (let [link, p] of pendingJoin) {
+      mesh && mesh.peers.delete(p.temp);
+      try { p.peer.close(); } catch {}
+      pendingJoin.delete(link);
+    }
   }
 
-  async function acceptCode(text) {
-    if (!mesh) return null;
-    let raw = String(text || "").trim().replace(/^SF1:/i, "");
-    if (!raw) return null;
-    let msg;
-    try {
-      msg = await SF.unpack(raw);
-    } catch {
-      return null;
-    }
-    if (!msg || msg.k !== "offer") return null;
-    let id = "code";
-    let old = mesh.peers.get(id);
-    old && (old.close(), mesh.peers.delete(id));
-    codePeer = mesh.add(id, !1);
-    await codePeer.setRemote(msg.d);
-    let desc = await codePeer.answerComplete();
-    let out = await SF.pack({ k: "answer", d: { type: desc.type, sdp: desc.sdp } });
+  async function offerCode() {
+    if (!mesh || role !== "join") return null;
+    dropPending();
+    let link = SF.code(10);
+    let temp = "offer:" + link;
+    let peer = mesh.add(temp, !0);
+    let desc = await peer.offerComplete(10000);
+    pendingJoin.set(link, { peer, temp });
+    let body = await SF.pack({
+      k: "offer", from: selfPeer, link,
+      d: { type: desc.type, sdp: desc.sdp },
+    });
+    return "SF1:" + body;
+  }
+
+  async function acceptAnswerMessage(msg) {
+    if (!mesh || msg.k !== "answer" || !msg.link) return false;
+    let pending = pendingJoin.get(msg.link);
+    if (!pending) return false;
+    if (msg.to && msg.to !== selfPeer) return false;
+    await pending.peer.setRemote(msg.d);
+    mesh.rename(pending.temp, String(msg.from));
+    mesh.hostPeer = String(msg.from);
+    pendingJoin.delete(msg.link);
+    return true;
+  }
+
+  async function acceptOffer(msg) {
+    if (!mesh || role !== "host") return false;
+    if (!msg.from || !msg.link || !msg.d) return false;
+    let peer = mesh.add(String(msg.from), !1);
+    await peer.setRemote(msg.d);
+    let desc = await peer.answerComplete(10000);
+    let out = await SF.pack({
+      k: "answer", from: selfPeer, to: String(msg.from), link: msg.link,
+      d: { type: desc.type, sdp: desc.sdp },
+    });
     return "SF1:" + out;
+  }
+
+  // One paste box handles both directions: an offer produces the host's ANSWER
+  // code (a string); an answer completes the joining player's pending offer
+  // (true). The UI copies whichever comes back.
+  async function acceptCode(text) {
+    if (!mesh) return false;
+    let raw = String(text || "").trim().replace(/^SF1:/i, "");
+    if (!raw) return false;
+    let msg;
+    try { msg = await SF.unpack(raw); } catch { return false; }
+    if (!msg) return false;
+    if (msg.k === "offer") return acceptOffer(msg);
+    if (msg.k === "answer") return acceptAnswerMessage(msg);
+    return false;
+  }
+
+  async function acceptAnswer(text) {
+    return (await acceptCode(text)) === true;
+  }
+
+  // A third player's host list arrives over the host link. The new player
+  // initiates to every existing joiner; the offers and ICE travel through the
+  // host until the direct link is open. This creates the full mesh.
+  function connectMesh(pid) {
+    if (!mesh || !pid || pid === selfPeer || mesh.peers.has(pid)) return;
+    let peer = mesh.add(pid, !0);
+    peer.offer().then((d) => {
+      mesh.signal(pid, { k: "offer", d });
+    }).catch((err) => console.warn("[sf] mesh offer", pid, err && err.message));
   }
 
   // --- boot ----------------------------------------------------------------
@@ -120986,77 +120890,78 @@ var __sfPeer = (() => {
     selfPeer = SF.peerId();
     let code = (opts.code || SF.code()).toUpperCase();
 
-    let retries = {};
     let abilityAuth = null;
     mesh = new SF.Mesh({
       code,
-      onPeer: async (id, msg) => {
-        // "open" must be handled before the duplicate-peer guard: the peer
-        // already exists by then, and this is the only notification a peer that
-        // connected over a pasted code will ever get.
-        if (role === "host" && msg && msg.k === "open") {
-          let seatId = hostSim?.seat(id, "player");
+      host: role === "host",
+      onPeer: (id, msg) => {
+        if (role === "host") {
+          if (!msg || msg.k !== "open" || !hostSim) return;
+          let seatId = hostSim.seat(id, "player");
           mesh.send(id, {
             k: "welcome",
-            d: { id: seatId, roster: hostSim.roster(), code },
+            d: { id: seatId, roster: hostSim.roster(), code, host: selfPeer },
           });
+          // The mesh list arrives after the welcome. Every existing joiner is
+          // direct to the host already; the new one links to them over the host.
+          let others = [...mesh.peers.entries()]
+            .filter(([pid, p]) => pid !== id && p.open)
+            .map(([pid]) => pid);
+          mesh.send(id, { k: "mesh", d: { peers: others } });
+          // Existing peers need the new player's name/team for the scoreboard
+          // and for the remote names that come with later snapshots.
+          let roster = hostSim.roster();
+          for (const [pid, p] of mesh.peers.entries()) {
+            if (p.open) mesh.send(pid, { k: "roster", d: roster });
+          }
           return;
         }
-        if (mesh.peers.has(id)) return;
-        if (role === "host") {
-          // A joiner announced itself: offer it a datachannel and seat it.
-          if (msg && msg.k !== "hello") return;
-          let peer = mesh.add(id, !0);
-          hostSim.seat(id, "player");
-          let offer = await peer.offer();
-          mesh.signal(id, { k: "offer", d: offer });
-        } else {
-          // The joiner is the answerer: only an offer creates a peer. Everything
-          // else is a notification about one that already exists, and must not
-          // replace it.
-          if (msg && msg.k !== "offer") return;
-          mesh.add(id, !1);
-        }
+        // A joining client answers direct mesh offers from other joiners. Its
+        // link to the host is completed by the pasted answer, not an offer here.
+        if (msg && msg.k !== "offer") return;
+        mesh.add(id, !1);
       },
       onMessage: (id, msg) => {
         if (!msg) return;
         if (role === "host") {
-          if (msg.k === "in") for (let i of msg.d) hostSim.input(id, i);
-          if (msg.k === "hello") {
-            let seatId = hostSim.seat(id, "player");
-            mesh.send(id, { k: "welcome", d: { id: seatId, roster: hostSim.roster(), code } });
-          }
-        } else {
-          if (msg.k === "snap") {
-            globalThis.__snapCount = (globalThis.__snapCount || 0) + 1;
-            globalThis.__lastSnap = msg.d;
-            G.onSnapshot(msg.d);
-          }
-          if (msg.k === "event") G.onEvent(msg.d);
-          if (msg.k === "welcome") {
-            // The host's id for us is authoritative: the HUD, the roster and the
-            // predictor all key off selfId.
-            let seat = msg.d.id;
-            if (typeof seat === "number" && seat > 0) G.selfId = seat;
-            G.onWelcome({ id: seat ?? 1, roster: msg.d.roster, code, xp: 0, owner: !1 });
-          }
+          if (msg.k === "in" && hostSim) for (let i of msg.d) hostSim.input(id, i);
+          return;
+        }
+        if (msg.k === "snap") {
+          globalThis.__snapCount = (globalThis.__snapCount || 0) + 1;
+          globalThis.__lastSnap = msg.d;
+          G.onSnapshot(msg.d);
+        }
+        if (msg.k === "event") G.onEvent(msg.d);
+        if (msg.k === "welcome") {
+          // The host's id for us is authoritative: the HUD, the roster and the
+          // predictor all key off selfId. hostPeer is the authority link.
+          if (msg.d.host) mesh.hostPeer = String(msg.d.host);
+          let seat = msg.d.id;
+          if (typeof seat === "number" && seat > 0) G.selfId = seat;
+          G.onWelcome({ id: seat ?? 1, roster: msg.d.roster, code, xp: 0, owner: !1 });
+        }
+        if (msg.k === "mesh") {
+          for (let pid of msg.d?.peers || []) connectMesh(pid);
+        }
+        if (msg.k === "roster") {
+          // The host added or lost a player. Keep the scoreboard/remote names in
+          // step without replaying onWelcome (which would reset local state).
+          try { G.roster = new Map((msg.d || []).map((p) => [p.id, p])); } catch {}
         }
       },
       onLost: (id) => {
-        if (role === "host") hostSim.remove(id);
-        // A failed check is usually one dead candidate path, not a dead room.
-        // Rebuild the link once before telling the player they were disconnected.
-        if (role === "join") {
-          retries[id] = (retries[id] || 0) + 1;
-          if (retries[id] <= 2) setTimeout(() => { mesh.add(id, !1); mesh.hello(); }, 600 * retries[id]);
+        if (role !== "host" || !hostSim) return;
+        hostSim.remove(id);
+        // A leave must disappear from every remaining scoreboard. The direct
+        // links are independent of the mesh, so the survivor still has a path
+        // to the host for this roster update.
+        let roster = hostSim.roster();
+        for (const [pid, p] of mesh.peers.entries()) {
+          if (p.open) mesh.send(pid, { k: "roster", d: roster });
         }
       },
     });
-
-    // Local play must not wait for a broker. Try signalling in the background;
-    // a host without a broker is still a playable match, and joining peers that
-    // cannot find us over MQTT can still use the offer/answer codes.
-    let brokerDone = mesh.openBroker();
 
     if (role === "host") {
       hostSim = makeHost(opts.world, opts.selfId, opts.name, opts.mode || chosenMode());
@@ -121119,13 +121024,9 @@ var __sfPeer = (() => {
           selfSnap.ack = G.seq - 1;
           G.onSnapshot(selfSnap);
         }
-        // The broker-free code is a fallback. Offer it, but do not cover the
-        // game with it: the panel opens from the in-game button (or when no
-        // broker is reachable at all).
-      // The offer code is generated on demand from the panel button, never
-      // automatically: gathering takes seconds and must not touch the frame loop.
-      // Announce the match once. Re-sending it every frame rebuilt the HUD
-        // banner path and threw on the map id.
+        // Announce the match once. Re-sending it every frame rebuilt the HUD
+        // banner path and threw on the map id. Join codes are generated on
+        // demand from the panel; gathering must never touch this loop.
         if (!hostSim.announced) {
           hostSim.announced = !0;
           // The match object is consumed by the HUD, the podium and the pickup
@@ -121158,28 +121059,14 @@ var __sfPeer = (() => {
       });
       G.ready = !0;
       G.frozen = !1;
-      // The joiner cannot announce itself until signalling is actually open.
-      brokerDone.then((ok) => {
-        if (!ok) {
-          G.setNotice("No signalling broker reachable.");
-          // The broker is the fast path; this is the one that always works.
-          globalThis.__sfCodeUI?.show(
-            "No broker reachable. Ask the host for their offer code, paste it here, and send the return code back.",
-            "join"
-          );
-          return;
-        }
-        // The host may have subscribed after our first announcement, and a
-        // pub/sub broker keeps no history for us. Repeat for a few seconds until
-        // a datachannel opens.
-        let tries = 0;
-        mesh.hello();
-        let beat = setInterval(() => {
-          tries++;
-          if ([...mesh.peers.values()].some((p) => p.open) || tries > 12) return clearInterval(beat);
-          mesh.hello();
-        }, 700);
-      });
+      // No automatic signalling. The joining player creates a JOIN code from
+      // the panel (C), sends it to the host, and pastes the host's ANSWER code
+      // back. The local scene stays responsive while that happens.
+      G.setNotice("Press C to pair with the host.");
+      globalThis.__sfCodeUI?.show(
+        "Copy your JOIN code and send it to the host, then paste their ANSWER code here.",
+        "join"
+      );
     }
 
     let net = transport({ host: role === "host", selfId: 1, code });
@@ -121190,32 +121077,21 @@ var __sfPeer = (() => {
     return net;
   }
 
-  // The host applies the joiner's return code, completing the handshake with no
-  // signalling channel involved at all.
-  async function acceptAnswer(text) {
-    let raw = String(text || "").trim().replace(/^SF1:/i, "");
-    if (!raw || !codePeer) return false;
-    let msg;
-    try {
-      msg = await SF.unpack(raw);
-    } catch {
-      return false;
-    }
-    if (!msg || msg.k !== "answer") return false;
-    await codePeer.setRemote(msg.d);
-    return true;
-  }
-
-  globalThis.__sfCodeApi = { offer: offerCode, accept: acceptCode, acceptAnswer };
+  globalThis.__sfCodeApi = {
+    offer: offerCode,
+    accept: acceptCode,
+    acceptAnswer,
+    role: () => role,
+    hostPeer: () => (mesh ? mesh.hostPeer : null),
+  };
 
   return {
-    boot, wanted, mode: chosenMode, botCount, role: () => role, debug,
+    boot, wanted, mode: chosenMode, botCount, role: () => role,
     debug: () => ({
       role,
       peers: mesh ? [...mesh.peers.keys()] : [],
       open: mesh ? [...mesh.peers.values()].filter((p) => p.open).length : 0,
-      broker: !!(mesh && mesh.broker),
-      brokerUrl: mesh ? mesh.brokerUrl || null : null,
+      hostPeer: mesh ? mesh.hostPeer : null,
       code: mesh ? mesh.code : null,
       sent: hostSim ? hostSim.sentAt : null,
       bots: hostSim ? hostSim.botCount() : 0,
@@ -121234,7 +121110,7 @@ globalThis.__sfIcons = {
 async function She() {
   Wo.start(),
   Dt.kind === "friends" && (
-  RX(Dt.code, () => Ub(zY(`${location.origin}${location.pathname}`, Dt.code, j1, Dt.bots, IQ, E2()))),
+  RX(Dt.code, () => Ub(zY((globalThis.__SF_INVITE_BASE || `${location.origin}${location.pathname}`), Dt.code, j1, Dt.bots, IQ, E2()))),
   OA.announceJoins = !0);
   let r = cf(wy),
     e = cf(mf) ?? mf.fallback;
@@ -121260,9 +121136,9 @@ async function She() {
         selfId: 1,
       });
       globalThis.__sfPeerDbg = __sfPeer.debug;
-      // A host with no peers yet is already playing, so the boot notice must not
-      // sit on the screen; it is only honest while actually joining someone.
-      if (__sfPeer.wanted() === "host") Wo.setNotice("");
+      // A host with no peers yet is already playing; tell it how to invite
+      // instead of leaving the boot notice on screen.
+      if (__sfPeer.wanted() === "host") Wo.setNotice("Press Esc, then C, to pair players");
       Wo.sendLoadout(), N0();
     } catch (err) {
       console.error("sf-peer boot failed", err);
@@ -121315,7 +121191,7 @@ async function She() {
           }
           let n = t.code;
           if (Dt.kind === "online" && n) {
-            RX(n, () => Ub(FY(`${location.origin}${location.pathname}`, n, j1, IQ, E2())), "THIS MATCH");
+            RX(n, () => Ub(FY((globalThis.__SF_INVITE_BASE || `${location.origin}${location.pathname}`), n, j1, IQ, E2())), "THIS MATCH");
             let i = new URLSearchParams(location.search);
             i.set("code", n), __sfReplaceState(`${location.pathname}?${i}`);
           }

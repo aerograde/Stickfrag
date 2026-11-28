@@ -12,6 +12,8 @@ import json
 
 from playwright.sync_api import sync_playwright
 
+from test_entry import game_frame
+
 URL = "http://127.0.0.1:8123/stickfrag.html?play&name=tester&map=yard&soundviz=1"
 
 
@@ -23,11 +25,8 @@ def main() -> int:
         page.on("pageerror", lambda e: errors.append(str(e)))
         page.on("console", lambda m: errors.append(m.text) if m.type == "error" else None)
         page.goto(URL, wait_until="load", timeout=90000)
-        page.wait_for_function(
-            "() => !!globalThis.__sfGame && globalThis.__sfGame.ready === true",
-            timeout=90000,
-        )
-        page.wait_for_function(
+        game = game_frame(page)
+        game.wait_for_function(
             "() => !!globalThis.__sfGame && globalThis.__sfGame.ready === true",
             timeout=90000,
         )
@@ -36,7 +35,7 @@ def main() -> int:
         page.wait_for_timeout(1500)
 
         # --- wheel through the client's own handler --------------------------
-        wheel = page.evaluate(
+        wheel = game.evaluate(
             """() => {
               const slot = () => document.querySelector('#ammo .sl.on')?.dataset.kind ?? null;
               const cv = document.getElementById('game');
@@ -52,12 +51,12 @@ def main() -> int:
 
         # If pointer lock did not land, acquire it with a real click on the card.
         if not wheel["locked"]:
-            page.evaluate("() => document.getElementById('resume')?.click()")
+            game.evaluate("() => document.getElementById('resume')?.click()")
             page.wait_for_timeout(1000)
             page.mouse.click(640, 400)
             page.wait_for_timeout(1200)
 
-        seq = page.evaluate(
+        seq = game.evaluate(
             """() => {
               const g = globalThis.__sfGame;
               const inp = g.input;
@@ -76,7 +75,7 @@ def main() -> int:
         )
 
         # --- pip gate: standing emits, crouched does not ---------------------
-        gate = page.evaluate(
+        gate = game.evaluate(
             """() => {
               const el = document.getElementById('soundpips');
               if (!el) return { mounted: false };

@@ -4,12 +4,14 @@
 Layout of the single file
 -------------------------
   <style id="sf-home-css">            the landing page's stylesheets
-  <style id="sf-game-css" disabled>   the game's stylesheets
+  <style id="sf-game-css">            the game's stylesheets (inert in the menu)
   <template id="sf-game-dom">         the game's body markup, inert
+  <template id="sf-p2p-dom">          the broker-free connect panel, inert
   <div id="sf-home-root">             the live landing page markup
   <script>                            home bundle (haven, locker, room code)
   <script type="text/plain" id="sf-game-src">  the bundled game, not executed
-  <script>                            the shell: swaps screens, boots on PLAY
+  <script type="text/plain" id="sf-net-off">   the network stub, also inert
+  <script>                            the shell: menu and disposable match frames
 
 Why the game is parked as text instead of living in a live <script>
 -------------------------------------------------------------------
@@ -20,24 +22,24 @@ loading it eagerly behind the home screen would cost a full GPU context, the map
 geometry and roughly 90 MB of heap before the player has pressed anything.
 
 Instead the module text sits in a `type="text/plain"` script. That is inert: it
-is never parsed or executed, and its content is just a string until asked for. On
-PLAY the text becomes a module through a blob URL. Verified from file:// as well
-as http.
+is never parsed or executed, and its content is just a string until asked for.
 
-Why the two screens swap rather than stack
-------------------------------------------
-They collide. The stylesheets share 50 class names (.btn, .daily-row, .empty,
-.big, ...) and the two bodies use six of the same element ids (#gear, #feedback,
-#fb-close, #fb-send, #fb-status, #fb-text). One document cannot hold both
-unscoped. So the home markup is live, the game markup sits in a <template> (which
-getElementById and CSS selectors never see), and exactly one stylesheet is
-enabled at a time.
+Matches are isolated
+--------------------
+The menu lives in this document; a match runs in an iframe. Over http the frame
+is this same file with ?embed=1 (a real document, which browsers grant pointer
+lock to); from disk it is a game-only blob document built from the parked CSS,
+markup and module. HOME removes the frame, which releases the module, its
+listeners, timers, sockets and WebGL context. An ES module cannot be unloaded
+from the menu document, so importing a match in place leaked ~80 MB per cycle.
+The HUD and the menu also never share ids or class names.
 """
 
 from __future__ import annotations
 
 import base64
 import json
+import mimetypes
 import re
 import secrets
 from pathlib import Path
@@ -49,16 +51,15 @@ BUILD = ROOT / "build"
 OUT = SITE / "stickfrag.html"
 SVG = SITE / "stickfrag.svg"
 
-# Public MQTT brokers the peer layer signals over, named so the policy stays explicit.
-BROKER_ORIGINS = " ".join(
-    f"wss://{host}:{port}" for host, port in (
-        ("broker.emqx.io", 8084),
-        ("broker.hivemq.com", 8884),
-        ("test.mosquitto.org", 8081),
-    )
-)
-
 BRAND_SWAPS = [("STICKFRAG.COM", "STICKFRAG.HTML"), ("stickfrag.com", "stickfrag.html")]
+
+# The landing bundle builds the wordmark and its phone hint from literals. These
+# are the only visible copies that are safe to rename: a broad replace would
+# also hit hostnames and the contact email.
+HOME_BRAND_SWAPS = [
+    ('"STICKFRAG.COM"', '"STICKFRAG.HTML"'),
+    ("Play on your phone: open stickfrag.com on", "Play on your phone: open stickfrag.html on"),
+]
 
 # Landing stylesheets, in the exact order the page links them. The order is load
 # bearing: landing-servers.css and landing-modelist.css both set --tiles-h for the
@@ -92,9 +93,12 @@ PIP_CSS = """
 
 P2P_CSS = """
 #sf-p2p { position: fixed; inset: 0; z-index: 60; display: none; place-items: center;
-  background: rgba(21,17,28,.82); font: 600 14px/1.4 ui-sans-serif, system-ui, sans-serif; }
+  background: rgba(21,17,28,.82); font: 600 14px/1.4 ui-sans-serif, system-ui, sans-serif;
+  pointer-events: none; }
 #sf-p2p.on { display: grid; }
-#sf-p2p .box { width: min(560px, 92vw); background: #fff4dc; color: #15111c;
+#sf-p2p-backdrop { position: absolute; inset: 0; pointer-events: auto; }
+#sf-p2p .box { position: relative; z-index: 1; pointer-events: auto;
+  width: min(560px, 92vw); background: #fff4dc; color: #15111c;
   border: 3px solid #15111c; box-shadow: 8px 8px 0 #15111c; padding: 20px; }
 #sf-p2p h3 { margin: 0 0 6px; font-size: 18px; letter-spacing: .04em; }
 #sf-p2p p { margin: 0 0 10px; font-weight: 500; }
@@ -160,60 +164,163 @@ NARROW_HUD_CSS = """
 
 P2P_MARKUP = """
 <div id="sf-p2p" aria-hidden="true">
-  <div class="box" role="dialog" aria-label="Connect without a broker">
+  <div id="sf-p2p-backdrop"></div>
+  <div class="box" role="dialog" aria-label="Pair with long codes">
     <h3>CONNECT BY CODE</h3>
     <p id="sf-p2p-help"></p>
     <textarea id="sf-p2p-code" spellcheck="false" autocapitalize="off"></textarea>
     <div class="row">
-      <button id="sf-p2p-copy" type="button">COPY MY CODE</button>
-      <button id="sf-p2p-accept" type="button" class="dark">USE THEIR CODE</button>
+      <button id="sf-p2p-copy" type="button">COPY JOIN CODE</button>
+      <button id="sf-p2p-accept" type="button" class="dark">PASTE CODE</button>
     </div>
   </div>
 </div>
-<script nonce="__NONCE__">
-// Broker-free join. The host publishes an offer code; the joiner pastes it and
-// gets a return code to send back. Fallback for when the free brokers are down.
+"""
+
+# The join panel belongs to a match, not to the menu. It is carried as text and
+# injected into the game document, so typing "c" in the nickname field (or on
+# the landing page) can never open it. The handler also ignores form fields and
+# modifier-key combinations. There is no broker: the joining player creates a
+# JOIN code, the host pastes it and returns an ANSWER code, and the joining
+# player pastes that back. For 3+ players the host relays WebRTC signalling over
+# its data channels so the joiners form direct mesh links.
+P2P_SCRIPT = r"""
 (() => {
   const el = (id) => document.getElementById(id);
   const panel = el('sf-p2p');
   if (!panel) return;
   const help = el('sf-p2p-help');
   const box = el('sf-p2p-code');
+  const copy = el('sf-p2p-copy');
+  const accept = el('sf-p2p-accept');
+  const typing = (e) => {
+    const t = e.target;
+    return !!(t && (t.matches?.('input,textarea,select,[contenteditable]') || t.isContentEditable));
+  };
+  const role = () => (globalThis.__sfPeerDbg?.()?.role === 'host' ? 'host' : 'join');
   const show = (text, mode) => {
     panel.classList.add('on');
-    panel.dataset.mode = mode;
+    panel.dataset.mode = mode || role();
     help.textContent = text;
-    if (mode === 'host') el('sf-p2p-accept').textContent = 'SHOW OFFER AGAIN';
+    copy.textContent = panel.dataset.mode === 'host' ? 'COPY ANSWER CODE' : 'COPY JOIN CODE';
   };
+  const helpFor = () => (role() === 'host'
+    ? 'Paste a JOIN code from a player. Send back the ANSWER code that appears.'
+    : 'Create your JOIN code and send it to the host. Paste their ANSWER here.');
   window.__sfCodeUI = { show, panel, help, box };
-  // Escape closes it; C opens it again for the broker-free fallback.
   panel.addEventListener('click', (e) => { if (e.target === panel) panel.classList.remove('on'); });
   addEventListener('keydown', (e) => {
     if (e.key === 'Escape') panel.classList.remove('on');
-    if (e.key === 'c' || e.key === 'C') {
-      if (document.pointerLockElement) return;   // typing in game, not a shortcut
-      show(panel.dataset.mode === 'host'
-        ? 'Share this offer code with a friend, then paste their return code here.'
-        : 'Paste the host offer code, then send the return code back.', panel.dataset.mode || 'join');
-    }
+    if (e.key !== 'c' && e.key !== 'C') return;
+    if (typing(e) || e.ctrlKey || e.metaKey || e.altKey) return;
+    if (document.pointerLockElement) return;   // playing, not a shortcut
+    show(helpFor(), role());
   });
-  el('sf-p2p-copy').addEventListener('click', () => navigator.clipboard?.writeText(box.value));
-  el('sf-p2p-accept').addEventListener('click', async () => {
+  accept.addEventListener('click', async () => {
     const api = window.__sfCodeApi;
     if (!api) return;
-    if (panel.dataset.mode === 'host') {
-      box.value = (await api.offer()) || '';
+    const text = box.value.trim();
+    if (!text) { help.textContent = 'Paste a JOIN or ANSWER code first.'; return; }
+    let res;
+    try { res = await api.accept(text); } catch (e) { res = false; }
+    if (typeof res === 'string' && res) {
+      box.value = res;
+      help.textContent = 'ANSWER code — send this back to the joining player.';
+      copy.textContent = 'COPY ANSWER CODE';
       return;
     }
-    const code = await api.accept(box.value.trim());
-    if (code) {
-      box.value = code;
-      help.textContent = 'Send this return code back to the host.';
-      el('sf-p2p-copy').textContent = 'COPY RETURN CODE';
+    if (res === true) {
+      box.value = '';
+      help.textContent = 'CONNECTED. The match is linked.';
+      copy.textContent = 'COPY CODE';
+      return;
     }
+    help.textContent = 'That code was invalid or has expired.';
   });
+  copy.onclick = async () => {
+    if (panel.dataset.mode === 'join' && !box.value) {
+      const api = window.__sfCodeApi;
+      if (!api) return;
+      let code;
+      try { code = await api.offer(); } catch (e) { code = null; }
+      if (typeof code === 'string' && code) {
+        box.value = code;
+        help.textContent = 'JOIN code — send this to the host. Paste their ANSWER here and press PASTE CODE.';
+        copy.textContent = 'COPY JOIN CODE';
+        return;
+      }
+      help.textContent = 'The joining player creates the JOIN code. Paste it here and send back the ANSWER.';
+      return;
+    }
+    try { navigator.clipboard?.writeText(box.value)?.catch?.(() => {}); } catch (e) {}
+    box.select?.();
+  };
 })();
-</script>
+"""
+
+# The menu document only needs the match frame's chrome. The game's own styles
+# travel with the game document.
+SHELL_CSS = """
+#sf-game-layer { position: fixed; inset: 0; z-index: 50; background: #16121c; }
+#sf-game-frame { display: block; width: 100%; height: 100%; border: 0; background: #16121c; }
+#sf-game-loading {
+  position: absolute; inset: 0; z-index: 1; display: grid; place-content: center;
+  gap: 12px; text-align: center; background: #16121c; color: #c9c4d6;
+  font: 800 13px/1.4 ui-sans-serif, system-ui, sans-serif; letter-spacing: .14em;
+}
+#sf-game-loading b {
+  font: 900 58px/1 Impact, "Arial Black", "Helvetica Neue", sans-serif;
+  letter-spacing: 6px; color: #ff2a4d;
+  -webkit-text-stroke: 2px #000; paint-order: stroke fill;
+}
+#sf-error {
+  position: fixed; left: 50%; bottom: 26px; transform: translateX(-50%); z-index: 80;
+  max-width: min(620px, 92vw); background: #15111c; color: #fff4dc;
+  border: 3px solid #ff2a4d; box-shadow: 7px 7px 0 #000; padding: 14px 18px;
+  font: 700 13px/1.5 ui-sans-serif, system-ui, sans-serif; cursor: pointer;
+}
+"""
+
+# The shell is a separate file so it can be checked and read as JavaScript.
+SHELL = (Path(__file__).resolve().parent / "single-shell.js").read_text(encoding="utf-8")
+
+# Private windows and storage-blocked machines throw on the first write, not the
+# first read. The home bundle runs before the shell, so install a memory-backed
+# Storage here, before any page script touches it. The game document and the SVG
+# wrapper repeat this probe for their own origins.
+STORAGE_SHIM = r"""
+(() => {
+  const probe = (s) => {
+    try {
+      s.setItem('__sf_probe', '1');
+      s.getItem('__sf_probe');
+      s.removeItem('__sf_probe');
+      return true;
+    } catch (e) {
+      return false;
+    }
+  };
+  let ls = null, ss = null;
+  try { ls = window.localStorage; } catch (e) {}
+  try { ss = window.sessionStorage; } catch (e) {}
+  if (ls && ss && probe(ls) && probe(ss)) return;
+  const memory = () => {
+    const data = {};
+    return {
+      getItem: (k) => (Object.prototype.hasOwnProperty.call(data, k) ? data[k] : null),
+      setItem: (k, v) => { data[k] = String(v); },
+      removeItem: (k) => { delete data[k]; },
+      clear: () => { for (const k of Object.keys(data)) delete data[k]; },
+      key: (i) => Object.keys(data)[i] ?? null,
+      get length() { return Object.keys(data).length; }
+    };
+  };
+  for (const name of ['localStorage', 'sessionStorage']) {
+    try {
+      Object.defineProperty(window, name, { value: memory(), configurable: true });
+    } catch (e) {}
+  }
+})();
 """
 
 # The landing bundle still probes the original matchmaking servers on load. There
@@ -262,8 +369,8 @@ NET_OFF = r"""
   };
 
   // A websocket to a dead host should close immediately, not hang. The stubbed
-  // constructor must keep the readyState constants: the MQTT client compares
-  // against WebSocket.OPEN, and a missing constant silently disables every send.
+  // constructor keeps the readyState constants for any remaining site probe that
+  // compares against WebSocket.OPEN.
   const RealWS = window.WebSocket;
   const StubWS = function (url, protocols) {
     if (isDead(url)) {
@@ -288,303 +395,6 @@ NET_OFF = r"""
 })();
 """
 
-SHELL = r"""
-// ---------------------------------------------------------------------------
-// The shell: one document, two screens, one game context at a time.
-// ---------------------------------------------------------------------------
-(() => {
-  const qs = new URLSearchParams(location.search);
-  const homeRoot = document.getElementById('sf-home-root');
-  const gameTpl = document.getElementById('sf-game-dom');
-  const gameSrc = document.getElementById('sf-game-src');
-  const homeCss = document.getElementById('sf-home-css');
-  const gameCss = document.getElementById('sf-game-css');
-  const ICONS = __ICONS__;
-
-  // Only the landing stylesheet is active on the home screen. The `disabled`
-  // content attribute does nothing on a <style> element; the IDL property does.
-  gameCss.disabled = true;
-
-  let started = false;
-  const gq = new Map(); // parameters the shell is about to set
-
-  // The landing page references a few images by absolute path, which would
-  // resolve against the filesystem root when opened from disk. Use the inlined
-  // copies instead.
-  const rebaseImages = (root) => {
-    for (const el of root.querySelectorAll('img[src^="/"]')) {
-      const key = el.getAttribute('src').slice(1);
-      if (ICONS[key]) el.setAttribute('src', ICONS[key]);
-    }
-    for (const el of root.querySelectorAll('[style]')) {
-      const css = el.getAttribute('style');
-      if (!css.includes('url(/')) continue;
-      el.setAttribute('style', css.replace(
-        /url\(\/([^)]+)\)/g,
-        (m, key) => (ICONS[key] ? `url(${ICONS[key]})` : m)
-      ));
-    }
-  };
-
-  // The game reads its boot parameters from the query string when the module
-  // starts, so they have to be in place before the blob is imported.
-  const applyBootParams = () => {
-    // Inside the SVG's inline frame the document URL is a blob, so it has no query
-    // string of its own. The wrapper passes the SVG's query by postMessage and it
-    // is merged in here, before anything reads the parameters.
-    let extra = '';
-    try {
-      if (window.parent && window.parent !== window) extra = window.__SF_PARENT_QUERY || '';
-    } catch {}
-    const p = new URLSearchParams(extra);
-    new URLSearchParams(location.search).forEach((v, k) => p.set(k, v));
-    gq.forEach((v, k) => p.set(k, v));
-    const peer = p.get('peer');
-    if (peer) p.delete('offline'); else p.set('offline', '');
-    for (const k of ['code', 'region', 'review', 'overwatch', 'case', 'studio', 'replay', 'clip'])
-      if (!gq.has(k)) p.delete(k);
-    if (!peer) p.delete('room');
-    let n = '';
-    try { n = (localStorage.getItem('name') || '').trim(); } catch {}
-    if (!/^[A-Za-z0-9_]{3,16}$/.test(n)) n = (p.get('name') || '').trim();
-    if (!/^[A-Za-z0-9_]{3,16}$/.test(n)) n = 'player';
-    p.set('name', n);
-    if (!p.get('map')) p.set('map', 'yard');
-    window.__SF_NAME = n;
-    // The game reads these from location.search. Publish the same set here so it
-    // can still pick them up when the address bar cannot be written, which is the
-    // case inside the SVG wrapper's srcdoc frame.
-    window.__SF_BOOT_PARAMS = Object.fromEntries(p);
-    // Cosmetic: keep the address bar in step so a reload lands in the same
-    // match. Skipped rather than thrown when the document has no addressable
-    // URL, which is the case when this file is running inside the SVG wrapper.
-    try {
-      const next = location.pathname + '?' + p.toString();
-      if (next !== location.pathname + location.search) history.replaceState(null, '', next);
-    } catch {}
-  };
-
-  let gameNodes = [];
-  let gameSource = null;
-
-  // The home page and the game share six element ids (#gear, #feedback, #fb-close,
-  // #fb-send, #fb-status, #fb-text) and the game resolves its HUD with
-  // document.getElementById, which returns the FIRST match in document order.
-  // Inserting the game's markup *before* the home root therefore makes every
-  // shared id resolve to the game's node while a match runs, so the game never
-  // writes into the hidden menu. Hiding the home alone is not enough: the HUD
-  // used to empty the whole #gear section and going HOME landed on a blank page.
-  const swapToGame = () => {
-    gameCss.disabled = false;
-    document.body.classList.add('sf-playing');
-    const frag = gameTpl.content.cloneNode(true);
-    gameNodes = [...frag.children];
-    document.body.insertBefore(frag, homeRoot);
-    homeRoot.style.display = 'none';
-    homeRoot.setAttribute('aria-hidden', 'true');
-    homeCss.disabled = true;
-    const homeLock = document.getElementById('sf-home-lock');
-    if (homeLock) homeLock.disabled = true;
-    // The haven's 3D room holds its own WebGL context. Let it go before the game
-    // asks for one: two live contexts on a weak GPU is the difference between a
-    // playable match and a slideshow. The lobby rebuilds itself on HOME.
-    window.__sfLobbyRelease?.();
-  };
-
-  const swapToHome = () => {
-    for (const node of gameNodes) node.remove();
-    gameNodes = [];
-    // The game leaves inline style on <body> and the root (HUD zoom, cursor).
-    document.body.removeAttribute('style');
-    document.body.classList.remove('sf-playing');
-    homeRoot.style.display = '';
-    homeRoot.removeAttribute('aria-hidden');
-    homeCss.disabled = false;
-    const homeLock = document.getElementById('sf-home-lock');
-    if (homeLock) homeLock.disabled = false;
-    gameCss.disabled = true;
-    window.scrollTo(0, 0);
-    window.__sfLobbyRestore?.();
-    // A second PLAY has to be able to boot a fresh module: the old one is gone
-    // with its markup.
-    started = false;
-  };
-
-  // The game's HOME / "leave" paths all do location.replace('/#gear'), which in a
-  // single file would re-parse the whole document (and in the SVG wrapper would
-  // leave it entirely). They call this instead.
-  window.__sfHome = () => {
-    swapToHome();
-    const url = new URLSearchParams(location.search);
-    for (const k of ['peer', 'room', 'mode', 'map', 'bots', 'nobots'])
-      url.delete(k);
-    try {
-      const q = url.toString();
-      history.replaceState(null, '', location.pathname + (q ? '?' + q : ''));
-    } catch {}
-    return true;
-  };
-
-  const startGame = async () => {
-    if (started) return true;
-    started = true;
-
-    swapToGame();
-    gameSource ??= gameSrc.textContent;
-    gameSrc.remove();
-    const url = URL.createObjectURL(new Blob([gameSource], { type: 'text/javascript' }));
-    try {
-      return await import(url);
-    } finally {
-      // Evaluated; neither the blob nor its text is needed again.
-      URL.revokeObjectURL(url);
-    }
-  };
-  window.__sfStartGame = startGame;
-
-  const enter = async (peer, code) => {
-    if (code) gq.set('room', code);
-    gq.set('peer', peer);
-    applyBootParams();
-    try {
-      await startGame();
-    } catch (err) {
-      console.error('could not start the game', err);
-    }
-  };
-
-  // The landing page owns the whole menu flow (PLAY -> mode -> how -> map ->
-  // start). Nothing here may intercept those clicks: PLAY is a submit button
-  // inside #gear-join, so swallowing that form's submit froze the menu.
-  //
-  // The one control that cannot work as-is is the room-code JOIN: the page asks
-  // the (long gone) matchmaking server which room that code is. Peers here find
-  // each other over the broker instead, so that path is handled locally.
-  const codeFrom = (form) => {
-    const field =
-      (form && form.querySelector('input')) || document.getElementById('code-input');
-    const raw = ((field && field.value) || '').trim().toUpperCase();
-    const m = /[?&]room=([A-Z0-9]{6})/i.exec(raw);
-    const value = (m ? m[1] : raw).replace(/[^A-Z0-9]/g, '');
-    return /^[A-Z0-9]{6}$/.test(value) ? value : null;
-  };
-
-  document.addEventListener('submit', (e) => {
-    const form = e.target instanceof Element ? e.target : null;
-    if (!form || !form.matches('#code-join')) return;
-    const code = codeFrom(form);
-    if (!code) return; // invalid code: let the page show its own message
-    e.preventDefault();
-    e.stopImmediatePropagation();
-    enter('join', code);
-  }, true);
-
-  // The landing page launches by assigning to location.href. Instead of letting
-  // that navigate (and re-parse this whole file), take the URL it built and
-  // start the match in place. It carries mode, map and the room details, which
-  // is exactly what the game reads from the query string anyway.
-  window.__sfGo = (url) => {
-    try {
-      // Parse the query string on its own instead of resolving against
-      // location.href. Relative resolution needs an ordinary base URL, and an
-      // SVG-wrapped copy runs from about:srcdoc where that throws. Only the
-      // parameters matter here, so this works anywhere.
-      const q = url.indexOf('?');
-      const params = new URLSearchParams(q >= 0 ? url.slice(q + 1) : '');
-      if (!params.get('map')) params.set('map', 'yard');
-      // A match chosen from the menu is hosted locally. That is what gives it a
-      // real match object (mode, scoreboard, team scores, ability pickups)
-      // instead of the bare offline sandbox.
-      if (!params.get('peer')) params.set('peer', 'host');
-      // Remember the room so the server browser can list it. There is no
-      // matchmaking to ask, so this local record is what exists.
-      if (params.get('peer') === 'host') {
-        try {
-          const code = params.get('room') || 'LOCAL1';
-          const key = 'sf:rooms';
-          const list = JSON.parse(localStorage.getItem(key) || '[]')
-            .filter((r) => r.code !== code);
-          list.unshift({
-            code,
-            mode: params.get('mode') || 'ffa',
-            map: params.get('map') || 'yard',
-            players: 1,
-          });
-          localStorage.setItem(key, JSON.stringify(list.slice(0, 8)));
-        } catch {}
-        // The map can be "any" until the game resolves it, so correct the record
-        // from the live match once it exists.
-        const settle = (tries) => {
-          const map = globalThis.__sfGame?.match?.map;
-          if (map) {
-            try {
-              const key = 'sf:rooms';
-              const list = JSON.parse(localStorage.getItem(key) || '[]');
-              for (const room of list) if (room.map === 'any') room.map = map;
-              localStorage.setItem(key, JSON.stringify(list));
-            } catch {}
-            return;
-          }
-          if (tries > 0) setTimeout(() => settle(tries - 1), 500);
-        };
-        setTimeout(() => settle(60), 800);
-      }
-      params.forEach((v, k) => gq.set(k, v));
-      applyBootParams();
-      startGame().catch((err) => console.error('could not start the game', err));
-    } catch (err) {
-      // Anything unexpected falls back to the real navigation.
-      console.error('menu launch failed, navigating instead', err);
-      location.href = url;
-    }
-  };
-
-  // The invite a friend pastes. On the live site this pointed at /play/; here it
-  // has to come back to this file and ask for the peer join path.
-  window.__sfInvite = (code, map, game) => {
-    const p = new URLSearchParams({ peer: 'join' });
-    if (code) p.set('room', code);
-    if (map) p.set('map', map);
-    if (game) p.set('mode', game);
-    return location.origin + location.pathname + '?' + p.toString();
-  };
-
-  rebaseImages(homeRoot);
-  applyBootParams();
-
-  // Training is a normal host match with bots in it, so it needs nothing new on
-  // the simulation side. The live site has no such tile (its bots live on the
-  // server and fill real rooms), so it is added here, next to QUICK JOIN.
-  (() => {
-    const modes = document.getElementById('start-modes');
-    if (!modes) return;
-    const tile = document.createElement('button');
-    tile.type = 'button';
-    tile.id = 'start-training';
-    tile.className = 'choice mode-tile';
-    tile.setAttribute('aria-label', 'Training: a free-for-all against bots');
-    tile.innerHTML = '<span class="tile-name">TRAINING</span><span class="tile-join">4 BOTS \\u203A</span>';
-    tile.addEventListener('click', () => {
-      window.__sfGo(location.pathname + '?peer=host&mode=ffa&bots=4&map=yard');
-    });
-    modes.appendChild(tile);
-    // The site's grid is sized for five rows; give it the sixth.
-    modes.style.gridTemplateRows = 'repeat(6, 1fr)';
-    modes.style.height = 'calc(6 * var(--tile-row) + 5 * var(--tile-gap))';
-  })();
-
-  // Reload has to land somewhere sensible. A URL that names a mode is a match
-  // that was already chosen; ?peer= is an invite link. Both go straight in, and
-  // a bare home URL stays on the menu.
-  if (qs.has('peer') || qs.has('mode') || qs.has('play')) {
-    qs.forEach((v, k) => gq.set(k, v));
-    applyBootParams();
-    startGame().catch((err) => console.error('could not start the game', err));
-  }
-})();
-"""
-
-
 def read(path: Path) -> str:
     return path.read_text(encoding="utf-8")
 
@@ -596,38 +406,47 @@ def asset_uri(rel: str, mime: str) -> str | None:
     return "data:%s;base64,%s" % (mime, base64.b64encode(path.read_bytes()).decode("ascii"))
 
 
+# A one-pixel transparent GIF: a missing image still occupies its layer, so a
+# shorthand like `background: url(...) center / cover, url(...)` keeps its
+# positions and its separating commas. Replacing the whole layer instead used to
+# eat `center / cover,` and glue the next image on without a comma.
+BLANK_PIXEL = (
+    "data:image/gif;base64,"
+    "R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
+)
+
+
+def mime_for(rel: str) -> str:
+    return mimetypes.guess_type(rel)[0] or "application/octet-stream"
+
+
 def rewrite_css_urls(css: str) -> str:
     """Point every site-root url() at its inlined copy.
 
-    A reference to a file that is not in the mirror can never load, so that whole
-    background layer is dropped rather than left to 404: the declaration then
-    paints its remaining layer, which is the gradient behind the missing still.
+    Only the url() call is replaced. Everything after it -- `center / cover`, a
+    following layer, the comma between them -- is CSS the declaration needs and
+    is left exactly as it was.
     """
     def swap(m):
         quote, rel = m.group(1), m.group(2)
         if not rel.startswith("/"):
             return m.group(0)
-        mime = "image/svg+xml" if rel.endswith(".svg") else "image/webp"
-        uri = asset_uri(rel, mime)
-        if not uri:
-            return ""
+        uri = asset_uri(rel, mime_for(rel)) or BLANK_PIXEL
         return "url(%s%s%s)" % (quote, uri, quote)
-    css = re.sub(
-        r"url\(([\"\']?)(/[^)\"\']+)\1\)(?:\s+[^,;{}]*)?(?:,\s*)?", swap, css
-    )
-    return re.sub(r"background(?:-image)?:\s*,", "background:", css)
+    return re.sub(r"url\(([\"\']?)(/[^)\"\']+)\1\)", swap, css)
 
 
 def rewrite_markup_srcs(html: str) -> str:
-    """Point every site-root src/ href at its inlined copy."""
+    """Point every site-root src/ href at its inlined copy.
+
+    A missing image becomes the transparent pixel rather than a root-absolute
+    path, which under file:// resolves to the filesystem root and 404s.
+    """
     def swap(m):
         attr, quote, rel = m.group(1), m.group(2), m.group(3)
         if not rel.startswith("/"):
             return m.group(0)
-        mime = "image/svg+xml" if rel.endswith(".svg") else "image/webp"
-        uri = asset_uri(rel, mime)
-        if not uri:
-            return m.group(0)
+        uri = asset_uri(rel, mime_for(rel)) or BLANK_PIXEL
         return "%s=%s%s%s" % (attr, quote, uri, quote)
     return re.sub(r'(src|href)=([\"\'])(/[^\"\']+\.(?:webp|svg))\2', swap, html)
 
@@ -721,6 +540,10 @@ def icon_map() -> dict[str, str]:
 
 def main() -> None:
     home_js = read(BUILD / "home.js")
+    for old, new in HOME_BRAND_SWAPS:
+        if old not in home_js:
+            raise SystemExit(f"build-single: home brand string not found: {old[:50]}")
+        home_js = home_js.replace(old, new)
     landing_js = read(BUILD / "landing.js")
     support_js = read(BUILD / "supportscene.js")
     css_home = rewrite_css_urls(home_css())
@@ -728,11 +551,40 @@ def main() -> None:
     js_game = game_js()
     raw_home, html_attrs, body_attrs = home_body()
     body_home = rewrite_markup_srcs(raw_home)
+    # The header wordmark splits the TLD into a span. Rename only that, not the
+    # contact email or any hostname.
+    if '<span class="tld">.COM</span>' not in body_home:
+        raise SystemExit("build-single: header wordmark not found")
+    body_home = body_home.replace('<span class="tld">.COM</span>', '<span class="tld">.HTML</span>')
     body_game = rewrite_markup_srcs(game_body())
 
     nonce = secrets.token_urlsafe(12)
     assets = inline_assets()
-    shell = SHELL.replace("__ICONS__", json.dumps(icon_map(), separators=(",", ":")))
+    icons = icon_map()
+    icons_json = json.dumps(icons, separators=(",", ":"))
+    shell = (
+        SHELL.replace("__ICONS__", icons_json)
+        .replace("__GAME_ASSETS__", icons_json)
+        .replace("__NONCE__", nonce)
+        # The shell builds game documents, so it contains a literal </script>
+        # in a string. Inside this document's inline script that would close the
+        # element early. The escaped form is valid JavaScript and produces the
+        # same string at runtime.
+        .replace("</script", "<\\/script")
+    )
+    for token in ("__ICONS__", "__GAME_ASSETS__", "__NONCE__"):
+        if token in shell:
+            raise SystemExit(f"build-single: shell placeholder {token} was not replaced")
+    for label, text, close in (
+        ("home css", css_home, "</style"),
+        ("game css", css_game, "</style"),
+        ("game js", js_game, "</script"),
+    ):
+        if close in text:
+            raise SystemExit(f"build-single: {label} contains {close}; it cannot be inlined")
+    p2p = P2P_SCRIPT.replace("</script", "<\\/script")
+    net_off = NET_OFF.replace("</script", "<\\/script")
+    storage_shim = STORAGE_SHIM.replace("</script", "<\\/script")
 
     doc = f"""<!doctype html>
 <!--
@@ -741,9 +593,10 @@ def main() -> None:
 
   The home page is the real stickfrag.com landing page, whole: the header, the
   hero, the news rows, the #play section and the footer are all here and the page
-  scrolls exactly as it does live. The game's markup is inert inside a <template>
-  and its module text is parked in a type="text/plain" script until PLAY, so the
-  menu costs no WebGL context. See SHELL in the builder for why.
+  scrolls exactly as it does live. The game's markup and module are parked as
+  inert text. A match runs in a disposable iframe of its own, so HOME releases
+  the module, the WebGL context and every listener with it. See the shell in
+  tools/single-shell.js for why.
 -->
 <html lang="en" translate="no"{html_attrs}>
   <head>
@@ -752,11 +605,12 @@ def main() -> None:
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta
       http-equiv="Content-Security-Policy"
-      content="default-src 'self'; script-src 'nonce-{nonce}' blob:; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob: data:; worker-src 'self' blob:; connect-src 'self' blob: {BROKER_ORIGINS}; object-src 'none'; base-uri 'self'; form-action 'self'"
+      content="default-src 'self'; script-src 'nonce-{nonce}' blob:; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob: data:; worker-src 'self' blob:; connect-src 'self' blob:; frame-src 'self' blob: data:; object-src 'none'; base-uri 'self'; form-action 'self'"
     />
     <title>StickFrag</title>
     <meta name="description" content="StickFrag, standalone: a stickman shooter in one file." />
     <link rel="icon" href="data:," />
+    <script nonce="{nonce}">{storage_shim}</script>
     <script nonce="{nonce}">window.__SF_ASSETS = {assets};
 (function () {{
   var table = window.__SF_ASSETS || {{}};
@@ -787,20 +641,32 @@ def main() -> None:
 }})();</script>
     <style id="sf-home-css">{css_home}</style>
     <style id="sf-home-lock">{SF_HOME_CSS}</style>
-    <style id="sf-game-css">{css_game}</style>
+    <style id="sf-game-css" media="not all">{css_game}</style>
     <style id="sf-narrow-hud">{NARROW_HUD_CSS}</style>
     <style id="sf-pips">{PIP_CSS}</style>
     <style id="sf-p2p-css">{P2P_CSS}</style>
+    <style id="sf-shell-css">{SHELL_CSS}</style>
   </head>
   <body{body_attrs} class="sf-home">
 <template id="sf-game-dom">{body_game}</template>
+<template id="sf-p2p-dom">{P2P_MARKUP}</template>
 <div id="sf-home-root">{body_home}</div>
-{P2P_MARKUP.replace("__NONCE__", nonce)}
 <script type="text/plain" id="sf-game-src">{js_game}</script>
+<script type="text/plain" id="sf-p2p-src">{p2p}</script>
+<script type="text/plain" id="sf-net-off">{net_off}</script>
+<script nonce="{nonce}">window.__SF_EMBED_MATCH = (function () {{
+  try {{
+    var q = new URLSearchParams(location.search);
+    var p = new URLSearchParams(window.__SF_PARENT_QUERY || "");
+    var has = function (k) {{ return q.has(k) || p.has(k); }};
+    var embed = q.has("embed") || !!window.__SF_FORCE_EMBED;
+    return embed && (has("peer") || has("mode") || has("play"));
+  }} catch (e) {{ return false; }}
+}})();</script>
 <script nonce="{nonce}">{NET_OFF}</script>
-<script nonce="{nonce}">{home_js}</script>
-<script nonce="{nonce}">{landing_js}</script>
-<script nonce="{nonce}">{support_js}</script>
+<script nonce="{nonce}">if (!window.__SF_EMBED_MATCH) {{ {home_js} }}</script>
+<script nonce="{nonce}">if (!window.__SF_EMBED_MATCH) {{ {landing_js} }}</script>
+<script nonce="{nonce}">if (!window.__SF_EMBED_MATCH) {{ {support_js} }}</script>
 <script nonce="{nonce}">{shell}</script>
   </body>
 </html>

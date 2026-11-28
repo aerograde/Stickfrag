@@ -25,6 +25,8 @@ from pathlib import Path
 
 from playwright.sync_api import sync_playwright
 
+from test_entry import game_frame
+
 BASE = "http://127.0.0.1:8123"
 SHOT = Path("/tmp/stickfrag-single")
 
@@ -124,36 +126,47 @@ def main() -> int:
 
         # --- choosing a mode starts that mode -------------------------------
         home.click("#start-modes .mode-tile")
-        home.wait_for_timeout(16000)
-        live = home.evaluate(
+        game = game_frame(home, timeout=60000)
+        game.wait_for_function("() => !!globalThis.__sfGame?.ready", timeout=90000)
+        home.wait_for_timeout(14000)
+        live = game.evaluate(
             """() => {
-              const menu = document.getElementById('gear');
               return {
                 ready: globalThis.__sfGame?.ready === true,
                 mode: globalThis.__sfGame?.match?.mode ?? null,
                 teamScores: globalThis.__sfGame?.match?.teamScores ?? null,
                 role: globalThis.__sfPeerDbg?.()?.role ?? null,
                 fpsText: document.getElementById('fps')?.textContent?.trim() ?? null,
-                homeHidden: (function () {
-                  const el = document.getElementById('sf-home-root');
-                  return !el || getComputedStyle(el).display === 'none';
-                })(),
-                // The HUD's own #gear must be the game's, never the menu's.
-                gearInHome: !!(menu && menu.closest('#sf-home-root')),
-                menuIntact: (document.querySelector('#sf-home-root .play-big') !== null),
+                // The match frame has its own HUD nodes.
+                gameGear: !!document.getElementById('gear'),
+                gameCanvas: !!document.getElementById('game'),
               };
             }"""
         )
+        top = home.evaluate(
+            """() => ({
+              homeHidden: (function () {
+                const el = document.getElementById('sf-home-root');
+                return !el || getComputedStyle(el).display === 'none';
+              })(),
+              // The menu keeps its own #gear; the match's HUD is in its frame.
+              gearInHome: !!document.getElementById('gear')?.closest('#sf-home-root'),
+              menuIntact: !!document.querySelector('#sf-home-root .play-big'),
+              iframes: document.querySelectorAll('iframe').length,
+            })"""
+        )
+        live.update(top)
         home.screenshot(path=str(SHOT) + "-play.png")
 
         # --- HOME returns in place ------------------------------------------
         home.evaluate("() => globalThis.__sfHome()")
-        home.wait_for_timeout(2000)
+        home.wait_for_timeout(2500)
         back = home.evaluate(
             """() => ({
               play: !!document.querySelector('.play-big'),
               menuLen: (document.getElementById('gear') || {}).innerHTML?.length ?? 0,
-              gameGone: !document.getElementById('game'),
+              gameGone: !document.querySelector('#sf-game-frame'),
+              iframes: document.querySelectorAll('iframe').length,
               homeShown: getComputedStyle(document.getElementById('sf-home-root')).display !== 'none',
               lobbyLive: globalThis.__sfLobbyBoot ? globalThis.__sfLobbyBoot.live : null,
               search: location.search,
@@ -170,8 +183,10 @@ def main() -> int:
               return true;
             }"""
         )
-        home.wait_for_timeout(16000)
-        again = home.evaluate(
+        second_frame = game_frame(home, timeout=60000)
+        second_frame.wait_for_function("() => !!globalThis.__sfGame?.ready", timeout=90000)
+        home.wait_for_timeout(12000)
+        again = second_frame.evaluate(
             """() => ({
               ready: globalThis.__sfGame?.ready === true,
               mode: globalThis.__sfGame?.match?.mode ?? null,
@@ -187,8 +202,10 @@ def main() -> int:
             wait_until="load",
             timeout=90000,
         )
-        reload_page.wait_for_timeout(16000)
-        reloaded = reload_page.evaluate(
+        reload_frame = game_frame(reload_page, timeout=60000)
+        reload_frame.wait_for_function("() => !!globalThis.__sfGame?.ready", timeout=90000)
+        reload_page.wait_for_timeout(12000)
+        reloaded = reload_frame.evaluate(
             "() => ({ ready: globalThis.__sfGame?.ready === true, mode: globalThis.__sfGame?.match?.mode ?? null })"
         )
         reload_page.close()
@@ -259,13 +276,17 @@ def main() -> int:
         and live["role"] == "host"
         and "FPS" in (live["fpsText"] or "")
         and live["homeHidden"]
-        # The HUD must never resolve to the menu's nodes.
-        and live["gearInHome"] is False
+        and live["iframes"] == 1
+        # The match has its own HUD, and the menu keeps its own nodes.
+        and live["gameGear"] is True
+        and live["gameCanvas"] is True
+        and live["gearInHome"] is True
         and live["menuIntact"]
-        # HOME comes back in place, and the menu is still whole.
+        # HOME removes the match frame and restores the menu.
         and back["play"]
         and back["menuLen"] > 100_000
         and back["gameGone"]
+        and back["iframes"] == 0
         and back["homeShown"]
         and back["lobbyLive"] is True
         and "peer=" not in (back["search"] or "")
